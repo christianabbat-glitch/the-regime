@@ -12,7 +12,7 @@ Play it at https://christianabbat-glitch.github.io/the-regime/
 
 Each player sees only his own hand; the board and the log are shared.
 
-The host's browser runs the game, so the host has to keep the page open until the game ends. If the host's page reloads, the game resumes from the start of the current turn.
+The host's browser runs the game, so the host has to keep the page open until the game ends. If the host's page reloads, the game resumes from the start of the current round.
 
 ## Files
 
