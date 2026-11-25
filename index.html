@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><link rel="icon" href="data:,">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Regime</title>
@@ -34,6 +34,27 @@ h2{font-size:22px;margin-bottom:10px}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 select{min-height:44px;font:16px "PT Sans",sans-serif;background:#3a2318;color:var(--ink);border:1px solid #6b4430;border-radius:7px;padding:0 10px}
 
+.multi .sp-only,.guest .host-only{display:none!important}
+.guest #cfg{pointer-events:none;opacity:.7}
+.lob{position:fixed;inset:0;z-index:60;background:rgba(12,6,4,.84);display:grid;place-items:center;padding:16px;overflow:auto}
+.lob[hidden]{display:none}
+.lbox{width:min(480px,100%);background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:20px 20px 12px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.lbox h2{color:var(--gold);font-size:26px}
+.lbox .info a{color:var(--gold)}
+.lbox .code{letter-spacing:.12em;color:var(--ink)}
+.lf{display:flex;flex-direction:column;gap:4px;color:var(--muted);font-size:14px;flex:1 1 160px}
+.lf input,.llink{min-height:44px;font:16px "PT Sans",sans-serif;background:#1a0f0a;color:var(--ink);border:1px solid #6b4430;border-radius:7px;padding:0 10px;width:100%}
+#lcode{text-transform:uppercase;letter-spacing:.2em;font-weight:700}
+.lrow{display:flex;gap:8px;align-items:end;margin:12px 0;flex-wrap:wrap}
+.lrow.end{justify-content:flex-end;margin-top:4px}
+.llink{flex:1 1 200px;color:var(--muted);font-size:14px}
+.seatl{list-style:none;margin:12px 0;padding:0;display:grid;gap:6px}
+.seatl li{display:flex;align-items:center;gap:10px;background:#1a0f0a;border:1px solid var(--edge);border-radius:8px;padding:8px 12px}
+.seatl small{margin-left:auto;color:var(--muted);text-align:right}
+.dot{width:10px;height:10px;border-radius:50%;background:#6b4430;flex:none}
+.dot.on{background:#a7d46f}.dot.ai{background:transparent;border:2px solid #6b4430}
+.lerr{color:#ff8a8d;min-height:1.2em;margin:4px 0;font-size:15px}
+#roomTag{letter-spacing:.06em}
 .ticker{background:#1a0f0a;border:1px solid #6b4430;border-left:5px solid var(--kc,var(--gold));border-radius:9px;padding:10px 12px;font-size:17px;line-height:1.4;min-height:76px;margin-bottom:12px}
 .ticker small{display:block;font-size:13px;color:var(--muted);margin-bottom:2px}
 .dec{border-top:1px solid var(--edge);padding-top:12px}
@@ -399,14 +420,16 @@ background:linear-gradient(180deg,#f9d27a 0%,#f5a663 30%,#ec7f6a 44%,#2aa6a0 45%
 <header class="top">
 <div class="ttl"><h1>The Regime</h1><p class="sub" id="sub">Setting the table…</p></div>
 <div class="ctl">
-<label for="np" class="sub" style="margin:0">Players</label>
-<select id="np"><option>3</option><option selected>4</option><option>5</option><option>6</option></select>
-<label class="chk" for="open"><input type="checkbox" id="open"> Show all hands</label>
-<label for="speed" class="sub" style="margin:0">Pace</label>
-<select id="speed"><option value="slow">Slow</option><option value="normal" selected>Normal</option><option value="fast">Fast</option></select>
-<button class="btn" data-a="pause" id="pauseBtn">Pause</button>
-<button class="btn" data-a="step" id="stepBtn" disabled>Next step</button>
-<button class="btn" data-a="new">New game</button>
+<button class="btn sp-only" data-a="online" id="onlineBtn">Play online</button>
+<button class="btn" data-a="room" id="roomTag" hidden></button>
+<label for="np" class="sub sp-only" style="margin:0">Players</label>
+<select id="np" class="sp-only"><option>3</option><option selected>4</option><option>5</option><option>6</option></select>
+<label class="chk sp-only" for="open"><input type="checkbox" id="open"> Show all hands</label>
+<label for="speed" class="sub host-only" style="margin:0">Pace</label>
+<select id="speed" class="host-only"><option value="slow">Slow</option><option value="normal" selected>Normal</option><option value="fast">Fast</option></select>
+<button class="btn host-only" data-a="pause" id="pauseBtn">Pause</button>
+<button class="btn host-only" data-a="step" id="stepBtn" disabled>Next step</button>
+<button class="btn host-only" data-a="new">New game</button>
 </div>
 </header>
 <div class="main">
@@ -449,6 +472,7 @@ background:linear-gradient(180deg,#f9d27a 0%,#f5a663 30%,#ec7f6a 44%,#2aa6a0 45%
 </aside>
 </div>
 </div>
+<div id="lobby" class="lob" hidden><div class="lbox" role="dialog" aria-modal="true" aria-label="Play online"><div id="lbody"></div></div></div>
 <script>
 {
 const NAMES=[["Andrei","Bubnov","AB"],["Sergo","Ordzhonikidze","SO"],["Karl","Radek","KR"],["Alexei","Rykov","AR"],["Grigory","Zinoviev","GZ"],["Nikolai","Bukharin","NB"],["Ivan","Smirnov","IS"],["Jekabs","Peterss","JP"],["Gaya","Gai","GG"],["Valentin","Trifonov","VT"],["Lazar","Kaganovich","LK"],["Mikhail","Kalinin","MK"],["Nikita","Khrushchev","NK"],["Vyacheslav","Molotov","VM"],["Kliment","Voroshilov","KV"],["Anastas","Mikoyan","AM"],["Andrey","Vyshinsky","AV"],["Lavrenti","Beria","LB"],["Lev","Mekhlis","LM"],["Andrei","Zhdanov","AZ"],["Mikhail","Tukhachevsky","MT"],["Vasily","Bluykher","VB"],["Semyon","Budyonny","SB"],["Alexander","Yegorov","AY"],["Genrikh","Yagoda","GY"],["Nikolai","Yezhov","NY"],["Ivan","Akulov","IA"],["Mikhail","Frinovsky","MF"],["Nestor","Lakoba","NL"],["Robert","Eikhe","RE"],["Ivan","Golyakov","IG"],["Vasiliy","Ulrikh","VU"],["Evgeny","Pashukanis","EP"],["Ivan","Bakayev","IB"],["Pavel","Postyshev","PP"],["Pyotr","Zalutsky","PZ"],["Nikolai","Uglanov","NU"],["Artur","Artuzov","AA"],["Isaak","Zelensky","IZ"],["Akmal","Ikramov","AI"],["Sultan","Afandiyev","SA"],["Trofim","Lysenko","TL"],["Grigory","Petrovsky","GP"],["Boris","Shaposhnikov","BS"],["Georgy","Malenkov","GM"],["Semyon","Timoshenko","ST"],["Stanislaw","Kosior","SK"],["Yakov","Sheko","YS"],["Yan","Berzin","YB"],["Yefim","Yevdokimov","YY"]];
@@ -460,7 +484,7 @@ const DEPTS=[
 {name:"Cadres",ab:"Cadre",color:"#2d6a6a",power:"Transfer",ptext:"Swap two in a rank",seats:["Head of the Department of Leading Party Organs","Head of the Special Sector","Secretary of the Party Control Commission","First Secretary, Sverdlovsk Region","Central Committee Instructor for the Volga","District Party Secretary in Kharkov Oblast","Komsomol Organizer at a Sawmill in Arkhangelsk","Party Organizer on a Collective Farm in Yakutsk"]},
 {name:"Judiciary",ab:"Court",color:"#2e2926",power:"Overturn",ptext:"Flip a verdict; costs him a chip",seats:["Chairman of the Military Collegium","Procurator of the USSR","Deputy Chairman, Transbaikal Military Tribunal","Judge of the Supreme Court","Procurator of the Gorky Region","Legal Theorist at Rostov University","People's Judge in Tashkent","Court Stenographer in Baku"]}];
 const PL=[{n:"You",c:"#f2c14e"},{n:"Anna",c:"#ef7a85"},{n:"Boris",c:"#6fc3f0"},{n:"Vera",c:"#a7d46f"},{n:"Grisha",c:"#c39bea"},{n:"Dmitri",c:"#f39a4c"}];
-const ME=0,IND=0,PROP=1,ARMY=2,NKVD=3,CAD=4,JUD=5;
+let ME=0;let MULTI=false,HUM=new Set([0]);const isH=p=>p!=null&&(MULTI?HUM.has(p):p===ME);const IND=0,PROP=1,ARMY=2,NKVD=3,CAD=4,JUD=5;
 const DEF={stages:[{name:"Kirov aftermath",from:1,quota:1,fuse:5,odds:1},{name:"Show trials",from:4,quota:1,fuse:5,odds:2},{name:"Yezhovshchina",from:8,quota:2,fuse:4,odds:3},{name:"Final frenzy",from:12,quota:3,fuse:4,odds:4}],end:15,ammoBy:{3:3,4:3,5:3,6:3},gcap:12,trials:2,queue:8,exile:3,handBy:{3:10,4:8,5:7,6:6}};
 const K=(c,r)=>c+"-"+r;
 const ROWS=8;
@@ -510,9 +534,12 @@ const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const ps=()=>[...Array(S.np).keys()];
 const nm=c=>c.fn+" "+c.ln;
-const who=p=>p===ME?"You":PL[p].n;
-const to=p=>p===ME?"you":PL[p].n;
-const vb=(p,a,b)=>p===ME?a:b;
+const tok=(p,a,b)=>"\u0001"+p+"\u0003"+a+"\u0003"+b+"\u0002";
+function pers(s){s=String(s);for(let i=0;i<6&&s.includes("\u0001");i++)s=s.replace(/\u0001(\d)\u0003([^\u0001\u0002\u0003]*)\u0003([^\u0001\u0002\u0003]*)\u0002/g,(m,p,a,b)=>+p===ME?a:b);return s}
+const who=p=>tok(p,"You",PL[p].n);
+const to=p=>tok(p,"you",PL[p].n);
+const vb=(p,a,b)=>tok(p,a,b);
+const your=p=>tok(p,"your",PL[p].n+"'s");
 const pl=(n,w)=>n+" "+w+(n===1?"":"s");
 const freeChars=()=>Object.values(S.chars).filter(c=>c.status==="free");
 const byPrec=(a,b)=>prec(a.seat)-prec(b.seat);
@@ -521,7 +548,7 @@ const st=()=>S.cfg.stages[S.stage];
 const quotaNeed=()=>Math.max(0,st().quota);
 const holder=k=>S.seats[k]?S.chars[S.seats[k]]:null;
 const emptyArmy=()=>{for(let r=0;r<ROWS;r++)if(!S.seats[K(ARMY,r)])return K(ARMY,r);return null};
-function log(m){S.log.unshift({r:S.round,m});S.log.length=Math.min(S.log.length,400)}
+function log(m){S.logN=(S.logN||0)+1;S.log.unshift({r:S.round,m});S.log.length=Math.min(S.log.length,400)}
 
 function newGame(cfg,np){
 cfg=cfg?JSON.parse(JSON.stringify(cfg)):JSON.parse(JSON.stringify(DEF));np=np||4;const hand=cfg.handBy[np];
@@ -560,8 +587,8 @@ line:()=>{const f=freeChars().filter(c=>c.seat!=="hs");if(!f.length)return;const
 return h}
 
 /* ---------- pacing ---------- */
-async function wait(ms){const g=gen;let t=0;while(t<ms){await new Promise(r=>setTimeout(r,40));if(g!==gen)throw CANCEL;if(stepOne){stepOne=false;break}if(!paused)t+=40}}
-async function say(m,ids=[],o={}){log(m);S.narr={m,ids,kind:o.kind||""};render();await wait((o.f||1)*SP[speed])}
+async function wait(ms){const g=gen;let t=0,last=performance.now();while(t<ms){await (NET.on?NET.tick():new Promise(r=>setTimeout(r,40)));if(g!==gen)throw CANCEL;if(stepOne){stepOne=false;break}const now=performance.now();if(!paused)t+=NET.on?now-last:40;last=now}}
+async function say(m,ids=[],o={}){if(!MULTI)m=pers(m);log(m);S.narr={m,ids,kind:o.kind||""};render();await wait((o.f||1)*SP[speed])}
 function ask(kind,data={}){return new Promise((res,rej)=>{pending={kind,...data,res:v=>{pending=null;ui={a:null,step:0,t1:null};render();res(v)},rej};render();if(window.__autoMe)setTimeout(()=>{if(pending)pending.res(autoAnswer(kind,data))},0)})}
 
 /* ---------- computer players ---------- */
@@ -597,8 +624,8 @@ function aiDecide2(p){const am=S.ammo?S.ammo[p]:99;const used=(S.turn.used||[]).
 function aiMedal(p){const f=freeChars().filter(c=>!c.medal);const o=f.filter(c=>c.owner===p).sort((a,b)=>b.chips-a.chips||byPrec(a,b));return(o[0]||pick(f)).id}
 function aiAppoint(o,k,below){const m=below.find(id=>S.chars[id].owner===o);return m||below[0]}
 function weakest(p){const v=c=>c.status==="dead"?0:c.status==="free"?100-prec(c.seat):1;return S.hands[p].map(id=>S.chars[id]).filter(c=>!c.rev).sort((a,b)=>v(a)-v(b))[0]}
-function autoAnswer(kind,d){if(kind==="flip")return true;if(kind==="showchief")return Math.random()<.95;if(kind==="action")return aiDecide(ME);if(kind==="rowpick"){const sc=S.row.map(i=>cardScore(i,ME));const best=Math.max(...sc),avg=sc.reduce((a,b)=>a+b,0)/sc.length;return d.open||best-avg>=1.5?sc.indexOf(best):null}if(kind==="pass"||kind==="flipper")return pick(d.opts);
-if(kind==="reveal")return weakest(ME).id;if(kind==="arrest")return pick(d.pool);if(kind==="speak")return aiSpeak(ME,S.chars[d.id]);if(kind==="place"){const o=freeChars().filter(c=>c.owner!==ME);return pick(o.length?o:freeChars()).id}if(kind==="overturn")return aiOverturn(ME,S.chars[d.id],d.death,S.chars[d.j]);if(kind==="keep")return aiKeep(ME,S.chars[d.id]);if(kind==="medal")return aiMedal(ME);if(kind==="appoint")return d.gain&&Math.random()<.75;if(kind==="appointee")return aiAppoint(ME,d.k,d.opts)}
+function autoAnswer(kind,d,p=ME){if(kind==="flip")return true;if(kind==="showchief")return Math.random()<.95;if(kind==="action")return p===ME&&!NET.on?aiDecide(p):aiDecide2(p);if(kind==="rowpick"){const sc=S.row.map(i=>cardScore(i,p));const best=Math.max(...sc),avg=sc.reduce((a,b)=>a+b,0)/sc.length;return d.open||best-avg>=1.5?sc.indexOf(best):null}if(kind==="pass"||kind==="flipper")return pick(d.opts);
+if(kind==="reveal")return weakest(p).id;if(kind==="arrest")return pick(d.pool);if(kind==="speak")return aiSpeak(p,S.chars[d.id]);if(kind==="place"){const o=freeChars().filter(c=>c.owner!==p);return pick(o.length?o:freeChars()).id}if(kind==="overturn")return aiOverturn(p,S.chars[d.id],d.death,S.chars[d.j]);if(kind==="keep")return aiKeep(p,S.chars[d.id]);if(kind==="medal")return aiMedal(p);if(kind==="appoint")return d.gain&&Math.random()<.75;if(kind==="appointee")return aiAppoint(p,d.k,d.opts)}
 
 function predictHit(i){const snap=JSON.stringify(S);const h=H();try{CARDS[i].run(h)}catch(e){}const res=h.hit.map(id=>({id,owner:S.chars[id].owner}));S=JSON.parse(snap);return res}
 /* ---------- powers: only the real owner, by showing the card ---------- */
@@ -613,12 +640,12 @@ h.rev=true;await say(`${who(p)} ${vb(p,"turn","turns")} over ${nm(h)}'s card and
 async function nkvdCheck(){}
 
 /* ---------- the round ---------- */
-async function game(){try{while(!S.over){cp=JSON.stringify(S);await round()}}catch(e){if(e===CANCEL)return;if(e!==OVER)console.error(e)}render()}
+async function game(){try{while(!S.over){cp=JSON.stringify(S);if(NET.host)NET.saveCp(cp);await round()}}catch(e){if(e===CANCEL)return;if(e!==OVER)console.error(e)}render()}
 async function round(){
 S.phase="stalin";S.rf=S.flipper;await say(`Round ${S.round}. ${who(S.flipper)} ${vb(S.flipper,"hold","holds")} the Stalin deck.`,[],{kind:"round",f:.8});
 await nkvdCheck();
 
-if(S.flipper===ME)await ask("flip");
+if(isH(S.flipper))await askP(S.flipper,"flip");
 await flipF();await actionsF();await quotaF();await transitF();
 if(S.wpNext!=null)await bannerF();
 await trialF(S.wpNext!=null,"The stage changes");
@@ -643,7 +670,8 @@ await clockF(cd.c??1,false)}
 async function eyeF(){
 await say("The eye: everyone shows one card, drawn blind, to the player on their left.",[],{kind:"eye",f:1.1});
 let toMe=null,byMe=null;const right=(ME+S.np-1)%S.np,left=(ME+1)%S.np;
-ps().forEach(p=>{const t=(p+1)%S.np;const opts=S.hands[p].filter(id=>!S.chars[id].rev&&!S.known[t].includes(id));if(!opts.length)return;const id=pick(opts);S.known[t].push(id);if(t===ME)toMe=id;if(p===ME)byMe=id});
+const seen=[];ps().forEach(p=>{const t=(p+1)%S.np;const opts=S.hands[p].filter(id=>!S.chars[id].rev&&!S.known[t].includes(id));if(!opts.length)return;const id=pick(opts);S.known[t].push(id);seen.push([p,t,id]);if(t===ME)toMe=id;if(p===ME)byMe=id});
+if(MULTI){const m=seen.map(([p,t,id])=>tok(t,`${PL[p].n}, on your right, shows you a card: ${nm(S.chars[id])} is theirs. `,"")+tok(p,`${PL[t].n}, on your left, draws ${nm(S.chars[id])} from your hand. Now they know he is yours. `,"")).join("");if(m)await say(m.trim(),[],{kind:"eye",f:1.6});return}
 if(toMe)await say(`${PL[right].n}, on your right, shows you a card: ${nm(S.chars[toMe])} is theirs.`,[toMe],{kind:"eye",f:1.3});
 if(byMe)await say(`${PL[left].n}, on your left, draws ${nm(S.chars[byMe])} from your hand. Now they know he is yours.`,[byMe],{kind:"eye",f:1.3})}
 async function clockF(n,quiet){
@@ -655,12 +683,12 @@ if(S.clock>=S.cfg.end&&!S.lastRound){S.lastRound=true;await say(`The clock reach
 async function bannerF(){const p=S.banner;
  if(p==null){await say("The Plan is reviewed, but nobody holds the Challenge Red Banner. No Order of Lenin is awarded.",[],{kind:"stage",f:1});return}
  const f=freeChars().filter(c=>!c.medal);if(!f.length)return;
- const id=p===ME?await ask("medal"):aiMedal(p);const c=S.chars[id];if(!c||c.status!=="free")return;c.medal=true;S.medals=(S.medals||0)+1;
+ const id=isH(p)?await askP(p,"medal"):aiMedal(p);const c=S.chars[id];if(!c||c.status!=="free")return;c.medal=true;S.medals=(S.medals||0)+1;
  await say(`The Plan is reviewed. ${who(p)} ${vb(p,"hold","holds")} the Challenge Red Banner and ${vb(p,"award","awards")} the Order of Lenin to ${nm(c)}: from now on no player can put a chip on him. ${who(p)} ${vb(p,"keep","keeps")} the Banner.`,[id],{kind:"win",f:1.4})}
 async function stageF(i){
 const s=S.cfg.stages[i];const nBq=Math.max(...S.cfg.stages.map(x=>x.quota)),pq=S.cfg.stages[i-1]?S.cfg.stages[i-1].quota:s.quota;S.slideK=s.quota>pq?nBq-Math.min(nBq,pq):null;await say(`New stage. Stage ${i+1}: ${s.name}.${S.slideK!=null?" The shutter on the Butyrka van slides back: it now holds "+s.quota+".":""} From now on the quota is ${s.quota}, the fuse is ${s.fuse}, and a trial means death ${oddsTxt(s.odds??i+1)}.`,[],{kind:"stage",f:1.4});S.slideK=null;await fuseNow();
 if(i===S.cfg.stages.length-1){Object.values(S.chars).forEach(c=>{if(c.owner!=null)c.rev=true});await say(`Final stage: every hand is turned face up. The Terror stops when the clock reaches box ${S.cfg.end}.`,[],{kind:"reveal",f:1.6});return}
-for(const p of ps()){if(!S.hands[p].some(id=>!S.chars[id].rev))continue;const id=p===ME?await ask("reveal"):weakest(p).id;const c=S.chars[id];c.rev=true;
+for(const p of ps()){if(!S.hands[p].some(id=>!S.chars[id].rev))continue;const id=isH(p)?await askP(p,"reveal"):weakest(p).id;const c=S.chars[id];c.rev=true;
  const tag={dead:", already shot",gulag:", in the Gulag",queue:", in the Lubyanka"}[c.status]||"";await say(`${who(p)} ${vb(p,"reveal","reveals")} ${nm(c)}${tag}.`,[id],{kind:"reveal",f:.9})}}
 const ptVal=c=>c.status==="free"?1:c.status==="exile"?1:c.status==="dead"?-1:0;
 const ptsOf=p=>S.hands[p].reduce((a,id)=>a+ptVal(S.chars[id]),0);
@@ -677,25 +705,25 @@ throw OVER}
 async function actionsF(){
 S.phase="actions";S.turn={acting:S.flipper,done:[]};
 while(true){const p=S.turn.acting;
- S.turn.used=[];if(p!==ME)await say(`${PL[p].n} is deciding…`,[],{f:.6});
- for(let n=0;n<2;n++){S.turn.n=n;const x=p===ME?await ask("action",{n}):aiDecide2(p);S.turn.used.push(x.a);await doAction(p,x);await fuseNow();if(x.a==="none")break}
+ S.turn.used=[];if(MULTI||p!==ME)await say(`${who(p)} ${vb(p,"are","is")} deciding…`,[],{f:.6});
+ for(let n=0;n<2;n++){S.turn.n=n;const x=isH(p)?await askP(p,"action",{n}):aiDecide2(p);S.turn.used.push(x.a);await doAction(p,x);await fuseNow();if(x.a==="none")break}
  await nkvdCheck();
  S.turn.done.push(p);const rest=ps().filter(i=>!S.turn.done.includes(i));
- if(!rest.length){const opts=ps().filter(i=>i!==p);const nx=p===ME?await ask("flipper",{opts}):pick(opts);S.flipper=nx;S.turn.acting=null;await say(`${who(p)} ${vb(p,"hand","hands")} the Stalin deck to ${to(nx)} for the next round.`,[],{f:.8});break}
- const nx=p===ME?await ask("pass",{opts:rest}):pick(rest);S.turn.acting=nx;await say(`${who(p)} ${vb(p,"pass","passes")} the turn to ${to(nx)}.`,[],{f:.7})}}
+ if(!rest.length){const opts=ps().filter(i=>i!==p);const nx=isH(p)?await askP(p,"flipper",{opts}):pick(opts);S.flipper=nx;S.turn.acting=null;await say(`${who(p)} ${vb(p,"hand","hands")} the Stalin deck to ${to(nx)} for the next round.`,[],{f:.8});break}
+ const nx=isH(p)?await askP(p,"pass",{opts:rest}):pick(rest);S.turn.acting=nx;await say(`${who(p)} ${vb(p,"pass","passes")} the turn to ${to(nx)}.`,[],{f:.7})}}
 async function doAction(p,x){
 const P=who(p),c1=x.t1?S.chars[x.t1]:null;
 if(POW[x.a]&&!(await claimF(p,x.a,fxOf(x),descOf(x))))return;
-if(x.a==="none")return say(S.turn&&S.turn.n?`${P} ${vb(p,"end","ends")} ${p===ME?"your":"the"} turn.`:`${P} ${vb(p,"do","does")} nothing this turn.`,[],{f:.8});
-if(x.a==="banner"){if(S.banner===p)return;const fr=S.banner;S.banner=p;return say(`${P} ${vb(p,"work","works")} for the Plan and ${vb(p,"take","takes")} the Challenge Red Banner${fr!=null?` from ${fr===ME?"you":PL[fr].n}`:""}. Whoever holds it when the stage changes awards the Order of Lenin.`,[],{kind:"win",f:1})}
+if(x.a==="none")return say(S.turn&&S.turn.n?`${P} ${vb(p,"end","ends")} ${tok(p,"your","the")} turn.`:`${P} ${vb(p,"do","does")} nothing this turn.`,[],{f:.8});
+if(x.a==="banner"){if(S.banner===p)return;const fr=S.banner;S.banner=p;return say(`${P} ${vb(p,"work","works")} for the Plan and ${vb(p,"take","takes")} the Challenge Red Banner${fr!=null?` from ${to(fr)}`:""}. Whoever holds it when the stage changes awards the Order of Lenin.`,[],{kind:"win",f:1})}
 if(x.a==="hunt"){const c=S.chars[x.t1];if(!c||c.status!=="exile")return;return assassinF(p,c.id,holder(K(NKVD,0)))}
 if(x.a==="flee"){if(!c1||c1.status!=="free"||!PASS.has(c1.id)||!c1.chips||S.exile.length>=xCap())return;const k=c1.seat,post="abroad";
  c1.rev=true;S.seats[k]=null;c1.was=k;c1.seat=null;c1.abroad="";c1.status="exile";c1.chips=0;S.exile.push(c1.id);
  await say(`${P} ${vb(p,"turn","turns")} over ${nm(c1)}'s card. He has a passport, and he uses it: he slips across the border and never comes home. He is in exile.`,[c1.id],{kind:"reveal",f:1.4});
  return fillUp()}
-if(x.a==="den"){if(c1.medal)return say(`${nm(c1)} wears the Order of Lenin: nobody can denounce him.`,[c1.id],{f:.8});if((S.ammo[p]||0)<=0)return say(`${P} ${vb(p,"have","has")} no chips left to denounce with.`,[],{f:.8});S.ammo[p]--;S.spent=(S.spent||0)+1;const b=c1.chips;chip(c1.id,1);S.stats.now[p]++;return say(`${P} ${vb(p,"denounce","denounces")} ${nm(c1)}: ${b} → ${c1.chips} chips. (${p===ME?"Your":PL[p].n+"'s"} supply: ${S.ammo[p]}.)`,[c1.id],{kind:"chips"})}
-if(x.a==="clr"){const b=c1.chips;const g=-chip(c1.id,-1);S.ammo[p]+=g;S.gained=(S.gained||0)+g;return say(`${P} ${vb(p,"clear","clears")} a chip from ${nm(c1)}: ${b} → ${c1.chips}${g?`, and ${vb(p,"add","adds")} it to ${p===ME?"your":"their"} supply (${S.ammo[p]})`:""}.`,[c1.id],{kind:"clear"})}
-if(x.a==="protect"){const b=c1.chips;const g=-chip(c1.id,-2);S.ammo[p]+=g;S.gained=(S.gained||0)+g;return say(`Industry protects ${nm(c1)}: ${b} → ${c1.chips} chips${g?`; the ${pl(g,"chip")} ${g===1?"goes":"go"} into ${p===ME?"your":PL[p].n+"'s"} supply (${S.ammo[p]})`:""}.`,[c1.id],{kind:"clear"})}
+if(x.a==="den"){if(c1.medal)return say(`${nm(c1)} wears the Order of Lenin: nobody can denounce him.`,[c1.id],{f:.8});if((S.ammo[p]||0)<=0)return say(`${P} ${vb(p,"have","has")} no chips left to denounce with.`,[],{f:.8});S.ammo[p]--;S.spent=(S.spent||0)+1;const b=c1.chips;chip(c1.id,1);S.stats.now[p]++;return say(`${P} ${vb(p,"denounce","denounces")} ${nm(c1)}: ${b} → ${c1.chips} chips. (${tok(p,"Your",PL[p].n+"'s")} supply: ${S.ammo[p]}.)`,[c1.id],{kind:"chips"})}
+if(x.a==="clr"){const b=c1.chips;const g=-chip(c1.id,-1);S.ammo[p]+=g;S.gained=(S.gained||0)+g;return say(`${P} ${vb(p,"clear","clears")} a chip from ${nm(c1)}: ${b} → ${c1.chips}${g?`, and ${vb(p,"add","adds")} it to ${tok(p,"your","their")} supply (${S.ammo[p]})`:""}.`,[c1.id],{kind:"clear"})}
+if(x.a==="protect"){const b=c1.chips;const g=-chip(c1.id,-2);S.ammo[p]+=g;S.gained=(S.gained||0)+g;return say(`Industry protects ${nm(c1)}: ${b} → ${c1.chips} chips${g?`; the ${pl(g,"chip")} ${g===1?"goes":"go"} into ${your(p)} supply (${S.ammo[p]})`:""}.`,[c1.id],{kind:"clear"})}
 if(x.a==="rewrite"){const c2=S.chars[x.t2];if(c2.medal)return say(`${nm(c2)} wears the Order of Lenin: no chip can be put on him.`,[c2.id],{f:.8});const n=Math.min(2,c1.chips);c1.chips-=n;c2.chips+=n;return say(`Pravda rewrites the story: ${pl(n,"chip")} move from ${nm(c1)} to ${nm(c2)}.`,[c1.id,c2.id],{kind:"chips"})}
 if(x.a==="mv"){const t=x.k2;if(!t||c1.status!=="free"||!nbrs(c1.seat).includes(t))return;const o=S.seats[t];const up=t==="rh"||(c1.seat!=="rh"&&pk(t)[1]<pk(c1.seat)[1]),dn=c1.seat==="rh"||(t!=="rh"&&pk(t)[1]>pk(c1.seat)[1]);swapSeat(c1.seat,t);
  await say(`${P} ${vb(p,up?"promote":dn?"demote":"move",up?"promotes":dn?"demotes":"moves")} ${nm(c1)} ${up||dn?"to":"across to"} ${seatTitle(t)}${o?`, swapping him with ${nm(S.chars[o])}`:""}.`,o?[c1.id,o]:[c1.id],{kind:"move"});return fillUp()}
@@ -708,8 +736,8 @@ if(x.a==="recruit"){const k=emptyArmy();if(!k||c1.status!=="gulag")return;S.gula
  await say(`The Marshal recruits from the camps: ${nm(c1)} leaves the Gulag and rises through the empty ranks to ${seatTitle(k)}.`,[c1.id],{kind:"move"});await draftF(p,c1);return fillUp()}}
 async function draftF(p,c){const ow=c.owner;
  if(ow===p){if(!c.rev){c.rev=true;await say(`${who(p)} ${vb(p,"take","takes")} ${nm(c)} openly: his card goes face up.`,[c.id],{kind:"reveal",f:1})}return}
- if(ow!=null){if(c.rev){await say(`${nm(c)}'s card is already face up, so he stays with ${ow===ME?"you":PL[ow].n}.`,[c.id],{kind:"move",f:.8});return}
-  const keep=ow===ME?await ask("keep",{id:c.id,p}):aiKeep(ow,c);
+ if(ow!=null){if(c.rev){await say(`${nm(c)}'s card is already face up, so he stays with ${to(ow)}.`,[c.id],{kind:"move",f:.8});return}
+  const keep=isH(ow)?await askP(ow,"keep",{id:c.id,p}):aiKeep(ow,c);
   if(keep){c.rev=true;S.kept=(S.kept||0)+1;await say(`${who(ow)} ${vb(ow,"show","shows")} ${nm(c)}'s card and ${vb(ow,"keep","keeps")} him.`,[c.id],{kind:"reveal",f:1.1});return}
   S.hands[ow]=S.hands[ow].filter(i=>i!==c.id)}
  else S.unowned=S.unowned.filter(i=>i!==c.id);
@@ -728,12 +756,12 @@ let ap=null;const rh=holder("rh");
 if(rh&&rh.owner!=null&&firsts.some(g=>g.below.length>1)){const o=rh.owner;
  if(rh.rev)ap=o;
  else{const gain=firsts.some(g=>aiAppoint(o,g.k,g.below)!==g.below[0]);
-  const claim=o===ME?await ask("appoint",{gain}):gain&&Math.random()<.75;
+  const claim=isH(o)?await askP(o,"appoint",{gain}):gain&&Math.random()<.75;
   if(claim){rh.rev=true;ap=o;await say(`${who(o)} ${vb(o,"show","shows")} ${nm(rh)}'s card: Stalin's right hand makes the appointments.`,[rh.id],{kind:"reveal",f:1.2})}}}
 const moves=[],apps=[];let stop=false;
 for(let c=0;c<6;c++)for(let r=0;r<ROWS;r++){if(S.seats[K(c,r)])continue;const below=[];for(let rr=r+1;rr<ROWS;rr++)if(S.seats[K(c,rr)])below.push(S.seats[K(c,rr)]);if(!below.length)break;
  let id=below[0];
- if(ap!=null&&!stop&&below.length>1){const ch=ap===ME?await ask("appointee",{k:K(c,r),opts:below}):aiAppoint(ap,K(c,r),below);if(ch==="__stop")stop=true;else if(below.includes(ch))id=ch;if(id!==below[0])apps.push([id,K(c,r),below[0]])}
+ if(ap!=null&&!stop&&below.length>1){const ch=isH(ap)?await askP(ap,"appointee",{k:K(c,r),opts:below}):aiAppoint(ap,K(c,r),below);if(ch==="__stop")stop=true;else if(below.includes(ch))id=ch;if(id!==below[0])apps.push([id,K(c,r),below[0]])}
  const fr=S.chars[id].seat;S.seats[fr]=null;S.seats[K(c,r)]=id;S.chars[id].seat=K(c,r);moves.push([id,K(c,r)])}
 if(!moves.length)return;const last={};moves.forEach(([id,k])=>last[id]=k);const ids=Object.keys(last);
 if(apps.length){S.appts=(S.appts||0)+apps.length;await say(`${who(ap)} ${vb(ap,"appoint","appoints")} ${apps.map(([id,k,by])=>`${nm(S.chars[id])} to ${seatTitle(k)}, passing over ${nm(S.chars[by])}`).join("; ")}.`,apps.map(a=>a[0]),{kind:"move",f:1.2})}
@@ -754,8 +782,8 @@ while(need>0){nk=holder(K(NKVD,0));
  if(!nk){stand=true;break}
  if(nk.rev&&nk.owner!=null){no=nk.owner;break}
  await say(`${nm(nk)} sits in the NKVD chief's seat. Whoever controls him must show his card now, or he is arrested.`,[nk.id],{kind:"arrest",f:1.2});
- const show=nk.owner==null?false:nk.owner===ME?await ask("showchief",{id:nk.id,need}):Math.random()<.95;
- if(show){nk.rev=true;no=nk.owner;shown=true;await say(`${who(no)} ${vb(no,"show","shows")} his card. ${nm(nk)} is ${no===ME?"your":who(no)+"'s"} man, and ${no===ME?"you choose":who(no)+" chooses"} who is taken.`,[nk.id],{kind:"reveal",f:1.3});break}
+ const show=nk.owner==null?false:isH(nk.owner)?await askP(nk.owner,"showchief",{id:nk.id,need}):Math.random()<.95;
+ if(show){nk.rev=true;no=nk.owner;shown=true;await say(`${who(no)} ${vb(no,"show","shows")} his card. ${nm(nk)} is ${your(no)} man, and ${tok(no,"you choose",PL[no].n+" chooses")} who is taken.`,[nk.id],{kind:"reveal",f:1.3});break}
  await say(`Nobody shows his card. A chief nobody stands behind does not last.`,[nk.id],{kind:"death",f:1.1});
  await arrestBatch([nk.id],"an NKVD chief nobody claimed",false,true,true);need--}
 if(stand&&need>0){nk=null;
@@ -763,7 +791,7 @@ if(stand&&need>0){nk=null;
  let si=0;while(need>0&&si<SEATS.length){const k=SEATS[si];const c=holder(k);if(!c){si++;continue}
   if(c.rev&&c.owner!=null){no=c.owner;nk=c;break}
   await say(`Seat ${prec(k)}: ${nm(c)}. Whoever controls him must show his card and carry out the arrests, or he is arrested.`,[c.id],{kind:"arrest",f:1.2});
-  const show=c.owner==null?false:c.owner===ME?await ask("showchief",{id:c.id,need,stand:true}):Math.random()<.95;
+  const show=c.owner==null?false:isH(c.owner)?await askP(c.owner,"showchief",{id:c.id,need,stand:true}):Math.random()<.95;
   if(show){c.rev=true;no=c.owner;nk=c;shown=true;await say(`${who(no)} ${vb(no,"show","shows")} his card and ${vb(no,"carry","carries")} out the arrests.`,[c.id],{kind:"reveal",f:1.2});break}
   await say(`Nobody shows his card. ${nm(c)} is arrested for the arrests he would not make.`,[c.id],{kind:"death",f:1.1});
   await arrestBatch([c.id],"refusing the NKVD's duty",false,true,true);need--}}
@@ -776,15 +804,15 @@ let no=null,nk=null,shown=false,stand=false,hunted=false;
 while(need>0){({no,nk,shown,stand,need}=await dutyF(need));
 if(need<=0||no==null)break;
 
-if(!shown)await say(`${stand?`${nm(nk)} carries out the NKVD's duty. He`:`The NKVD chief, ${nm(nk)},`} is ${no===ME?"yours, so you choose":who(no)+"'s, so "+who(no)+" chooses"} who is taken.`,[nk.id],{kind:"arrest",f:.9});
+if(!shown)await say(`${stand?`${nm(nk)} carries out the NKVD's duty. He`:`The NKVD chief, ${nm(nk)},`} is ${tok(no,"yours, so you choose",PL[no].n+"'s, so "+PL[no].n+" chooses")} who is taken.`,[nk.id],{kind:"arrest",f:.9});
 const picks=[];
 while(need>0){const all=freeChars().filter(c=>c.id!==nk.id&&!picks.includes(c.id)&&!crew(c));if(!all.length)break;let pool=all.filter(c=>c.chips>0);if(!pool.length)pool=all;
  let id;
- if(no===ME){id=await ask("arrest",{pool:pool.map(c=>c.id),need,picks,stand});
-  picks.push(id);if(need>1)await say(`You mark ${nm(S.chars[id])} for arrest.`,[...picks],{kind:"arrest",f:.5})}
+ if(isH(no)){id=await askP(no,"arrest",{pool:pool.map(c=>c.id),need,picks,stand});
+  picks.push(id);if(need>1)await say(`${who(no)} ${vb(no,"mark","marks")} ${nm(S.chars[id])} for arrest.`,[...picks],{kind:"arrest",f:.5})}
  else{let cand=pool.filter(c=>c.owner!==no);if(!cand.length)cand=pool;cand.sort((a,b)=>b.chips-a.chips||byPrec(a,b));id=cand[0].id;picks.push(id)}
  need--}
-if(no!==ME&&picks.length>1)await say(`${who(no)} ${vb(no,"mark","marks")} ${picks.map(i=>nm(S.chars[i])).join(", ")} for arrest.`,picks,{kind:"arrest"});
+if(!isH(no)&&picks.length>1)await say(`${who(no)} ${vb(no,"mark","marks")} ${picks.map(i=>nm(S.chars[i])).join(", ")} for arrest.`,picks,{kind:"arrest"});
 await arrestBatch(picks,"NKVD quota",false,true,true);break}}
 async function assassinF(p,id,nk){const c=S.chars[id],o=odds();
  await say(`Special Tasks sends an assassin after ${nm(c)} in exile. Death ${oddsTxt(o)}${nk?`; a miss puts a chip on the NKVD chief, ${nm(nk)}`:""}.`,nk?[id,nk.id]:[id],{kind:"arrest",f:1.3});
@@ -804,10 +832,10 @@ await say(mass?`${why}: Stalin calls a mass trial. The Military Collegium tries 
 for(let t=0;t<n&&S.queue.length;t++){
  const id=S.queue.shift(),c=S.chars[id],file=c.file||0;c.status="dock";S.dock=id;
  await say(`On trial: ${nm(c)}, once ${seatTitle(c.was)}.`,[id],{kind:"trial",f:1.1});
- if(file){let speak=false;if(c.owner===ME)speak=await ask("speak",{id,mass});else if(c.owner!=null)speak=aiSpeak(c.owner,c);
+ if(file){let speak=false;if(isH(c.owner))speak=await askP(c.owner,"speak",{id,mass});else if(c.owner!=null)speak=aiSpeak(c.owner,c);
   if(speak){const o=c.owner,was=c.rev;c.rev=true;
    await say(`${who(o)} ${vb(o,"speak","speaks")} for ${nm(c)}${was?"":` and ${vb(o,"show","shows")} his card`}. Under interrogation he names a name.`,[id],{kind:"reveal",f:1.2});
-   if(o===ME){for(let i=0;i<file&&freeChars().length;i++){const tid=await ask("place",{n:file-i,why:"names"});chip(tid,1);await say(`He names ${nm(S.chars[tid])}.`,[tid],{kind:"chips",f:.6});await fuseNow()}}
+   if(isH(o)){for(let i=0;i<file&&freeChars().length;i++){const tid=await askP(o,"place",{n:file-i,why:"names"});chip(tid,1);await say(`He names ${nm(S.chars[tid])}.`,[tid],{kind:"chips",f:.6});await fuseNow()}}
    else{const tg=aiNameTargets(o,file);await say(`He names ${[...new Set(tg)].map(i=>nm(S.chars[i])).join(", ")}.`,[...new Set(tg)],{kind:"chips"});await fuseNow()}}
   else await say(`Nobody speaks for ${nm(c)}. He names nobody.`,[id],{kind:"trial",f:.9})}
  c.file=0;
@@ -815,7 +843,7 @@ for(let t=0;t<n&&S.queue.length;t++){
  await say(`The die is cast: ${roll}. ${death?"Death.":"Ten years in the Gulag."}`,[id],{kind:death?"death":"gulag",f:1.2});
  const j=holder(K(JUD,0));
  if(j&&j.owner!=null&&j.status==="free"){const jo=j.owner;
-  const want=jo===ME?await ask("overturn",{id,j:j.id,death,roll,mass}):aiOverturn(jo,c,death,j);
+  const want=isH(jo)?await askP(jo,"overturn",{id,j:j.id,death,roll,mass}):aiOverturn(jo,c,death,j);
   if(want&&await claimF(jo,"commute",{help:death?[id]:[],hurt:death?[]:[id]},`to overturn the verdict on ${nm(c)}`)){death=!death;
    await say(`The Chairman overturns the verdict: ${death?"death":"the Gulag"}.`,[j.id,id],{kind:death?"death":"gulag",f:1.1});
    if(!(S.cfg.chairMode==="mercy"&&!death)){j.chips++;await say(`Overruling the court has a price: ${nm(j)} takes a chip (${j.chips} of ${fuseOf(j)}).`,[j.id],{kind:"chips",f:1});await fuseNow()}}}
@@ -835,7 +863,7 @@ async function endRoundF(){S.phase="end";
 S.hist.push({r:S.round,free:freeChars().length,arr:S.arrests,pol:POLS.filter(k=>{const c=holder(k);return c&&c.owner!=null}).length,og:POLS.filter(k=>{const c=holder(k);return c&&c.og}).length});
 for(const p of ps()){if(S.hands[p].some(id=>["free","gulag","queue","exile"].includes(S.chars[id].status)))continue;
  const opts=S.unowned.filter(id=>S.chars[id].status==="free"&&!S.chars[id].og);if(!opts.length)continue;const id=pick(opts);S.unowned=S.unowned.filter(x=>x!==id);S.chars[id].owner=p;S.hands[p].push(id);
- await say(p===ME?`You have nobody left, so you take ${nm(S.chars[id])} from nobody's cards.`:`${PL[p].n} has nobody left and takes a new card from nobody's cards.`,p===ME?[id]:[],{f:1.1})}
+ await say(tok(p,`You have nobody left, so you take ${nm(S.chars[id])} from nobody's cards.`,`${PL[p].n} has nobody left and takes a new card from nobody's cards.`),!MULTI&&p===ME?[id]:[],{f:1.1})}
 S.troika=[];const r=S.round;S.round++;S.arrests=0;S.used={};S.stats.prev=S.stats.now;S.stats.now=Array(S.np).fill(0);
 await say(`End of round ${r}: ${freeChars().length} of ${SEATS.length} characters are still free.`,[],{kind:"round",f:.9})}
 
@@ -919,7 +947,8 @@ let chips="";[[30,30],[44,24],[56,32],[38,38],[50,40],[24,40],[62,40],[44,34]].f
 $("#bw").innerHTML=`<svg class="bowl" viewBox="0 0 86 56" aria-hidden="true"><ellipse cx="43" cy="38" rx="40" ry="16" fill="#1d110b"/><ellipse cx="43" cy="32" rx="40" ry="16" fill="#3a2a20" stroke="#8a7a5a" stroke-width="1.5"/><ellipse cx="43" cy="32" rx="33" ry="11" fill="#20140e"/>${chips}</svg><span>Chips</span>`;
 renderBoard()}
 function decHTML(){
-const P=pending;if(S.over){const w=S.winner;return`<div class="dec"><h3>${w&&(w.share?w.share.includes(ME):w.p===ME)?"You survived":"The Terror ends"}</h3><p>${w.share?`${esc(w.share.map(who).join(" and "))} share the win on ${pl(w.pts,"point")}.`:`${esc(who(w.p))} ${vb(w.p,"win","wins")} with ${pl(w.pts,"point")}.`} ${esc(S.score.map(x=>`${who(x.p)} ${x.pts}`).join(" · "))}</p><button class="btn pri" data-a="new">Play again</button></div>`}
+const P=pending;if(S.over){const w=S.winner;return`<div class="dec"><h3>${w&&(w.share?w.share.includes(ME):w.p===ME)?"You survived":"The Terror ends"}</h3><p>${w.share?`${esc(w.share.map(who).join(" and "))} share the win on ${pl(w.pts,"point")}.`:`${esc(who(w.p))} ${vb(w.p,"win","wins")} with ${pl(w.pts,"point")}.`} ${esc(S.score.map(x=>`${who(x.p)} ${x.pts}`).join(" · "))}</p>${NET.on&&!NET.host?`<p class="wait">Waiting for ${esc(PL[0].n)} to start a new game.</p>`:`<button class="btn pri" data-a="new">Play again</button>`}</div>`}
+if(!P&&NET.on)return NET.waitHTML();
 if(!P)return`<div class="dec"><p class="wait">${paused?"Paused. Press Next step to go one step at a time, or Pause again to resume.":"Watching the table…"}</p></div>`;
 const b=(v,label,sub,pri)=>`<button class="btn${pri?" pri":""}" data-a="dec" data-v="${v}">${label}${sub?`<small>${sub}</small>`:""}</button>`;
 if(P.kind==="rowpick"){const rh=holder("rh");return`<div class="dec"><h3>Stalin's right hand</h3><p>You control ${esc(nm(rh))}${P.open?", and everyone knows it":", in secret"}. ${P.open?"Pick Stalin's card for this round from the row.":"Show his card to pick Stalin's card for this round, or stay silent and keep him secret; then the card is drawn at random."}</p><div class="plea">${S.row.map((i,ix)=>b(String(ix),CARDS[i].t,CARDS[i].fx,0)).join("")}${P.open?"":b("none","Stay silent","The card is drawn from the row at random.")}</div></div>`}
@@ -954,7 +983,7 @@ const ph=["stalin","actions","quota","trial","end"],lab=["Stalin's card","Turns"
 const steps=`<ol class="steps" aria-label="Order of the round">${ph.map((p,i)=>`<li class="${i===at?"now":i<at?"done":""}${(i===3&&S.wpNext!=null)||(i===4&&(S.wpNext!=null||S.lastRound))?" flag":""}"><i>${i+1}</i>${lab[i]}</li>`).join("")}</ol>`;
 const cur=S.cur!=null?`<div class="mini2"><b>★</b><div><strong>${esc(CARDS[S.cur].t)}</strong><span>${esc(CARDS[S.cur].fx)}. Clock +${CARDS[S.cur].c??1}.</span></div></div>`:"";
 const peek="";
-const pl_=$("#play");const keep=pending?null:pl_.scrollTop;$("#play").innerHTML=`<h2>Round ${S.round}</h2>${steps}<div class="ticker" style="--kc:${KC[S.narr.kind]||"#d2a94c"}"><small>${esc(S.cfg.stages[S.stage].name)} · clock ${S.clock} of ${S.cfg.end}</small>${esc(S.narr.m||"…")}</div>${cur}${peek}${decHTML()}`;
+const pl_=$("#play");const keep=pending?null:pl_.scrollTop;$("#play").innerHTML=pers(`<h2>Round ${S.round}</h2>${steps}<div class="ticker" style="--kc:${KC[S.narr.kind]||"#d2a94c"}"><small>${esc(S.cfg.stages[S.stage].name)} · clock ${S.clock} of ${S.cfg.end}</small>${esc(S.narr.m||"…")}</div>${cur}${peek}${decHTML()}`);
 if(pending){const d=pl_.querySelector(".dec");if(d)pl_.scrollTop=pl_.scrollHeight}else if(keep!=null)pl_.scrollTop=keep}
 function renderInfo(){
 const c=S.sel?S.chars[S.sel]:null;
@@ -963,7 +992,7 @@ const k=c.seat||c.was;const dep=k==="rh"?"Stalin's office":k==="hs"?"Head of Sta
 const own=c.owner==null?(S.open||S.over?"Nobody controls him.":"You don't know who controls him."):knowsMe(c)?(c.owner===ME?(c.rev?"He is yours, and the table knows it.":"He is yours. Nobody else knows."):`${PL[c.owner].n} controls him${c.rev?", openly":". Only you know this"}.`):"You don't know who controls him.";
 const stat={free:`Seat ${prec(k)}: ${seatTitle(k)}`,queue:`In the Lubyanka, awaiting trial (was ${seatTitle(k)}); file of ${pl(c.file||0,"chip")}`,gulag:"In the Gulag",transit:"In the Butyrka, waiting to be moved to the Lubyanka",exile:`In exile (once ${seatTitle(k)})`,dead:"Shot"}[c.status];
 $("#info").innerHTML=`<h2>Character</h2><div class="who"><span class="tile"><b class="ini">${c.id}</b></span><div><h3>${esc(nm(c))}</h3><p>${esc(stat)} · ${esc(dep)}</p></div></div><p class="info"><b>${pl(c.chips,"chip")}.</b> ${esc(own)}</p>`}
-function renderLog(){$("#log").innerHTML=S.log.slice(0,150).map(l=>`<li><span>R${l.r}</span>${esc(l.m)}</li>`).join("")}
+function renderLog(){$("#log").innerHTML=pers(S.log.slice(0,150).map(l=>`<li><span>R${l.r}</span>${esc(l.m)}</li>`).join(""))}
 function renderCfg(){
 const c=S.cfg;$("#cfg").innerHTML=c.stages.map((s,i)=>`<fieldset><legend>Stage ${i+1}: ${esc(s.name)}</legend><label for="f${i}">Starts at clock<input id="f${i}" type="number" min="0" max="60" value="${s.from}" data-cfg="from" data-i="${i}"${i===0?" disabled":""}></label><label for="q${i}">Quota<input id="q${i}" type="number" min="0" max="12" value="${s.quota}" data-cfg="quota" data-i="${i}"></label><label for="u${i}">Fuse<input id="u${i}" type="number" min="1" max="9" value="${s.fuse}" data-cfg="fuse" data-i="${i}"></label><label for="d${i}">Death on a roll of 1 to<input id="d${i}" type="number" min="0" max="6" value="${s.odds??i+1}" data-cfg="odds" data-i="${i}"></label></fieldset>`).join("")+`<fieldset><legend>Table</legend><label for="cend">Clock ends at<input id="cend" type="number" min="10" max="80" value="${c.end}" data-cfg="end"></label><label for="cq">Lubyanka cells<input id="cq" type="number" min="1" max="12" value="${c.queue}" data-cfg="queue"></label></fieldset>`}
 function drawChart(){
@@ -975,9 +1004,9 @@ const bw=Math.max(4,iw/mx*.35),am=Math.max(6,...d.map(p=>p.arr)),bh=v=>ih*.35*v/
 g+=`<polyline points="${d.map((p,i)=>x(i)+","+y(p.free)).join(" ")}" fill="none" stroke="#d2a94c" stroke-width="3"/>`;d.forEach((p,i)=>g+=`<circle cx="${x(i)}" cy="${y(p.free)}" r="4" fill="#d2a94c"/>`);
 const l=d[d.length-1];g+=`<text x="${Math.min(x(d.length-1)+8,W-R-4)}" y="${y(l.free)-10}" text-anchor="${x(d.length-1)>W-80?"end":"start"}" fill="#f0e6d0" font-size="14" font-weight="700" style="paint-order:stroke;stroke:#28170f;stroke-width:4px">${l.free} free</text>`;
 g+=`<text x="${W-R}" y="${T+12}" text-anchor="end" fill="#c9b79a" font-size="13" style="paint-order:stroke;stroke:#28170f;stroke-width:4px">red bars: arrests per round</text>`;s.innerHTML=g}
-function render(){if(!S||window.__norender)return;
+function render(){if(S&&NET.host)NET.flush();if(!S||window.__norender)return;NET.title();
 $("#sub").textContent=S.over?`Game over after ${S.round} rounds`:`Round ${S.round} · ${S.cfg.stages[S.stage].name} · ${freeChars().length} of ${SEATS.length} still free`;
-$("#np").value=S.np;$("#open").checked=!!S.open;$("#pauseBtn").textContent=paused?"Resume":"Pause";$("#stepBtn").disabled=!paused||!!pending;
+if(!NET.on)$("#np").value=S.np;$("#open").checked=!!S.open;$("#pauseBtn").textContent=paused?"Resume":"Pause";$("#stepBtn").disabled=!paused||!!pending;
 renderTable();renderPlay();renderInfo();renderLog();drawChart();fit();
 if(!document.activeElement||!document.activeElement.dataset||!document.activeElement.dataset.cfg)renderCfg()}
 
@@ -987,18 +1016,21 @@ function fit(){const stg=$("#stage"),t=$("#table");if(!ONE.matches){t.style.tran
 const w=t.offsetWidth,h=t.offsetHeight,W=stg.clientWidth,Hh=stg.clientHeight;if(!w||!h)return;const k=Math.min(W/w,Hh/h,1.3);t.style.transform=`translateX(-50%) scale(${k.toFixed(4)})`}
 function tab(t){document.querySelectorAll(".tb").forEach(b=>b.classList.toggle("on",b.dataset.t===t));document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x.id==="t-"+t));if(t==="chart")drawChart()}
 /* ---------- input ---------- */
-function startNew(np,cfg){if(pending&&pending.rej)pending.rej(CANCEL);pending=null;ui={a:null,step:0,t1:null};gen++;newGame(cfg||(S&&S.cfg),np||(S&&S.np)||4);game()}
+function startNew(np,cfg){if(pending&&pending.rej)pending.rej(CANCEL);pending=null;ui={a:null,step:0,t1:null};gen++;NET.cancel();newGame(cfg||(S&&S.cfg),np||(S&&S.np)||4);if(NET.on)NET.decorate();game()}
 function finish(x){pending.res(x)}
 function onTarget(d){const P=pending;if(!P)return;const id=d.id||null,k=d.k||null;
 if(P.kind==="arrest"||P.kind==="place"||P.kind==="reveal"||P.kind==="hunt"||P.kind==="medal"||P.kind==="appointee")return P.res(id);
 if(P.kind==="action"){if(ui.a==="recruit")return finish({a:"recruit",t1:id});if(ui.a==="hunt")return finish({a:"hunt",t1:id});
  if(ui.step===1){const c=S.chars[id];if(ui.a==="mv"||ui.a==="rewrite"||ui.a==="transfer"||(ui.a==="dem"&&c.seat==="rh")){ui.t1=id;ui.step=2;return render()}return finish({a:ui.a,t1:id})}
  return finish({a:ui.a,t1:ui.t1,t2:id,k2:k})}}
-document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b||b.disabled||!S)return;const a=b.dataset.a,d=b.dataset;
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b||b.disabled)return;const a=b.dataset.a,d=b.dataset;
+if(a==="lob")return NET.lobClick(d);if(a==="online")return NET.openMenu();if(a==="room")return NET.openRoom();if(!S)return;
 if(a==="tab")return tab(d.t);
-if(a==="sel"){S.sel=d.id;tab("info");return render()}
+if(a==="sel"){S.sel=d.id;NET.sel=d.id;tab("info");return render()}
 if(a==="tgt")return onTarget(d);
-if(a==="new")return startNew();
+if(a==="new")return NET.on&&!NET.host?null:startNew();
+if(a==="aiseat")return NET.aiSeat(+d.p);
+if(a==="takeback")return NET.takeBack();
 if(a==="pause"){paused=!paused;return render()}
 if(a==="step"){stepOne=true;return}
 if(a==="pick"){if(!pending||pending.kind!=="action")return;if(d.v==="none")return pending.res({a:"none"});if(d.v==="banner")return pending.res({a:"banner"});if(d.v.startsWith("flee:"))return pending.res({a:"flee",t1:d.v.slice(5)});ui={a:d.v,step:1,t1:null};return render()}
@@ -1012,9 +1044,195 @@ $("#cfg").addEventListener("change",e=>{const t=e.target;if(!t.dataset.cfg)retur
 const ro=new ResizeObserver(()=>{if(S)drawChart()});ro.observe($("#fig"));
 const ro2=new ResizeObserver(()=>{if(S)fit()});ro2.observe($("#stage"));ONE.addEventListener("change",()=>{if(S)render()});
 window.claude?.hot?.snapshot?.(()=>({cp,open:S&&S.open}));
-function start(data){if(data&&data.cp){try{S=JSON.parse(data.cp);gen++;game();return}catch(e){}}startNew(4)}
+/* ---------- online play: the host's browser runs the game; everyone else mirrors it ---------- */
+const FB_CONFIG={apiKey:"AIzaSyCw7Fz1zSK0lujBfkv6clY3kwBdwIKryuA",authDomain:"the-regime-26978.firebaseapp.com",databaseURL:"https://the-regime-26978-default-rtdb.firebaseio.com",projectId:"the-regime-26978",storageBucket:"the-regime-26978.firebasestorage.app",messagingSenderId:"814859846908",appId:"1:814859846908:web:1467c7a47566f9c69bc379"};
+const FB_SDK="https://www.gstatic.com/firebasejs/10.12.2/";
+const SITE="https://christianabbat-glitch.github.io/the-regime/";
+const DEFN=PL.map(x=>x.n),AIN=["Anna","Boris","Vera","Grisha","Dmitri","Olga","Pavel","Lena"];
+const GAME_VER=(()=>{let h=5381;const t=(document.currentScript&&document.currentScript.textContent)||"";for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return(h>>>0).toString(36)})();
+const FireB={
+ async init(){const load=f=>new Promise((res,rej)=>{const s=document.createElement("script");s.src=FB_SDK+f;s.onload=res;s.onerror=()=>rej(new Error("couldn't load "+f));document.head.appendChild(s)});
+  if(!window.firebase){await load("firebase-app-compat.js");await Promise.all([load("firebase-auth-compat.js"),load("firebase-database-compat.js")])}
+  if(!firebase.apps.length)firebase.initializeApp(FB_CONFIG);await firebase.auth().signInAnonymously();this.db=firebase.database()},
+ get(p){return this.db.ref(p).get().then(s=>s.val())},
+ set(p,v){return this.db.ref(p).set(v)},
+ update(p,o){return this.db.ref(p).update(o)},
+ listen(p,cb){const r=this.db.ref(p),f=s=>cb(s.val());r.on("value",f);return()=>r.off("value",f)},
+ claim(p,fn){return this.db.ref(p).transaction(fn).then(r=>({ok:r.committed,v:r.snapshot.val()}))},
+ here(p){const r=this.db.ref(p),c=this.db.ref(".info/connected");const f=s=>{if(s.val()){r.onDisconnect().remove();r.set(true)}};c.on("value",f);return()=>{c.off("value",f);r.onDisconnect().cancel();r.remove()}}};
+/* stand-in for Firebase when testing several tabs on one machine (?fake=1): tabs share one tree over a BroadcastChannel */
+const FakeB={tree:{},ls:[],
+ init(){this.ch=new BroadcastChannel("regime-fake");this.ch.onmessage=e=>this.recv(e.data);this.ch.postMessage({op:"hello"});addEventListener("pagehide",()=>(this.mine||[]).forEach(p=>this.w(p,null)));return new Promise(r=>setTimeout(r,150))},
+ recv(m){if(m.op==="hello"){this.ch.postMessage({op:"full",tree:this.tree});return}if(m.op==="full"){if(!Object.keys(this.tree).length&&m.tree&&Object.keys(m.tree).length){this.tree=m.tree;this.fire("")}return}this.put(m.p,m.v);this.fire(m.p)},
+ parts:p=>p.split("/").filter(Boolean),
+ at(p){let n=this.tree;for(const k of this.parts(p)){if(n==null||typeof n!=="object")return null;n=n[k]}return n===undefined?null:n},
+ put(p,v){const ks=this.parts(p);let n=this.tree;const st=[];for(const k of ks.slice(0,-1)){if(n[k]==null||typeof n[k]!=="object")n[k]={};st.push([n,k]);n=n[k]}
+  const l=ks[ks.length-1];if(v==null)delete n[l];else n[l]=JSON.parse(JSON.stringify(v));for(let i=st.length-1;i>=0;i--){const[o,k]=st[i];if(o[k]&&!Object.keys(o[k]).length)delete o[k];else break}},
+ fire(p){for(const l of this.ls.slice())if(p===""||l.p===p||l.p.startsWith(p+"/")||p.startsWith(l.p+"/")){const j=JSON.stringify(this.at(l.p));if(j!==l.j){l.j=j;l.cb(JSON.parse(j))}}},
+ w(p,v){this.put(p,v);this.ch.postMessage({p,v});this.fire(p)},
+ get(p){return Promise.resolve(JSON.parse(JSON.stringify(this.at(p))))},
+ set(p,v){this.w(p,v);return Promise.resolve()},
+ update(p,o){for(const k in o)this.w(p+"/"+k,o[k]);return Promise.resolve()},
+ listen(p,cb){const l={p,cb};this.ls.push(l);setTimeout(()=>{if(l.j===undefined){l.j=JSON.stringify(this.at(p));cb(JSON.parse(l.j))}},0);return()=>{this.ls=this.ls.filter(x=>x!==l)}},
+ claim(p,fn){const v=fn(JSON.parse(JSON.stringify(this.at(p))));if(v===undefined)return Promise.resolve({ok:false,v:this.at(p)});this.w(p,v);return Promise.resolve({ok:true,v})},
+ here(p){this.w(p,true);(this.mine=this.mine||[]).push(p);return()=>this.w(p,null)}};
+const NET={on:false,host:false,code:null,seat:0,B:null,sel:null,w:null,rq:Math.floor(Math.random()*1e6),gen:null,meta:null,seats:{},online:{},ticks:[],pub:{s:{},c:{},n:0},
+ cid:(()=>{const r=()=>Math.random().toString(36).slice(2,10);try{let c=sessionStorage.getItem("regime-cid");if(!c){c=r();sessionStorage.setItem("regime-cid",c)}return c}catch(e){return r()}})(),
+ R(p){return"rooms/"+this.code+(p?"/"+p:"")},
+ /* timing that survives a hidden tab: a worker ticks even when the page's own timers are throttled */
+ tick(){if(!this.wk){try{this.wk=new Worker(URL.createObjectURL(new Blob(["setInterval(()=>postMessage(0),40)"],{type:"text/javascript"})));this.wk.onmessage=()=>{const t=this.ticks;this.ticks=[];t.forEach(f=>f())}}catch(e){this.wk=1}}
+  return this.wk===1?new Promise(r=>setTimeout(r,40)):new Promise(r=>this.ticks.push(r))},
+ title(){document.title=(this.on&&pending?"▶ Your move · ":"")+"The Regime"},
+ boot(){const q=new URLSearchParams(location.search);const code=(q.get("room")||"").toUpperCase().replace(/[^A-Z]/g,"");this.fake=q.has("fake");if(!code)return false;this.go(code);return true},
+ async connect(){if(this.B)return;const B=this.fake?FakeB:FireB;await B.init();this.B=B},
+ link(){return location.origin+location.pathname+"?room="+this.code+(this.fake?"&fake=1":"")},
+ setURL(code){try{history.replaceState(null,"",code?"?room="+code+(this.fake?"&fake=1":""):location.pathname)}catch(e){}},
+ /* ----- the lobby ----- */
+ lob(h,screen=""){this.screen=screen;$("#lobby").hidden=false;$("#lbody").innerHTML=h;const f=$("#lbody input:not([readonly])");if(f&&!f.value&&matchMedia("(hover:hover)").matches)f.focus()},
+ lobClose(){this.screen="";$("#lobby").hidden=true},
+ err(m){const e=$("#lerr");if(e)e.textContent=m},
+ name(){try{return localStorage.getItem("regime-name")||""}catch(e){return""}},
+ readName(){const el=$("#lname");const n=((el?el.value:this.name())||"").replace(/\s+/g," ").trim().slice(0,16);if(!n){this.err("Type your name first.");if(el)el.focus();return null}try{localStorage.setItem("regime-name",n)}catch(e){}return n},
+ buttons(...b){return`<div class="lrow end">${b.join("")}</div>`},
+ soloBtn(l="Play the computer instead"){return`<button class="btn sm" data-a="lob" data-x="solo">${l}</button>`},
+ openMenu(){if(this.code)return this.openRoom();
+  this.lob(`<h2>Play online</h2><p class="info">Play with friends on their own phones or computers. One person hosts and everyone else joins with the room code or link. The computer plays any empty seat.</p>
+<label class="lf">Your name<input id="lname" maxlength="16" value="${esc(this.name())}" autocomplete="nickname" enterkeyhint="go"></label>
+<div class="lrow"><label class="lf">Players<select id="lnp">${[3,4,5,6].map(n=>`<option${n===(S?S.np:4)?" selected":""}>${n}</option>`).join("")}</select></label><button class="btn pri" data-a="lob" data-x="host">Host a game</button></div>
+<div class="lrow"><label class="lf">Or join with a code<input id="lcode" maxlength="4" autocapitalize="characters" autocomplete="off" placeholder="ABCD" enterkeyhint="go"></label><button class="btn" data-a="lob" data-x="join">Join</button></div>
+<p class="lerr" id="lerr" role="alert"></p>${this.buttons(`<button class="btn sm" data-a="lob" data-x="close">Back to the computer game</button>`)}`,"menu")},
+ openRoom(){if(!this.code)return this.openMenu();if(this.meta&&this.meta.status==="playing"&&!this.on)return this.lateScreen();this.roomScreen()},
+ async lobClick(d){const x=d.x;try{
+  if(x==="close"){this.lobClose();if(!S&&!this.on)startNew(4);return}
+  if(x==="solo"){if(this.on||this.code)this.stop();this.setURL(null);this.lobClose();startNew(4);return}
+  if(x==="host"){const n=this.readName();if(!n)return;const np=+$("#lnp").value;this.lob(`<p class="wait">Setting up a room…</p>`);await this.connect();const code=await this.create(n,np);this.setURL(code);return this.go(code)}
+  if(x==="join"){const n=this.readName();if(!n)return;const code=($("#lcode").value||"").toUpperCase().replace(/[^A-Z]/g,"");if(code.length!==4)return this.err("Room codes are four letters.");this.autoSit=true;this.setURL(code);return this.go(code)}
+  if(x==="copy"){const t=this.link(),b=$('[data-x="copy"]');try{await navigator.clipboard.writeText(t);if(b)b.textContent="Copied"}catch(e){const i=$("#llink");if(i){i.select();document.execCommand&&document.execCommand("copy")}if(b)b.textContent="Copied"}return}
+  if(x==="share"){try{await navigator.share({title:"The Regime",text:"Join my game of The Regime: room "+this.code,url:this.link()})}catch(e){}return}
+  if(x==="start")return this.hostStart();
+  if(x==="leave")return this.leave();
+  if(x==="sit")return this.joinSeat();
+  if(x==="take")return this.take(+d.s);
+  if(x==="takehost")return this.takeHost();
+  if(x==="reload"){const u=new URL(location.href);u.searchParams.set("v",Date.now().toString(36));location.replace(u.toString());return}
+ }catch(e){console.error(e);this.fail(e)}},
+ fail(e){this.lob(`<h2>Can't connect</h2><p class="info">Online play couldn't start: ${esc(e&&e.message||e)}. It needs an internet connection, and it works from the game's page at <a href="${SITE}" target="_blank" rel="noopener">${SITE.replace("https://","")}</a>.</p>${this.buttons(this.soloBtn("Play the computer"))}`,"fail")},
+ async create(name,np){const L="ABCDEFGHJKLMNPQRSTUVWXYZ";for(let i=0;i<30;i++){this.code=[0,1,2,3].map(()=>L[Math.floor(Math.random()*L.length)]).join("");if(await this.B.get(this.R("meta")))continue;
+  await this.B.set(this.R(),{meta:{ver:GAME_VER,host:this.cid,status:"lobby",np,created:Date.now()},seats:{s0:{name,cid:this.cid}}});return this.code}throw new Error("no free room code")},
+ mySeat(){for(const k in this.seats)if(this.seats[k]&&this.seats[k].cid===this.cid)return+k.slice(1);return null},
+ async go(code){this.code=code;this.lob(`<h2>Room ${esc(code)}</h2><p class="wait">Connecting…</p>`,"wait");
+  try{await this.connect()}catch(e){return this.fail(e)}
+  const meta=await this.B.get(this.R("meta"));
+  if(!meta){this.code=null;this.setURL(null);return this.lob(`<h2>No room ${esc(code)}</h2><p class="info">Nobody is hosting a game with that code. Check the code, or host one yourself.</p>${this.buttons(`<button class="btn" data-a="online">Play online</button>`,this.soloBtn("Play the computer"))}`,"none")}
+  this.meta=meta;this.seats=await this.B.get(this.R("seats"))||{};
+  const amHost=meta.host===this.cid;
+  if(meta.status==="closed")return this.closedScreen();
+  if(amHost){if(meta.ver!==GAME_VER)await this.B.update(this.R("meta"),{ver:GAME_VER});this.meta.ver=GAME_VER}
+  else if(meta.ver!==GAME_VER)return this.verScreen();
+  this.watchRoom();const mine=this.mySeat();
+  if(amHost){this.host=true;this.seat=0;this.hereOn(0);if(meta.status==="playing")return this.resume();return this.roomScreen()}
+  if(mine!=null){this.seat=mine;this.hereOn(mine);if(meta.status==="playing")return this.guestStart(mine);return this.roomScreen()}
+  if(meta.status==="lobby"){if(this.autoSit){this.autoSit=false;return this.joinSeat()}return this.joinScreen()}
+  return this.lateScreen()},
+ watchRoom(){if(this.roomUn)return;const B=this.B;
+  this.roomUn=[B.listen(this.R("meta"),m=>{if(!m)return;const old=this.meta||{};this.meta=m;this.roomChanged(old,m)}),
+   B.listen(this.R("seats"),s=>{this.seats=s||{};this.refresh()}),
+   B.listen(this.R("on"),o=>{this.online=o||{};this.refresh();if(this.on&&S)render()})]},
+ roomChanged(old,m){
+  if(this.host){this.refresh();return}
+  if(m.status==="closed"){if(this.on||this.code)return this.closedScreen();return}
+  if(m.ver!==GAME_VER&&m.ver!==old.ver)return this.verScreen();
+  const mine=this.mySeat();
+  if(m.status==="playing"&&mine!=null){if(!this.on)return this.guestStart(mine);if(m.gen!==this.gen)this.subGen(m.gen);return}
+  this.refresh()},
+ refresh(){if(this.screen==="room")this.roomScreen();else if(this.screen==="late")this.lateScreen()},
+ hereOn(i){if(this.hereUn)this.hereUn();this.hereUn=this.B.here(this.R("on/s"+i))},
+ roomScreen(){const m=this.meta||{},np=m.np||4,playing=m.status==="playing",n=Object.keys(this.seats).length;
+  const rows=[...Array(Math.max(np,n)).keys()].map(i=>{const s=this.seats["s"+i];const on=s&&this.online["s"+i];const nm_=s?s.name:playing&&S&&S.pn?S.pn[i]:"Computer";
+   return`<li><i class="dot${s?(on?" on":""):" ai"}"></i><b>${esc(nm_)}${i===this.seat&&s&&s.cid===this.cid?" (you)":""}</b><small>${s?(i===0?"host, ":"")+(on?"here":"away"):playing?"the computer":"empty: the computer plays it"}</small></li>`}).join("");
+  const share=navigator.share?`<button class="btn sm" data-a="lob" data-x="share">Share</button>`:"";
+  this.lob(`<h2>Room ${esc(this.code)}</h2><p class="info">${playing?"The game is under way.":"Send this link to the other players, or tell them the code <b class=\"code\">"+esc(this.code)+"</b>."}</p>
+<div class="lrow"><input class="llink" id="llink" readonly value="${esc(this.link())}" aria-label="Link to this room"><button class="btn sm" data-a="lob" data-x="copy">Copy</button>${share}</div>
+<ul class="seatl">${rows}</ul>
+${playing?"":this.host?`<div class="lrow"><label class="lf">Players<select id="rnp">${[3,4,5,6].filter(k=>k>=n).map(k=>`<option${k===np?" selected":""}>${k}</option>`).join("")}</select></label><button class="btn pri" data-a="lob" data-x="start">Start the game</button></div>`:`<p class="wait">Waiting for ${esc((this.seats.s0||{}).name||"the host")} to start the game.</p>`}
+<p class="lerr" id="lerr" role="alert"></p>${this.buttons(this.on?`<button class="btn sm" data-a="lob" data-x="close">Back to the table</button>`:"",`<button class="btn sm" data-a="lob" data-x="leave">${this.host?"Close the room":"Leave"}</button>`)}`,"room")},
+ joinScreen(){this.lob(`<h2>Room ${esc(this.code)}</h2><p class="info">${esc((this.seats.s0||{}).name||"Someone")} is hosting a game of The Regime. Type your name to take a seat.</p><label class="lf">Your name<input id="lname" maxlength="16" value="${esc(this.name())}" autocomplete="nickname" enterkeyhint="go"></label><p class="lerr" id="lerr" role="alert"></p>${this.buttons(this.soloBtn(),`<button class="btn pri" data-a="lob" data-x="sit">Take a seat</button>`)}`,"join")},
+ async joinSeat(){const n=this.readName();if(!n)return;const np=(this.meta||{}).np||4;let got=null;
+  const r=await this.B.claim(this.R("seats"),cur=>{cur=cur||{};got=null;for(const k in cur)if(cur[k]&&cur[k].cid===this.cid){got=+k.slice(1);return cur}for(let i=1;i<np;i++)if(!cur["s"+i]){cur["s"+i]={name:n,cid:this.cid};got=i;return cur}});
+  if(!r.ok||got==null)return this.lob(`<h2>Room ${esc(this.code)} is full</h2><p class="info">Every seat at this table is taken.</p>${this.buttons(this.soloBtn("Play the computer"))}`,"full");
+  this.seat=got;this.seats=r.v||this.seats;this.hereOn(got);this.roomScreen()},
+ lateScreen(){const hs=Object.keys(this.seats).map(k=>+k.slice(1)).filter(i=>!this.online["s"+i]);
+  this.lob(`<h2>Room ${esc(this.code)}</h2><p class="info">This game has already started.${hs.length?" If you were playing and lost your place, take your seat back:":" Every seat is taken."}</p><div class="lrow">${hs.map(i=>`<button class="btn" data-a="lob" data-x="${i===0?"takehost":"take"}" data-s="${i}">I'm ${esc(this.seats["s"+i].name)}${i===0?" (host)":""}</button>`).join("")}</div>${this.buttons(this.soloBtn())}`,"late")},
+ async take(i){await this.B.update(this.R("seats/s"+i),{cid:this.cid});this.seats["s"+i].cid=this.cid;this.seat=i;this.hereOn(i);this.guestStart(i)},
+ async takeHost(){await this.B.update(this.R(),{"meta/host":this.cid,"seats/s0/cid":this.cid});this.meta.host=this.cid;this.host=true;this.seat=0;this.hereOn(0);this.resume()},
+ verScreen(){this.lob(`<h2>Different versions</h2><p class="info">You and the host have different versions of the game, probably because it was updated since one of you opened it. Reload to get the newest; if that doesn't fix it, the host should reload too.</p>${this.buttons(this.soloBtn(),`<button class="btn pri" data-a="lob" data-x="reload">Reload</button>`)}`,"ver")},
+ closedScreen(){const was=this.on;this.stop();this.setURL(null);this.lob(`<h2>The room is closed</h2><p class="info">${was?"The host has closed the game.":"This game is over and its room is closed."}</p>${this.buttons(`<button class="btn" data-a="online">Play online</button>`,this.soloBtn("Play the computer"))}`,"closed")},
+ /* ----- running the game ----- */
+ begin(names,hum){if(pending&&pending.rej)pending.rej(CANCEL);pending=null;gen++;MULTI=true;this.on=true;ME=this.seat;HUM=new Set(hum);names.forEach((n,i)=>PL[i].n=n);document.body.classList.add("multi");document.body.classList.toggle("guest",!this.host);this.roomTag()},
+ hostStart(){const m=this.meta||{};const np=+($("#rnp")?$("#rnp").value:m.np||4);const names=[],hum=[];
+  for(let i=0;i<np;i++){const s=this.seats["s"+i];if(s){let n=s.name,k=2;while(names.includes(n))n=s.name+" "+k++;names.push(n);hum.push(i)}else names.push(null)}
+  const ai=AIN.filter(n=>!names.includes(n));for(let i=0;i<np;i++)if(names[i]==null)names[i]=ai.shift();
+  this.lobClose();this.begin(names,hum);this.hostListen();startNew(np,S&&S.cfg)},
+ hostListen(){if(this.hostUn)return;this.ctlSeen=null;
+  this.hostUn=[this.B.listen(this.R("ans"),v=>{const w=this.w;if(!v||!w)return;const a=v["s"+w.p];if(!a)return;try{const x=JSON.parse(a);if(x.rid===w.rid)w.res(x.v)}catch(e){}}),
+   this.B.listen(this.R("ctl"),v=>{v=v||{};if(!this.ctlSeen){this.ctlSeen={...v};return}for(const k in v)if(v[k]!==this.ctlSeen[k]){this.ctlSeen[k]=v[k];const i=+k.slice(1);if(S&&i<S.np&&!HUM.has(i)){HUM.add(i);S.hum=[...HUM];render()}}})]},
+ decorate(){S.pn=PL.slice(0,S.np).map(x=>x.n);S.hum=[...HUM];S.open=false;S.wait=null;this.newGen()},
+ newGen(){const old=this.gen||(this.meta&&this.meta.gen);this.gen=Date.now().toString(36)+Math.floor(Math.random()*1e3);this.pub={s:{},c:{},n:0};
+  const u={"meta/status":"playing","meta/gen":this.gen,"meta/np":S.np,req:null,ans:null};if(old&&old!==this.gen)u["g/"+old]=null;this.B.update(this.R(),u);if(this.meta)this.meta.gen=this.gen},
+ saveCp(cp){if(this.B&&this.code)this.B.set(this.R("cp"),cp)},
+ async resume(){const cp=await this.B.get(this.R("cp"));let s=null;try{s=cp&&JSON.parse(cp)}catch(e){}
+  if(!s){await this.B.update(this.R("meta"),{status:"lobby"});this.meta.status="lobby";return this.roomScreen()}
+  this.lobClose();this.begin(s.pn||[],s.hum||[0]);this.hostListen();this.cancel();S=s;S.open=false;S.wait=null;S.sel=null;this.newGen();game()},
+ flush(){if(!this.B||!this.gen||!S||!this.on)return;const u={},P=this.pub,g="g/"+this.gen;
+  for(const k in S){if(k==="chars"||k==="log"||k==="sel"||k==="open")continue;const j=JSON.stringify(S[k]);if(j===undefined||P.s[k]===j)continue;P.s[k]=j;u[g+"/s/"+k]=j}
+  for(const k in P.s)if(!(k in S)){delete P.s[k];u[g+"/s/"+k]=null}
+  for(const id in S.chars){const j=JSON.stringify(S.chars[id]);if(P.c[id]!==j){P.c[id]=j;u[g+"/c/"+id]=j}}
+  const N=S.logN||0,k=Math.min(N-P.n,S.log.length);for(let i=k-1;i>=0;i--)u[g+"/l/"+(N-1-i)]=JSON.stringify(S.log[i]);P.n=N;
+  if(Object.keys(u).length)this.B.update(this.R(),u)},
+ ask(p,kind,data){return new Promise((res,rej)=>{const rid=++this.rq;S.wait={p,kind};const w={p,rid,kind,data,rej,res:v=>{if(this.w!==w)return;this.w=null;if(S)S.wait=null;this.B.set(this.R("req/s"+p),null);res(v)}};this.w=w;render();this.B.set(this.R("req/s"+p),JSON.stringify({...data,kind,rid}))})},
+ cancel(){const w=this.w;this.w=null;if(w)try{w.rej(CANCEL)}catch(e){}if(S)S.wait=null},
+ aiSeat(p){if(!this.host||!S)return;HUM.delete(p);S.hum=[...HUM];const w=this.w;if(w&&w.p===p)w.res(autoAnswer(w.kind,w.data,p));render()},
+ takeBack(){if(this.on&&!this.host)this.B.set(this.R("ctl/s"+ME),Math.random().toString(36).slice(2))},
+ waitHTML(){const w=S.wait;let h="";
+  if(!this.host&&S.hum&&!S.hum.includes(ME)&&!S.over)h+=`<p class="wait">The computer is playing your seat for now.</p><button class="btn sm" data-a="takeback">Take my seat back</button>`;
+  if(w&&w.p!==ME){const nm_=PL[w.p].n,away=!this.online["s"+w.p];h+=`<p class="wait">Waiting for ${esc(nm_)} to decide…${away?" ("+esc(nm_)+" seems to be away)":""}</p>`;if(this.host)h+=`<button class="btn sm" data-a="aiseat" data-p="${w.p}">Let the computer play for ${esc(nm_)}</button>`}
+  else if(!h)h=`<p class="wait">${paused?"Paused. Press Next step to go one step at a time, or Pause again to resume.":"Watching the table…"}</p>`;
+  return`<div class="dec">${h}</div>`},
+ /* ----- a guest's screen: rebuild the host's state and draw it from this seat ----- */
+ guestStart(i){this.seat=i;this.host=false;this.begin([],[]);S=null;this.sel=null;this.done=null;this.req=null;this.lobClose();$("#sub").textContent="Joining the table…";if(this.meta&&this.meta.gen)this.subGen(this.meta.gen)},
+ subGen(g){if(this.gen===g&&this.gUn)return;(this.gUn||[]).forEach(f=>f());this.gen=g;const c={s:{},sj:{},c:{},cj:{},l:{}};this.cache=c;const base=this.R("g/"+g);
+  const sync=(o,oj,v)=>{v=v||{};for(const k in oj)if(!(k in v)){delete oj[k];delete o[k]}for(const k in v)if(oj[k]!==v[k]){oj[k]=v[k];try{o[k]=JSON.parse(v[k])}catch(e){}}};
+  this.gUn=[this.B.listen(base+"/s",v=>{sync(c.s,c.sj,v);this.gSched()}),this.B.listen(base+"/c",v=>{sync(c.c,c.cj,v);this.gSched()}),
+   this.B.listen(base+"/l",v=>{v=v||{};for(const k in v)if(!(k in c.l))try{c.l[k]=JSON.parse(v[k])}catch(e){}this.gSched()}),
+   this.B.listen(this.R("req/s"+this.seat),v=>{try{this.req=v?JSON.parse(v):null}catch(e){this.req=null}this.gSched()})]},
+ gSched(){if(!this.gT)this.gT=setTimeout(()=>{this.gT=0;this.gApply()},30)},
+ gApply(){const c=this.cache;if(!c||!this.on||this.host||!c.s.cfg||!c.s.hands||!c.s.narr||Object.keys(c.c).length<SEATS.length)return;
+  const s=JSON.parse(JSON.stringify(c.s));s.chars=JSON.parse(JSON.stringify(c.c));s.log=Object.keys(c.l).map(Number).sort((a,b)=>b-a).slice(0,400).map(k=>c.l[k]);s.sel=this.sel;s.open=false;
+  S=s;(S.pn||[]).forEach((n,i)=>{if(PL[i])PL[i].n=n});
+  const rq=this.req;
+  if(rq&&rq.rid!==this.done){if(!pending||pending.rid!==rq.rid){ui={a:null,step:0,t1:null};const rid=rq.rid;
+    pending={...rq,res:v=>{if(this.done===rid)return;this.done=rid;pending=null;ui={a:null,step:0,t1:null};this.B.set(this.R("ans/s"+ME),JSON.stringify({rid,v}));render()}};
+    if(navigator.vibrate&&document.hidden)try{navigator.vibrate(120)}catch(e){}
+    if(window.__autoMe)setTimeout(()=>{if(pending&&pending.rid===rid)pending.res(autoAnswer(rq.kind,rq,ME))},0)}}
+  else pending=null;
+  render()},
+ /* ----- leaving ----- */
+ async leave(){try{if(this.B&&this.code){if(this.host)await this.B.update(this.R("meta"),{status:"closed"});else if(this.meta&&this.meta.status==="lobby"&&this.mySeat()!=null)await this.B.set(this.R("seats/s"+this.mySeat()),null)}}catch(e){}
+  this.stop();this.setURL(null);this.lobClose();startNew(4)},
+ stop(){[this.gUn,this.roomUn,this.hostUn].forEach(a=>(a||[]).forEach(f=>f()));if(this.hereUn)this.hereUn();this.gUn=this.roomUn=this.hostUn=this.hereUn=null;this.cancel();
+  if(pending&&pending.rej)pending.rej(CANCEL);pending=null;gen++;MULTI=false;this.on=false;this.host=false;this.gen=null;this.code=null;this.meta=null;this.seats={};this.online={};this.seat=0;ME=0;HUM=new Set([0]);
+  PL.forEach((x,i)=>x.n=DEFN[i]);document.body.classList.remove("multi","guest");this.roomTag();S=null},
+ roomTag(){const t=$("#roomTag");if(!t)return;t.hidden=!this.on;t.textContent=this.on?"Room "+this.code:""}};
+async function askP(p,kind,data={}){
+ if(p===ME){if(!NET.on)return ask(kind,data);S.wait={p,kind};try{return await ask(kind,data)}finally{if(S)S.wait=null}}
+ if(!NET.on||!HUM.has(p))return autoAnswer(kind,data,p);
+ return NET.ask(p,kind,data)}
+document.addEventListener("change",e=>{if(e.target.id==="rnp"&&NET.host&&NET.B)NET.B.update(NET.R("meta"),{np:+e.target.value})});
+document.addEventListener("keydown",e=>{if(e.key!=="Enter"||!e.target.closest||!e.target.closest("#lobby"))return;const id=e.target.id;const x=id==="lcode"?"join":id==="lname"?($('[data-x="sit"]')?"sit":"host"):null;if(x){e.preventDefault();NET.lobClick({x})}});
+
+function start(data){if(NET.boot())return;if(data&&data.cp){try{S=JSON.parse(data.cp);gen++;game();return}catch(e){}}startNew(4)}
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
-window.__regime={get S(){return S},get pending(){return pending},startNew,SP,render};
+window.__regime={get S(){return S},get pending(){return pending},startNew,SP,render,NET,get ME(){return ME}};
 }
 </script>
 </body>
