@@ -871,7 +871,7 @@ const IC_AMD='<svg viewBox="0 0 12 14" width="10" height="12" aria-label="Amend"
 const RV={Support:['+1','pos'],Acclaim:['+2','pos'],Doubt:['−1','neg'],Protest:['−2','neg'],Abstain:['0','zero'],Defer:[IC_DEF,'def'],Amend:[IC_AMD,'amd']};
 function cardHTML(c,cls){
  if(!c)return'';
- const a=c.ag;const rv=RV[c.resp]||['','zero'];const hd=`<div class="h" style="background:${DC[c.d]};color:${DT[c.d]}"><span class="hi ${rv[1]}">${rv[0]}</span>${DN[c.d].toUpperCase()}</div>`;
+ const a=c.ag;const rv=RV[c.resp]||['','zero'];const hd=`<div class="h" style="background:${DC[c.d]};color:${DT[c.d]}">${DN[c.d].toUpperCase()}</div>`;
  const fate=c.fate?`<div class="fate">Fate: ${c.fate}</div>`:'';
  return `<div class="card ${cls||''}" data-cid="${c.id}"><div class="f">${hd}<div class="a"><b>${esc(a.t)}</b><span class="ad">${esc(a.d)}</span><span class="as">${esc(a.s)}</span></div><div class="r"><span class="rv ${rv[1]}">${rv[0]}</span><b>${c.resp.toUpperCase()}</b><span class="rf">${esc(FLAV[c.d][c.resp]||'')}</span></div>${fate}</div><div class="b" style="background:repeating-linear-gradient(45deg,${DC[c.d]},${DC[c.d]} 7px,${DK[c.d]} 7px,${DK[c.d]} 13px)"></div></div>`;
 }
