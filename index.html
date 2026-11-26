@@ -278,6 +278,7 @@ I:[
 {c:3,t:'Transfer cadres to the Urals.',d:"A man in the department named by the Party line moves to Industry's bottom seat. If it names nobody, the chair names the department by choosing the man.",s:'Support: each supporter names another man there.',k:'transferI',z:{seat:'LINE'},x:'name'},
 {c:3,t:'Double the norms on the Canal.',d:'Every prisoner on the Canal moves two places along. Whoever is pushed off the end dies.',s:'Support: one place further.',k:'push',n:2,z:{none:1},x:'more'},
 {c:3,t:'Release the engineers from the sharashka.',d:"A prisoner in the sharashka returns to Industry's bottom seat.",s:'Support: each supporter names another.',k:'sharBack',z:{pris:['shar']},x:'name'},
+{c:3,t:'Dalstroy needs hands for the Kolyma goldfields.',d:'A prisoner in the Lubyanka is sent to the Gulag.',s:'Support: each supporter names another prisoner.',k:'toGulag',z:{pris:['lub']},x:'name'},
 {c:2,t:'Report on tractor output in Kharkov.',d:'Nothing happens.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none'},
 {c:3,t:'Celebrate a Stakhanovite in the Party press.',d:"A man from any other department moves to Propaganda's bottom seat.",s:'Support: each supporter names another man.',k:'transferTo',to:'P',z:{anyBut:'P'},x:'name'},
 {c:2,t:'A trade delegation to Berlin.',d:'An Industry man goes abroad with the delegation and does not return: he goes into exile, if a place is free.',s:'Support: the next man down goes too.',k:'exileOut',z:{seat:'I'},x:'next'},
@@ -299,10 +300,10 @@ R:[
 {c:2,t:'Manoeuvres in the Kiev district.',d:'Nothing happens.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none'},
 ],
 J:[
-{c:6,t:'Try the Trotskyite-Zinovievite centre.',d:'Try a prisoner in the Lubyanka. Sentence: the Gulag.',s:'Support: each supporter names another prisoner in the Lubyanka to stand trial with him. Objections can stop the trial.',k:'verdict',base:1,z:{pris:['lub']},x:'name'},
-{c:6,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to the Gulag.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',base:1,z:{none:1},x:'harsh'},
+{c:10,t:'Try the Trotskyite-Zinovievite centre.',d:'Try a prisoner in the Lubyanka. Sentence: the Gulag.',s:'Support: each supporter names another prisoner in the Lubyanka to stand trial with him. Objections can stop the trial.',k:'verdict',base:1,z:{pris:['lub']},x:'name'},
+{c:3,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to the Gulag.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',base:1,z:{none:1},x:'harsh'},
 {c:2,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka. Sentence: the Canal.',s:'Support: each supporter names an accomplice from the Lubyanka to share his sentence. Objections can stop the trial.',k:'verdict',base:2,z:{pris:['lub']},x:'name'},
-{c:3,t:'Review the case files.',d:'Turn over the top card of the black deck. The fate in its corner becomes the proposed sentence for everyone in the Lubyanka.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',fateBase:1,z:{none:1},x:'harsh'},
+{c:2,t:'Review the case files.',d:'Turn over the top card of the black deck. The fate in its corner becomes the proposed sentence for everyone in the Lubyanka.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',fateBase:1,z:{none:1},x:'harsh'},
 {c:2,t:'Assign specialists to the sharashka.',d:'A prisoner in the Lubyanka goes to the sharashka, if a place is free.',s:'Support: each supporter names another prisoner.',k:'toShar',z:{pris:['lub']},x:'name'},
 {c:2,t:'The wrong file was sent.',d:'A prisoner on the Canal is sent back to the end of the Gulag queue.',s:'Support: each supporter names another.',k:'canalBack',z:{pris:['canal']},x:'name'},
 {c:2,t:'Amnesty for the repentant.',d:"The prisoner at the front of the Gulag queue goes to the bottom seat of the department named by the Party line (Industry's if it names nobody).",s:'Support: the next prisoner in line too.',k:'amnesty',z:{fixed:'frontGulag'},x:'next'},
@@ -311,11 +312,11 @@ J:[
 ],
 };
 const RESPMIX={
-P:{Amend:5,Support:6,Acclaim:3,Doubt:5,Protest:2,Defer:2,Abstain:4,Either:1},
-N:{Support:25,Acclaim:23,Doubt:5,Protest:1,Amend:6,Defer:1,Abstain:6,Either:3},
-I:{Abstain:5,Defer:4,Support:8,Acclaim:3,Doubt:4,Protest:1,Amend:2,Either:1},
-R:{Support:8,Acclaim:4,Doubt:5,Protest:2,Amend:3,Defer:2,Abstain:4,Either:1},
-J:{Defer:3,Support:9,Acclaim:4,Doubt:3,Protest:1,Amend:3,Abstain:3,Either:1},
+P:{Amend:5,Support:6,Acclaim:3,Doubt:7,Defer:2,Abstain:4,Either:1},
+N:{Support:25,Acclaim:23,Doubt:6,Amend:6,Defer:1,Abstain:6,Either:3},
+I:{Abstain:5,Defer:4,Support:10,Acclaim:3,Doubt:5,Amend:2,Either:1},
+R:{Support:8,Acclaim:4,Doubt:7,Amend:3,Defer:2,Abstain:4,Either:1},
+J:{Defer:3,Support:9,Acclaim:4,Doubt:7,Abstain:3,Either:1},
 };
 const FLAV={
 P:{Support:'Pravda will print it on the front page.',Acclaim:'Thunderous applause, rising to an ovation.',Doubt:'The masses may not understand this.',Protest:'This is a slander against the Party!',Amend:'Let us correct the wording, comrades.',Defer:'Let the editors look at it again.',Abstain:'Pravda has no comment.',Either:'As the Party decides.'},
@@ -329,7 +330,7 @@ const RUNG=['the sharashka','the Gulag','the Canal','the firing squad'];
 for(const d of D)for(const a of AG[d])if(a.k==='transferTo'||a.k==='transferI')a.d+=' If that department is full, he trades places with the man in its bottom seat.';
 for(const d of D)for(const a of AG[d])if(['draft','sharBack','amnesty'].includes(a.k))a.d+=' If that department is full, the chair seats him in any department with a free seat.';
 // Stalin's voice: his own small deck. Pure weight on the scales: it never names anyone.
-const SVOICE=[['Acclaim','+2','Stalin nods.',3],['Acclaim','+2','Comrade Stalin is pleased.',2],['Support','+1','Stalin puffs his pipe.',6],['Doubt','−1','Stalin frowns.',3],['Protest','−2','Stalin taps his pipe on the table.',1],['Abstain','0','Stalin says nothing.',3],['Defer','','“We will come back to this.” Cannot be overruled.',2]];
+const SVOICE=[['Acclaim','+1','Stalin nods.',3],['Acclaim','+1','Comrade Stalin is pleased.',2],['Support','+1','Stalin puffs his pipe.',6],['Doubt','−1','Stalin frowns.',3],['Doubt','−1','Stalin taps his pipe on the table.',1],['Abstain','0','Stalin says nothing.',3],['Defer','','“We will come back to this.” Cannot be overruled.',2]];
 function buildStalin(){const ids=[];let n=0;for(const[r,v,t,c]of SVOICE)for(let k=0;k<c;k++){const id='s'+(n++);CARDS[id]={id,d:'S',stalin:true,resp:r,sv:v,txt:t};ids.push(id)}return shuffle(ids)}
 const LINE0={id:'L0',d:'P',ag:{t:'Vigilance against the Trotskyite conspiracy.',d:'The Party line names nobody yet.',s:'',line:'-'},resp:'Abstain'};
 
@@ -507,6 +508,7 @@ function val(p,k,ids,amt,rung){
   case'draft':case'sharBack':case'amnesty':v+=w*0.7;break;
   case'feed':v-=w*0.6;break;
   case'toShar':v+=w*0.5;break;
+  case'toGulag':v+=w*0.15+0.03;break;
   case'canalBack':v+=w*0.45;break;
   case'transferI':v-=w*0.1;break;
   case'transferTo':v+=w*(topClaimOf(amt)?-0.05:0.25);break;
@@ -559,10 +561,10 @@ function aiLead(p,d){
 function respUtil(p,M,resp){
  const a=M.ag;const acc=M.plays.some(x=>x.resp==='Acclaim');if(resp==='Defer'&&acc)return 0;if(deferActive(M)&&resp!=='Defer'&&resp!=='Acclaim')return 0;
  if(resp==='Either')return Math.max(respUtil(p,M,'Support'),respUtil(p,M,'Doubt'))+0.01;
- const v0=agVal(p,M,M.subj,0),vp=agVal(p,M,M.subj,1),vp2=agVal(p,M,M.subj,2);
+ const v0=agVal(p,M,M.subj,0),vp=agVal(p,M,M.subj,1);
  if(a.x==='harsh'){const vm=agVal(p,M,M.subj,-1);
-  return{Support:0.6*(vp-v0),Acclaim:0.9*(vp2-v0),Doubt:0.6*(vm-v0),Protest:0.9*(vm-v0),Defer:-0.5*v0,Abstain:0,Amend:amendGain(p,M)}[resp]}
- return{Support:0.5*v0+0.5*(vp-v0),Acclaim:0.7*v0+0.8*(vp2-v0),Doubt:-0.6*v0,Protest:-0.9*v0,Defer:-0.7*v0,Abstain:0,Amend:amendGain(p,M)}[resp];
+  return{Support:0.6*(vp-v0),Acclaim:0.62*(vp-v0),Doubt:0.6*(vm-v0),Defer:-0.5*v0,Abstain:0,Amend:amendGain(p,M)}[resp]}
+ return{Support:0.5*v0+0.5*(vp-v0),Acclaim:0.52*v0+0.5*(vp-v0),Doubt:-0.6*v0,Defer:-0.7*v0,Abstain:0,Amend:amendGain(p,M)}[resp];
 }
 function nudgeable(M){return !M.subj&&!!M.ag&&['mass','troika','push'].includes(M.ag.k)}
 function nudgeVal(p,M,dir){const a=M.ag,T=tally(M),nd=(M.nudge||0)+dir;
@@ -749,7 +751,7 @@ async function meeting(d){
   if(c.resp==='Defer'){M.defer=true;note+=M.plays.some(x=>x.resp==='Acclaim')?' But the room has already broken into applause: an Acclaim overrules the Defer.':' The agenda will be deferred, unless someone answers with an Acclaim.'}
   if(c.resp==='Acclaim'&&M.defer&&M.plays.filter(x=>x.resp==='Acclaim').length===1)note+=' The ovation overrules the Defer.';
   if((resp==='Support'||resp==='Acclaim')&&M.ag.x==='name'&&!deferActive(M)&&!M.fizzle){
-   for(let k=0;k<(resp==='Acclaim'?2:1);k++){const opts=nameable(M);if(!opts.length)break;let n;
+   for(let k=0;k<1;k++){const opts=nameable(M);if(!opts.length)break;let n;
     if(p===HUMAN){cap(note,'Name another man to add to the agenda (or skip).');n=await ask('man',{ids:opts,allowNone:true,ai:()=>aiName(HUMAN,M,opts)})}else n=aiName(p,M,opts);
     if(!n)break;M.named.push(n);note+=` Proposes adding ${man(n).sn} (${man(n).ini}).`}
   }
@@ -773,14 +775,14 @@ async function chooseSubject(p,M,ids){
  if(p===HUMAN){cap(`Agenda: “${M.ag.t}”`,'Choose the subject: click one of the highlighted men.');return await ask('man',{ids,ai:()=>bestSubj(HUMAN,M,ids)})}
  return bestSubj(p,M,ids);
 }
-const VOICE={Support:1,Acclaim:2,Doubt:-1,Protest:-2};
+const VOICE={Support:1,Acclaim:1,Doubt:-1};
 function tally(M){let f=0,a=0;for(const x of M.plays){const v=VOICE[x.resp]||0;if(v>0)f+=v;else a-=v}
  const net=f-a;return{f,a,net,extra:Math.max(0,net),soft:Math.max(0,-net),fail:net<0}}
 function finalList(M,T){const a=M.ag;let list=agList(M,M.subj);
  if(a.x==='next'||a.x==='up'){for(let i=0;i<T.extra;i++){const n=nextOf(list[list.length-1],a.x==='up'?-1:1);if(n&&!list.includes(n))list.push(n)}}
  if(a.x==='name'){for(const n of M.named.slice(0,T.extra))if(!list.includes(n))list.push(n)}
  return list}
-const KV={arrest:'arrested',expose:'exposed',medal:'given the Order of Lenin',promote:'moved up',demote:'moved down',bottom:'sent to the bottom seat',swapIR:'swapped with Industry',exileOut:'sent abroad',shoot:'shot',accident:'killed',assassin:'hunted by an assassin',draft:'recalled to the Red Army',sharBack:'returned to Industry',amnesty:'amnestied',feed:'sent to the Canal',toShar:'sent to the sharashka',canalBack:'sent back to the Gulag',transferI:'transferred to the Urals',transferTo:'transferred',reshuffle:'reshuffled',favourite:"made Stalin's right hand"};
+const KV={arrest:'arrested',expose:'exposed',medal:'given the Order of Lenin',promote:'moved up',demote:'moved down',bottom:'sent to the bottom seat',swapIR:'swapped with Industry',exileOut:'sent abroad',shoot:'shot',accident:'killed',assassin:'hunted by an assassin',draft:'recalled to the Red Army',sharBack:'returned to Industry',amnesty:'amnestied',feed:'sent to the Canal',toShar:'sent to the sharashka',toGulag:'sent to the Gulag',canalBack:'sent back to the Gulag',transferI:'transferred to the Urals',transferTo:'transferred',reshuffle:'reshuffled',favourite:"made Stalin's right hand"};
 function forecast(M){
  const a=M.ag,T=tally(M);const lab=id=>`${man(id).ini} ${man(id).sn}`;
  if(!a)return'';
@@ -839,6 +841,7 @@ async function resolve(M){
  case'feed':for(const id of list){toCanal(id);out.push(`${nm(id)} is sent to dig the Canal`)}break;
  case'push':{const before=S.stats.deaths;canalPush(amt);const k=S.stats.deaths-before;out.push(`the Canal moves ${amt} place${amt>1?'s':''} along`+(k?`, and ${k} prisoner${k>1?'s':''} die${k>1?'':'s'} at the end`:''));break}
  case'review':{const l=S.lub.slice();if(!l.length)out.push('the Lubyanka is empty');for(const id of l){const f=fateFlip();sentence(id,{Sharashka:0,Gulag:1,Canal:2,Shot:3}[f]);out.push(`${nm(id)}: ${f.toUpperCase()}`)}break}
+ case'toGulag':for(const id of list){toGulag(id);S.stats.toGulag++;out.push(`${nm(id)} is sent to the Gulag`)}break;
  case'toShar':for(const id of list){out.push(toShar(id)?`${nm(id)} goes to the sharashka`:`the sharashka is full`)}break;
  case'canalBack':for(const id of list){toGulag(id);out.push(`${nm(id)} goes back to the Gulag`)}break;
  case'transferI':{const dn=[];for(const id of list)out.push(transferMsg(id,'I',tradeInto('I',id,dn)));break}
@@ -997,7 +1000,7 @@ function renderMine(){
 }
 const IC_DEF='<svg viewBox="0 0 12 14" width="10" height="12" aria-label="Defer"><path d="M2 1h8M2 13h8M3 1c0 4 6 4 6 6s-6 2-6 6M9 1c0 4-6 4-6 6s6 2 6 6" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
 const IC_AMD='<svg viewBox="0 0 12 14" width="10" height="12" aria-label="Amend"><path d="M6 1v12M2.5 4.5L6 1l3.5 3.5M2.5 9.5L6 13l3.5-3.5" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>';
-const RV={Either:['±1','pmv'],Support:['+1','pos'],Acclaim:['+2','pos'],Doubt:['−1','neg'],Protest:['−2','neg'],Abstain:['0','zero'],Defer:[IC_DEF,'def'],Amend:[IC_AMD,'amd']};
+const RV={Either:['±1','pmv'],Support:['+1','pos'],Acclaim:['+1','pos'],Doubt:['−1','neg'],Abstain:['0','zero'],Defer:[IC_DEF,'def'],Amend:[IC_AMD,'amd']};
 function cardHTML(c,cls){
  if(!c)return'';
  const a=c.ag;const rv=RV[c.resp]||['','zero'];const hd=`<div class="h" style="background:${DC[c.d]};color:${DT[c.d]}">${DN[c.d].toUpperCase()}</div>`;
@@ -1062,7 +1065,7 @@ function stalinHTML(c,cls){
  return `<div class="card scard ${cls||''}"><div class="f"><div class="sh">STALIN</div><div class="sbig" style="background:${col}">${big}</div><div class="stx">${esc(c.txt)}</div></div><div class="b" style="background:radial-gradient(circle at 50% 45%,#d4af37 0 9px,transparent 10px),repeating-linear-gradient(45deg,#7d1d1a,#7d1d1a 7px,#5a1311 7px,#5a1311 13px)"></div></div>`;
 }
 function tug(){const M=S.M;if(!M)return;let f='',a='';{const r=trialRung(M);document.querySelectorAll('.trk').forEach(el=>el.classList.toggle('on',r!=null&&+el.dataset.rung===r))}
- for(const x of M.plays){if(x.resp==='Support')f+=v(1);if(x.resp==='Acclaim')f+=v(2);if(x.resp==='Doubt')a+=v(1,1);if(x.resp==='Protest')a+=v(2,1)}
+ for(const x of M.plays){if(x.resp==='Support')f+=v(1);if(x.resp==='Acclaim')f+=v(1);if(x.resp==='Doubt')a+=v(1,1)}
  function v(n,ag){return `<span class="v" style="background:${ag?'#c0392b':'#27ae60'};${n>1?'width:22px':''}"></span>`}
  const T=tally(M);
  $('#tug').innerHTML=(M.scard&&!M.sRevealed?'<span style="color:#e8b4a8;margin-right:8px">Stalin has not spoken yet.</span>':'')+`<span>For</span><span class="side">${f||'–'}</span><span style="margin:0 6px">vs</span><span class="side">${a||'–'}</span><span>Against</span>`+(deferActive(M)?'<span style="margin-left:10px;color:#ffd84a">DEFERRED</span>':M.defer?'<span style="margin-left:10px;color:#9fd88a">Defer overruled</span>':'')+(T.fail&&M.ag.x!=='harsh'?'<span style="margin-left:10px;color:#e74c3c">failing</span>':'')+nomChip(M)+`<div class="fc">${esc(forecast(M))}</div>`;
@@ -1145,8 +1148,8 @@ function rulesScreen(){
 <h2>1 · The corridor</h2><p>Everyone lays one card face down: one of his men, or the blank. They flip together, and anyone who came forward is revealed for good.</p>
 <h2>2 · Five meetings</h2><p>Propaganda, NKVD, Industry, Red Army, Judiciary, in that order. A department meets only if someone has a revealed man in it. The owner of its highest revealed man chairs and goes first, then play goes clockwise. If you hold a card of that colour, you must play exactly one.</p>
 <p>The chair's card is read as an <b>agenda</b> (top left). Everyone else's card is read as a <b>response</b> (bottom right).</p>
-<h2>3 · The vote</h2><p>Every response card shows its voice: <b>+1</b> Support, <b>+2</b> Acclaim, <b>−1</b> Doubt, <b>−2</b> Protest, <b>0</b> Abstain, and the rare <b>±1</b> Either Way, whose sign you choose when you play it. Stalin's card counts too. Add them all up. If the total is below zero, the agenda fails. If it is zero or more, it passes, and every point above zero makes it bigger: one more man (the next man down, or the next name a supporter put forward, in order), one more seat, one more place on the Canal. In a trial, the total moves the sentence along the track instead: each point harsher or milder. Amend moves the agenda one seat up or down; on an agenda without a single subject (a mass trial, a troika, a Canal push) it makes it one step milder or harsher, smaller or bigger, as the amender chooses. Defer postpones it to the department's next meeting, unless someone in the room plays an Acclaim, which overrules it. When the chair picks the department or the camp by choosing the subject, every supporter's extra name must come from the same place. Abstain says nothing. In trials, the voices make the sentence harsher or milder instead.</p>
-<h2>Stalin's chair</h2><p>At every meeting a card from Stalin's own small deck is dealt face down to his chair, and turned over after everyone else has spoken. It is pure weight: +2, +1, 0, −1 or −2 on the scales, and it never names anyone. His Defer cannot be overruled, not even by an Acclaim. Once the man in Stalin's right-hand seat has come forward, his owner may look at Stalin's card before each meeting.</p>
+<h2>3 · The vote</h2><p>Every response card shows its voice: <b>+1</b> Support, <b>+1</b> Acclaim, <b>−1</b> Doubt, <b>0</b> Abstain, and the rare <b>±1</b> Either Way, whose sign you choose when you play it. Every voice weighs the same, Stalin's included; Acclaim counts like Support, but it also overrules a Defer. Stalin's card counts too. Add them all up. If the total is below zero, the agenda fails. If it is zero or more, it passes, and every point above zero makes it bigger: one more man (the next man down, or the next name a supporter put forward, in order), one more seat, one more place on the Canal. In a trial, the total moves the sentence along the track instead: each point harsher or milder. Amend moves the agenda one seat up or down; on an agenda without a single subject (a mass trial, a troika, a Canal push) it makes it one step milder or harsher, smaller or bigger, as the amender chooses. The Judiciary deck has no Amend. Defer postpones it to the department's next meeting, unless someone in the room plays an Acclaim, which overrules it. When the chair picks the department or the camp by choosing the subject, every supporter's extra name must come from the same place. Abstain says nothing.</p>
+<h2>Stalin's chair</h2><p>At every meeting a card from Stalin's own small deck is dealt face down to his chair, and turned over after everyone else has spoken. It is pure weight: +1, 0 or −1 on the scales, like any other voice, and it never names anyone. His Defer cannot be overruled, not even by an Acclaim. Once the man in Stalin's right-hand seat has come forward, his owner may look at Stalin's card before each meeting.</p>
 <h2>4 · Prisons</h2><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first, as shown on the track under the Lubyanka: the sharashka (safe, and the way back into Industry), the Gulag (alive, and may come back), the White Sea Canal (alive for now, but every department can push it along) and the firing squad. During a trial the current sentence glows on the track. The Canal moves along whenever an agenda pushes the work, and the end kills.</p>
 <h2>5 · Drawing</h2><p>At the end of the round everyone draws back up to fifteen, one card at a time, choosing the deck in the open. Whoever chaired the Judiciary decides who draws first.</p>
 <h2>The end</h2><p>The blue NKVD deck is the clock and is never reshuffled: it holds ten cards per player. When its last card is drawn, the Terror ends. For this playtest there is no declared winner: see how it feels.</p>
