@@ -225,7 +225,7 @@ P:[
 {c:1,t:'Bourgeois formalism in the arts.',d:'Reveal who owns a Propaganda man. The Party line becomes Propaganda.',k:'expose',z:{seat:'P'},x:'one',line:'P'},
 {c:1,t:'Unmask the hidden enemies.',d:'Reveal who owns a man in the Party line’s department and the man below him. If it names nobody, the chair picks the department.',k:'expose',z:{seat:'LINE'},x:'next',nx:1},
 {c:2,t:'The Party has erred: the line is withdrawn.',d:'The Party line names nobody.',k:'none',z:{none:1},x:'none',line:'-'},
-{c:3,t:'The Canal reforges the enemies of the people.',d:'Send a prisoner from the Lubyanka to the White Sea Canal.',k:'feed',z:{pris:['lub']},x:'one'},
+{c:4,t:'The Canal reforges the enemies of the people.',d:'Send a prisoner from the Lubyanka to the White Sea Canal.',k:'feed',z:{pris:['lub']},x:'one'},
 {c:2,t:"Honour Comrade Stalin's closest companions.",d:'Pin the Order of Lenin on a member of the Politburo.',k:'medal',z:{polit:1},x:'one'},
 {c:2,t:'A new favourite at the dacha.',d:"A department head trades places with Stalin's right hand.",k:'favourite',z:{heads:1},x:'one'},
 {c:2,t:'Self-criticism in the editorial office.',d:'A Propaganda man moves down two seats.',k:'demote',n:2,z:{seat:'P'},x:'one'},
@@ -270,6 +270,7 @@ I:[
 {c:3,t:'Double the norms on the Canal.',d:'Every prisoner on the Canal moves two places along. Whoever is pushed off the end dies.',k:'push',n:2,z:{none:1},x:'none'},
 {c:3,t:'Release the engineers from the sharashka.',d:"A prisoner in the sharashka returns to Industry's bottom seat.",k:'sharBack',z:{pris:['shar']},x:'one'},
 {c:3,t:'Dalstroy needs hands for the Kolyma goldfields.',d:'A prisoner in the Lubyanka and the next prisoner after him are sent to the Gulag.',k:'toGulag',z:{pris:['lub']},x:'next',nx:1},
+{c:3,t:'The Canal needs hands.',d:'A prisoner in the Lubyanka and the next prisoner after him are sent to dig the White Sea Canal.',k:'feed',z:{pris:['lub']},x:'next',nx:1},
 {c:2,t:'Report on tractor output in Kharkov.',d:'Nothing happens.',k:'none',z:{none:1},x:'none'},
 {c:4,t:'Celebrate a Stakhanovite in the Party press.',d:"A man from any other department moves to Propaganda's bottom seat.",k:'transferTo',to:'P',z:{anyBut:'P'},x:'one'},
 {c:2,t:"Elect workers as people's assessors.",d:"A man from any other department moves to the Judiciary's bottom seat.",k:'transferTo',to:'J',z:{anyBut:'J'},x:'one'},
@@ -301,7 +302,7 @@ J:[
 {c:10,t:'Try the Trotskyite-Zinovievite centre.',d:'Try a prisoner in the Lubyanka and the next prisoner after him. Sentence: the Gulag.',k:'verdict',base:1,z:{pris:['lub']},x:'next',nx:1},
 {c:3,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to be shot.',k:'mass',base:3,z:{none:1},x:'harsh'},
 {c:3,t:'Ten years without the right of correspondence.',d:'Try a prisoner in the Lubyanka. Sentence: shot. His family is told he got ten years.',k:'verdict',base:3,z:{pris:['lub']},x:'one'},
-{c:2,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka. Sentence: the Canal.',k:'verdict',base:2,z:{pris:['lub']},x:'one'},
+{c:4,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka. Sentence: the Canal.',k:'verdict',base:2,z:{pris:['lub']},x:'one'},
 {c:2,t:'Review the case files.',d:'Turn over the top card of the black deck before the vote. The fate in its corner is the sentence for everyone in the Lubyanka.',k:'mass',fateBase:1,z:{none:1},x:'harsh'},
 {c:2,t:'Assign specialists to the sharashka.',d:'A prisoner in the Lubyanka goes to the sharashka, if a place is free.',k:'toShar',z:{pris:['lub']},x:'one'},
 {c:2,t:'The wrong file was sent.',d:'A prisoner on the Canal is sent back to the end of the Gulag queue.',k:'canalBack',z:{pris:['canal']},x:'one'},
@@ -315,11 +316,11 @@ J:[
 // Approval scale. Target pass rates: NKVD ~85%, Red Army ~75%, Judiciary ~65%, Propaganda ~60%, Industry ~50%;
 // about one meeting in ten deferred. Halves are single cards in the twice-printed decks.
 const RESPMIX={
-P:{Amend:1,Support:14,Acclaim:1,Doubt:15,Defer:0.5,Abstain:5.5,Either:1},
+P:{Amend:1,Support:14,Acclaim:1,Doubt:16,Defer:0.5,Abstain:5.5,Either:1},
 N:{Support:56,Acclaim:2,Doubt:22,Amend:2,Defer:1,Abstain:3,Either:3},
-I:{Abstain:6.5,Defer:0.5,Support:13,Acclaim:1,Doubt:15,Amend:1,Either:1},
+I:{Abstain:6.5,Defer:0.5,Support:14,Acclaim:1,Doubt:17,Amend:1,Either:1},
 R:{Support:26,Acclaim:1,Doubt:10,Amend:1,Defer:0.5,Abstain:2.5,Either:1},
-J:{Defer:0.5,Support:15,Acclaim:1,Doubt:13,Abstain:3.5,Either:1},
+J:{Defer:0.5,Support:15,Acclaim:1,Doubt:15,Abstain:3.5,Either:1},
 };
 const FLAV={
 P:{Support:'Pravda will print it on the front page.',Acclaim:'Thunderous applause, rising to an ovation.',Doubt:'The masses may not understand this.',Protest:'This is a slander against the Party!',Amend:'Let us correct the wording, comrades.',Defer:'Let the editors look at it again.',Abstain:'Pravda has no comment.',Either:'As the Party decides.'},
@@ -333,8 +334,8 @@ const RUNG=['the sharashka','the Gulag','the Canal','the firing squad'];
 for(const d of D)for(const a of AG[d])if(['transferTo','transferI'].includes(a.k))a.d+=(a.nx||0)>0?' If it is full, they swap places with its bottom men.':' If it is full, he swaps places with its bottom man.';
 for(const d of D)for(const a of AG[d])if(['draft','sharBack','amnesty'].includes(a.k))a.d+=` If it is full, he swaps places with its bottom man, who goes to ${a.k==='sharBack'?'the sharashka':'the Gulag'} in his place.`;
 // Stalin's voice: his own small deck. Pure weight on the scales: it never names anyone.
-const SVOICE=[['Support','+1','Stalin nods.',3],['Acclaim','+1','Comrade Stalin is pleased.',2],['Support','+1','Stalin puffs his pipe.',6],['Doubt','−1','Stalin frowns.',3],['Doubt','−1','Stalin taps his pipe on the table.',1],['Abstain','0','Stalin says nothing.',3],['Defer','','“We will come back to this.” Cannot be overruled.',1]];
-function buildStalin(){const ids=[];let n=0;for(const[r,v,t,c]of SVOICE)for(let k=0;k<c;k++){const id='s'+(n++);CARDS[id]={id,d:'S',stalin:true,resp:r,sv:v,txt:t};ids.push(id)}return shuffle(ids)}
+const SVOICE=[['Support','+1','Stalin nods.',3],['Acclaim','+1','Comrade Stalin is pleased.',2],['Support','+1','Stalin puffs his pipe.',6],['Doubt','−1','Stalin frowns.',3],['Doubt','−1','Stalin taps his pipe on the table.',1],['Abstain','0','Stalin says nothing.',3],['Defer','','“We will come back to this.” Cannot be overruled.',1],['Abstain','0','The Gulag is cold. The two men held there longest die.',2,'cold']];
+function buildStalin(){const ids=[];let n=0;for(const[r,v,t,c,f]of SVOICE)for(let k=0;k<c;k++){const id='s'+(n++);CARDS[id]={id,d:'S',stalin:true,resp:r,sv:v,txt:t,cold:f==='cold'};ids.push(id)}return shuffle(ids)}
 const LINE0={id:'L0',d:'P',ag:{t:'Vigilance against the Trotskyite conspiracy.',d:'The Party line names nobody yet.',s:'',line:'-'},resp:'Abstain'};
 
 // ================= UTIL =================
@@ -421,6 +422,8 @@ function osoArrest(id){const m=man(id);if(m.medal>0){m.medal--;return'medal'}toG
 const CANAL_N=5; // places on the White Sea Canal; whoever is pushed off the last one dies
 function canalPush(n){for(let k=0;k<n;k++){const last=S.canal[CANAL_N-1];if(last){S.canal[CANAL_N-1]=null;S.grave.push(last);S.stats.deaths++}for(let i=CANAL_N-1;i>0;i--)S.canal[i]=S.canal[i-1];S.canal[0]=null}}
 // a new prisoner always starts at the first place; the men in front of him shuffle along just far enough to make room
+async function canalWinter(){if(!S.canal.some(Boolean))return;const before=S.grave.length;canalPush(1);const dead=S.grave.slice(before);
+ cap('The work on the Canal never stops: everyone moves one place along.'+(dead.length?` ${dead.map(id=>man(id).sn+' ('+man(id).ini+')').join(', ')} dies at the end.`:''));render();await wait(1500)}
 function toCanal(id){pull(id);let g=S.canal.indexOf(null);if(g<0){canalPush(1);g=0}for(let i=g;i>0;i--)S.canal[i]=S.canal[i-1];S.canal[0]=id}
 function toShar(id){if(S.shar.length>=3)return false;pull(id);S.shar.push(id);return true}
 function toExile(id){if(S.exile.length>=3)return false;pull(id);S.exile.push(id);return true}
@@ -651,6 +654,7 @@ async function game(){
   if(S.finalRound){cap('FINAL ROUND. The blue deck is empty: this is the last round of the Terror.');render();await wait(1800)}
   if(S.round>1)await corridor();
   for(const d of D)await meeting(d);
+  await canalWinter();
   if(S.finalRound){cap('The final round is over. Yezhov falls, and the Terror is over.');render();await wait(2000);S.over=true;break}
   if(!S.nkvdMet&&S.decks.N.length){S.disc.N.push(S.decks.N.pop());S.stats.burn++;cap('The NKVD did not meet. Stalin grows impatient: a blue card is burned.');render();await wait(1300)}
   await drawPhase();
@@ -1101,11 +1105,12 @@ async function stalinSpeak(M){
  const pk=M.sEl.querySelector('.peek');if(pk)pk.remove();
  M.plays.push({p:'S',cid:M.scard,resp:c.resp});
  if(c.resp==='Defer')M.sDefer=true;
- cap(`Stalin: ${c.sv?c.sv+' · ':''}${c.txt}`+(c.resp==='Defer'?' Nobody can overrule him.':''));tug();render();await wait(1500);
+ let frozen='';if(c.cold){const ids=S.gulag.slice(0,2);if(ids.length){flashTok(ids);await wait(500);ids.forEach(kill);frozen=` ${ids.map(id=>man(id).sn+' ('+man(id).ini+')').join(' and ')} freeze${ids.length>1?'':'s'} to death.`}else frozen=' The Gulag is empty; nobody freezes this time.'}
+ cap(`Stalin: ${c.sv&&!c.cold?c.sv+' · ':''}${c.txt}`+frozen+(c.resp==='Defer'?' Nobody can overrule him.':''));tug();render();await wait(c.cold?2200:1500);
 }
 function stalinHTML(c,cls){
- const col=c.resp==='Defer'?'#3d6b8a':c.sv&&c.sv[0]==='+'?'#2e8b57':c.sv&&c.sv[0]==='−'?'#c0392b':'#7d7d7d';
- const big=c.resp==='Defer'?IC_DEF.replace('width="10" height="12"','width="26" height="30"'):c.sv;
+ const col=c.cold?'#2f6f9f':c.resp==='Defer'?'#3d6b8a':c.sv&&c.sv[0]==='+'?'#2e8b57':c.sv&&c.sv[0]==='−'?'#c0392b':'#7d7d7d';
+ const big=c.cold?'❄':c.resp==='Defer'?IC_DEF.replace('width="10" height="12"','width="26" height="30"'):c.sv;
  return `<div class="card scard ${cls||''}"><div class="f"><div class="sh">STALIN</div><div class="sbig" style="background:${col}">${big}</div><div class="stx">${esc(c.txt)}</div></div><div class="b" style="background:radial-gradient(circle at 50% 45%,#d4af37 0 9px,transparent 10px),repeating-linear-gradient(45deg,#7d1d1a,#7d1d1a 7px,#5a1311 7px,#5a1311 13px)"></div></div>`;
 }
 function tug(){const M=S.M;if(!M)return;let f='',a='';{const r=trialRung(M);document.querySelectorAll('.trk').forEach(el=>el.classList.toggle('on',r!=null&&+el.dataset.rung===r))}
@@ -1365,7 +1370,7 @@ function rulesScreen(){
 <p>The chair's card is read as an <b>agenda</b> (top left). Everyone else's card is read as a <b>response</b> (bottom right).</p>
 <h2>3 · The vote</h2><p>The vote only decides whether the agenda passes. Every response card shows its voice: <b>+1</b> Support, <b>+1</b> Acclaim, <b>−1</b> Doubt, <b>0</b> Abstain, and the rare <b>±1</b> Either Way, whose sign you choose when you play it. Stalin's card counts too. Add them up: zero or more and it passes, below zero it fails. What happens is printed on the agenda: how many men, which department, which sentence. A trial that fails leaves its prisoners waiting in the Lubyanka. <b>Acclaim</b> (rare) also overrules a Defer. <b>Amend</b> (rare) takes one man off the agenda and puts any other man it could name in his place. <b>Defer</b> postpones the agenda to the department's next meeting, unless someone plays an Acclaim. Abstain says nothing.</p>
 <h2>Stalin's chair</h2><p>At every meeting a card from Stalin's own small deck is dealt face down to his chair, and turned over after everyone else has spoken. It is pure weight: +1, 0 or −1 on the scales, like any other voice, and it never names anyone. His Defer cannot be overruled, not even by an Acclaim. Once the man in Stalin's right-hand seat has come forward, his owner may look at Stalin's card before each meeting.</p>
-<h2>4 · Prisons</h2><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first, as shown on the track under the Lubyanka: the sharashka (safe, and the way back into Industry), the Gulag (alive, and may come back), the White Sea Canal (alive for now, but every department can push it along) and the firing squad. During a trial the current sentence glows on the track. The Canal moves along whenever an agenda pushes the work, and the end kills.</p>
+<h2>4 · Prisons</h2><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first, as shown on the track under the Lubyanka: the sharashka (safe, and the way back into Industry), the Gulag (alive, and may come back), the White Sea Canal (alive for now) and the firing squad. During a trial the current sentence glows on the track. The camps are deadlier than the Lubyanka. <b>The Gulag is cold:</b> two cards in Stalin's deck kill the two men held there longest when they are turned over. <b>The Canal never stops:</b> it moves one place along at the end of every round, and whenever an agenda pushes the work; whoever is pushed off the end dies. A new prisoner always starts at the first place.</p>
 <h2>5 · Drawing</h2><p>At the end of the round everyone draws back up to fifteen, one card at a time, choosing the deck in the open. Whoever chaired the Judiciary decides who draws first.</p>
 <h2>The end</h2><p>The blue NKVD deck is the clock and is never reshuffled: it holds ten cards per player. When its last card is drawn (or burned), the round finishes and everyone plays one final round, like the last turn in Ticket to Ride. Nobody draws after it, and then the Terror ends. For this playtest there is no declared winner: see how it feels.</p>
 <p style="color:#d8c9ad;font-size:13px">Playtest safeguard: if the NKVD does not meet in a round, one blue card is burned, so the game cannot stall forever.</p>
