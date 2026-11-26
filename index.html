@@ -237,7 +237,7 @@ P:[
 {c:1,t:'Bourgeois formalism in the arts.',d:'Reveal who owns a Propaganda man. The Party line becomes Propaganda.',s:'Support: the next man down is exposed too.',k:'expose',z:{seat:'P'},x:'next',line:'P'},
 {c:2,t:'Unmask the hidden enemies.',d:'Reveal who owns a man in the department named by the Party line. If it names nobody, the chair names the department by choosing the man.',s:'Support: each supporter names another man there.',k:'expose',z:{seat:'LINE'},x:'name'},
 {c:2,t:'The Party has erred: the line is withdrawn.',d:'The Party line names nobody.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none',line:'-'},
-{c:3,t:'The Canal reforges the enemies of the people.',d:'Send a prisoner from the Lubyanka or the Gulag to the White Sea Canal.',s:'Support: each supporter names another prisoner.',k:'feed',z:{pris:['lub','gulag']},x:'name'},
+{c:3,t:'The Canal reforges the enemies of the people.',d:'Send a prisoner from the Lubyanka to the White Sea Canal.',s:'Support: each supporter names another prisoner.',k:'feed',z:{pris:['lub']},x:'name'},
 {c:2,t:"Honour Comrade Stalin's closest companions.",d:'Pin the Order of Lenin on a member of the Politburo.',s:'Support: each supporter names another Politburo man.',k:'medal',z:{polit:1},x:'name'},
 {c:2,t:'A new favourite at the dacha.',d:"A department head trades places with Stalin's right hand.",s:'Support changes nothing.',k:'favourite',z:{heads:1},x:'none'},
 {c:2,t:'Self-criticism in the editorial office.',d:'A Propaganda man moves down two seats.',s:'Support: one seat further.',k:'demote',n:2,z:{seat:'P'},x:'more'},
@@ -247,7 +247,7 @@ P:[
 ],
 N:[
 {c:12,t:'Arrest the enemies named by the Party.',d:'Arrest a man in the department named by the Party line. If it names nobody, the chair names the department by choosing the man.',s:'Support: each supporter names another man there.',k:'arrest',z:{seat:'LINE'},x:'name'},
-{c:9,t:'Mass operation against anti-Soviet elements.',d:'Arrest a man in the fifth, sixth or seventh seat of any department.',s:'Support: the next man down is arrested too.',k:'arrest',z:{low:1},x:'next'},
+{c:11,t:'Mass operation against anti-Soviet elements.',d:'Arrest a man in the fifth, sixth or seventh seat of any department.',s:'Support: the next man down is arrested too.',k:'arrest',z:{low:1},x:'next'},
 {c:3,t:'The Politburo must be cleansed.',d:'Arrest a member of the Politburo.',s:'Support: each supporter names another Politburo man.',k:'arrest',z:{polit:1},x:'name'},
 {c:5,t:'Purge our own ranks.',d:'Arrest an NKVD man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'N'},x:'next'},
 {c:6,t:'Liquidate counter-revolutionary elements in the camps.',d:'A prisoner in the Lubyanka, the Gulag or on the Canal is shot.',s:'Support: each supporter names another prisoner.',k:'shoot',z:{pris:['lub','gulag','canal']},x:'name'},
@@ -256,6 +256,7 @@ N:[
 {c:4,t:'Wreckers on the railways.',d:'Arrest an Industry man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'I'},x:'next'},
 {c:2,t:"Send investigators to the Prosecutor's Office.",d:"A man from any other department moves to the Judiciary's bottom seat.",s:'Support: each supporter names another man.',k:'transferTo',to:'J',z:{anyBut:'J'},x:'name'},
 {c:2,t:'Recall the residents from abroad.',d:'An NKVD man ordered home decides not to come: he defects into exile, if a place is free.',s:'Support: the next man down goes too.',k:'exileOut',z:{seat:'N'},x:'next'},
+{c:6,t:'Troika: sentence by special procedure.',d:'Three NKVD officers, no court: everyone in the Lubyanka is sentenced to the Gulag.',s:'Support changes nothing. Objections can still stop it.',k:'troika',z:{none:1},x:'none'},
 {c:3,t:'Hunt the double-dealers in the press.',d:'Arrest a Propaganda man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'P'},x:'next'},
 ],
 I:[
@@ -265,41 +266,43 @@ I:[
 {c:3,t:'Transfer cadres to the Urals.',d:"A man in the department named by the Party line moves to Industry's bottom seat. If it names nobody, the chair names the department by choosing the man.",s:'Support: each supporter names another man there.',k:'transferI',z:{seat:'LINE'},x:'name'},
 {c:3,t:'Double the norms on the Canal.',d:'Every prisoner on the Canal moves two places along. Whoever is pushed off the end dies.',s:'Support: one place further.',k:'push',n:2,z:{none:1},x:'more'},
 {c:3,t:'Release the engineers from the sharashka.',d:"A prisoner in the sharashka returns to Industry's bottom seat.",s:'Support: each supporter names another.',k:'sharBack',z:{pris:['shar']},x:'name'},
-{c:4,t:'Report on tractor output in Kharkov.',d:'Nothing happens.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none'},
+{c:2,t:'Report on tractor output in Kharkov.',d:'Nothing happens.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none'},
 {c:2,t:'Celebrate a Stakhanovite in the Party press.',d:"A man from any other department moves to Propaganda's bottom seat.",s:'Support: each supporter names another man.',k:'transferTo',to:'P',z:{anyBut:'P'},x:'name'},
 {c:2,t:'A trade delegation to Berlin.',d:'An Industry man goes abroad with the delegation and does not return: he goes into exile, if a place is free.',s:'Support: the next man down goes too.',k:'exileOut',z:{seat:'I'},x:'next'},
+{c:4,t:'Unmask the wreckers in our factories.',d:'Arrest an Industry man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'I'},x:'next'},
 {c:2,t:'An accident at the Magnitogorsk works.',d:"The man in Industry's bottom seat is killed.",s:'Support: the man above him dies too.',k:'accident',z:{fixed:'bottomI'},x:'up'},
 ],
 R:[
 {c:3,t:'Replace the General Staff.',d:'The head of the Red Army is sent to its bottom seat. Everyone below moves up.',s:'Support: the next man down goes too.',k:'bottom',z:{fixed:'headR'},x:'next'},
 {c:3,t:'Increase tank production.',d:'A Red Army man trades places with the Industry man in the same rank.',s:'Support: the next man down trades too.',k:'swapIR',z:{seat:'R'},x:'next'},
 {c:4,t:'We honour the victorious battle against the fascists in Finland.',d:'Pin the Order of Lenin on a Red Army man.',s:'Support: the next man down gets one too.',k:'medal',z:{seat:'R'},x:'next'},
-{c:4,t:'Recall experienced officers from the camps.',d:"The prisoner at the front of the Gulag queue joins the Red Army's bottom seat.",s:'Support: the next prisoner in line comes too.',k:'draft',z:{fixed:'frontGulag'},x:'next'},
+{c:2,t:'Recall experienced officers from the camps.',d:"The prisoner at the front of the Gulag queue joins the Red Army's bottom seat.",s:'Support: the next prisoner in line comes too.',k:'draft',z:{fixed:'frontGulag'},x:'next'},
 {c:3,t:'Deepen the Canal for the Navy.',d:'Every prisoner on the Canal moves one place along. Whoever is pushed off the end dies.',s:'Support: one place further.',k:'push',n:1,z:{none:1},x:'more'},
 {c:2,t:'Military advisers to Spain.',d:'A Red Army man goes abroad into exile, if a place is free.',s:'Support: the next man down goes too.',k:'exileOut',z:{seat:'R'},x:'next'},
 {c:2,t:'Defend the Far East.',d:'A Red Army man is posted to its bottom seat.',s:'Support: the next man down goes too.',k:'bottom',z:{seat:'R'},x:'next'},
 {c:2,t:'Promote the young commanders.',d:'A Red Army man moves up one seat.',s:'Support: one seat further.',k:'promote',n:1,z:{seat:'R'},x:'more'},
+{c:4,t:'Expose the conspiracy in the General Staff.',d:'Arrest a man in one of the top three seats of the Red Army.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'R',top:3},x:'next'},
 {c:2,t:'Political commissars for the Army.',d:"A man from any other department moves to the Red Army's bottom seat.",s:'Support: each supporter names another man.',k:'transferTo',to:'R',z:{anyBut:'R'},x:'name'},
-{c:3,t:'Manoeuvres in the Kiev district.',d:'Nothing happens.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none'},
+{c:2,t:'Manoeuvres in the Kiev district.',d:'Nothing happens.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none'},
 ],
 J:[
-{c:5,t:'Try the Trotskyite-Zinovievite centre.',d:'Try a prisoner in the Lubyanka. Sentence: the Gulag.',s:'Support: a harsher sentence. Objections: a milder one.',k:'verdict',base:1,z:{pris:['lub']},x:'harsh'},
-{c:5,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to the Gulag.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',base:1,z:{none:1},x:'harsh'},
+{c:6,t:'Try the Trotskyite-Zinovievite centre.',d:'Try a prisoner in the Lubyanka. Sentence: the Gulag.',s:'Support: a harsher sentence. Objections: a milder one.',k:'verdict',base:1,z:{pris:['lub']},x:'harsh'},
+{c:6,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to the Gulag.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',base:1,z:{none:1},x:'harsh'},
 {c:2,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka. Sentence: the Canal.',s:'Support: a harsher sentence. Objections: a milder one.',k:'verdict',base:2,z:{pris:['lub']},x:'harsh'},
 {c:3,t:'Review the case files.',d:'Turn over the top card of the black deck. The fate in its corner becomes the proposed sentence for everyone in the Lubyanka.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',fateBase:1,z:{none:1},x:'harsh'},
-{c:3,t:'Assign specialists to the sharashka.',d:'A prisoner in the Lubyanka or the Gulag goes to the sharashka, if a place is free.',s:'Support: each supporter names another prisoner.',k:'toShar',z:{pris:['lub','gulag']},x:'name'},
+{c:2,t:'Assign specialists to the sharashka.',d:'A prisoner in the Lubyanka goes to the sharashka, if a place is free.',s:'Support: each supporter names another prisoner.',k:'toShar',z:{pris:['lub']},x:'name'},
 {c:2,t:'The wrong file was sent.',d:'A prisoner on the Canal is sent back to the end of the Gulag queue.',s:'Support: each supporter names another.',k:'canalBack',z:{pris:['canal']},x:'name'},
 {c:2,t:'Amnesty for the repentant.',d:"The prisoner at the front of the Gulag queue goes to the bottom seat of the department named by the Party line (Industry's if it names nobody).",s:'Support: the next prisoner in line too.',k:'amnesty',z:{fixed:'frontGulag'},x:'next'},
 {c:2,t:'Recall a cadre to Moscow.',d:'A man moves to the bottom seat of the department named by the Party line. Nothing happens if it names nobody.',s:'Support: each supporter names another man.',k:'transferTo',to:'LINE',z:{anyBut:'LINE'},x:'name'},
-{c:3,t:'Approve the new procedural code.',d:'Nothing happens.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none'},
+{c:1,t:'Approve the new procedural code.',d:'Nothing happens.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none'},
 ],
 };
 const RESPMIX={
 P:{Amend:5,Support:5,Acclaim:3,Doubt:4,Protest:2,Defer:2,Abstain:5},
-N:{Support:16,Acclaim:13,Doubt:9,Protest:2,Amend:6,Defer:2,Abstain:8},
-I:{Abstain:7,Defer:5,Support:5,Acclaim:1,Doubt:4,Protest:1,Amend:2},
-R:{Support:6,Acclaim:4,Doubt:4,Protest:3,Amend:3,Defer:2,Abstain:4},
-J:{Defer:6,Support:5,Acclaim:3,Doubt:4,Protest:2,Amend:2,Abstain:3},
+N:{Support:18,Acclaim:16,Doubt:9,Protest:2,Amend:6,Defer:2,Abstain:9},
+I:{Abstain:6,Defer:4,Support:7,Acclaim:3,Doubt:4,Protest:1,Amend:2},
+R:{Support:7,Acclaim:4,Doubt:4,Protest:2,Amend:3,Defer:2,Abstain:4},
+J:{Defer:3,Support:4,Acclaim:1,Doubt:7,Protest:2,Amend:3,Abstain:7},
 };
 const FLAV={
 P:{Support:'Pravda will print it on the front page.',Acclaim:'Thunderous applause, rising to an ovation.',Doubt:'The masses may not understand this.',Protest:'This is a slander against the Party!',Amend:'Let us correct the wording, comrades.',Defer:'Let the editors look at it again.',Abstain:'Pravda has no comment.'},
@@ -347,7 +350,7 @@ let S=null;const HUMAN=0;
 function newState(np){
  const decks=buildDecks();
  S={np,round:0,players:[],men:{},seats:{P:[],N:[],I:[],R:[],J:[]},rh:null,kal:null,lub:[],shar:[],gulag:[],canal:Array(8).fill(null),exile:[],grave:[],
-  decks:{},disc:{P:[],N:[],I:[],R:[],J:[]},line:LINE0,deferred:{},over:false,M:null,stats:{arrests:0,deaths:0,skipped:0,meetings:0,burn:0},firstDraw:0,nkvdMet:false};
+  decks:{},disc:{P:[],N:[],I:[],R:[],J:[]},line:LINE0,deferred:{},over:false,M:null,stats:{arrests:0,deaths:0,skipped:0,meetings:0,burn:0,verdicts:0,toGulag:0,toCanal:0,toShot:0,toShar:0},firstDraw:0,nkvdMet:false};
  for(const d of D)S.decks[d]=shuffle(decks[d].slice());
  S.decks.N=S.decks.N.slice(0,9*np);
  MEN.forEach((m,i)=>{const id='m'+i;const pts=m[2].split(' ');S.men[id]={id,home:m[0],sn:m[1],name:m[2],title:m[3],ini:pts[0][0]+pts[pts.length-1][0],owner:null,rev:false,nobody:false,medal:false,from:null};
@@ -421,7 +424,7 @@ async function freeInto(M,id,pref,verb){const nm=x=>`${man(x).sn} (${man(x).ini}
  return`${DN[pref]} is full, so ${ch===HUMAN?'you seat':P(ch).name+' seats'} ${nm(id)} in ${DN[d]}`}
 function aiFreeDept(p,id,opts){const mine=man(id).owner===p;let best=opts[0],bv=-1e9;
  for(const d of opts){const tc=topClaim(d);let v=RNG()*0.1+(7-S.seats[d].length)*0.02;if(mine&&tc&&tc.p===p)v+=0.3;if(mine&&!tc)v+=0.2;if(!mine&&tc&&tc.p===p)v-=0.1;if(v>bv){bv=v;best=d}}return best}
-function sentence(id,r){if(r<=0){if(!toShar(id))toGulag(id)}else if(r===1)toGulag(id);else if(r===2)toCanal(id);else kill(id)}
+function sentence(id,r){S.stats.verdicts++;if(r<=0){if(toShar(id))S.stats.toShar++;else{toGulag(id);S.stats.toGulag++}}else if(r===1){toGulag(id);S.stats.toGulag++}else if(r===2){toCanal(id);S.stats.toCanal++}else{kill(id);S.stats.toShot++}}
 function fateDraw(){
  if(!S.decks.J.length&&S.disc.J.length){S.decks.J=shuffle(S.disc.J);S.disc.J=[]}
  if(!S.decks.J.length)return{f:['Shot','Gulag','Gulag','Canal','Shot','Sharashka'][rnd(6)],cid:null};
@@ -436,7 +439,7 @@ async function proposeFate(M){if(!M.ag||!M.ag.fateBase||M.base!=null)return;cons
 // ================= TARGETS =================
 function areaIds(a){
  const z=a.z;if(z.none)return null;let ids=[];
- if(z.seat){const ld=z.seat==='LINE'?(lineDept()||(S.M&&S.M.ag===a&&S.M.nom)||null):z.seat;ids=(ld?[ld]:D).flatMap(d=>S.seats[d])}
+ if(z.seat){const ld=z.seat==='LINE'?(lineDept()||(S.M&&S.M.ag===a&&S.M.nom)||null):z.seat;ids=(ld?[ld]:D).flatMap(d=>z.top?S.seats[d].slice(0,z.top):S.seats[d])}
  else if(z.anyBut){const ex=z.anyBut==='LINE'?lineDept():z.anyBut;if(z.anyBut==='LINE'&&!ex)return[];ids=D.filter(d=>d!==ex).flatMap(d=>S.seats[d])}
  else if(z.low)ids=D.flatMap(d=>S.seats[d].slice(4));
  else if(z.polit)ids=D.map(d=>S.seats[d][0]).filter(Boolean).concat(S.rh?[S.rh]:[]);
@@ -483,13 +486,14 @@ function val(p,k,ids,amt,rung){
   case'favourite':v+=w*0.2;break;
   case'verdict':case'mass':v+=w*[0.3,0,-0.55,-1][Math.max(0,Math.min(3,rung))];break;
   case'review':v-=w*0.45;break;
+  case'troika':v+=w*0;v+=0.06;break;
   }}
  if(k==='push'){S.canal.forEach((id,i)=>{if(id){const w=wt(p,id);v-=w*(i>=8-amt?1:0.1)}})}
  return v;
 }
 function agList(M,subj){
  const a=M.ag;
- if(a.k==='mass'||a.k==='review')return S.lub.slice();
+ if(a.k==='mass'||a.k==='review'||a.k==='troika')return S.lub.slice();
  return subj?[subj]:[];
 }
 function plusList(M,subj){ // what one more supporting voice would add
@@ -514,7 +518,7 @@ function aiLead(p,d){
  for(const cid of P(p).hand){const c=CARDS[cid];if(c.d!==d)continue;const a=c.ag;const M={ag:a,named:[],subj:null};
   let opts=a.z.none?[null]:areaIds(a);
   if(!opts.length){const s={cid,subj:null,v:-0.02+RNG()*0.01};if(!best||s.v>best.v)best=s;continue}
-  for(const s of opts){let v=agVal(p,M,s,0)+(a.line?lineVal(p,a.line):0)+RNG()*0.06-0.03;if(a.k==='none')v=0.01+RNG()*0.02;
+  for(const s of opts){let v=agVal(p,M,s,a.x==='harsh'?1:0)+(a.line?lineVal(p,a.line):0)+RNG()*0.06-0.03;if(a.k==='none')v=0.01+RNG()*0.02;
    if(!best||v>best.v)best={cid,subj:s,v}}
  }
  return best;
@@ -731,7 +735,7 @@ function forecast(M){
  if(T.fail)return`If the meeting ended now: the agenda fails${why}.`;
  if(a.k==='push')return`If the meeting ended now: the Canal moves ${(a.n||0)+T.extra} place${(a.n||0)+T.extra>1?'s':''}${why}.`;
  if(a.k==='none')return'If the meeting ended now: '+(a.line==='-'?'the Party line is withdrawn.':'nothing happens.');
- if(a.k==='review')return'If the meeting ended now: everyone in the Lubyanka gets the fate on the black deck.';
+ if(a.k==='troika')return`If the meeting ended now: ${S.lub.length?'everyone in the Lubyanka goes to the Gulag':'nothing (the Lubyanka is empty)'}${why}.`;
  const list=finalList(M,T);if(!list.length)return'';
  const amt=a.x==='more'?` ${(a.n||0)+T.extra} seat${(a.n||0)+T.extra>1?'s':''}`:'';
  return`If the meeting ended now: ${list.map(lab).join(', ')} ${list.length>1?'are':'is'} ${KV[a.k]||'affected'}${amt}${why}.`;
@@ -781,6 +785,7 @@ async function resolve(M){
  case'transferI':for(const id of list)out.push(transferMsg(id,'I',tradeInto('I',id)));break;
  case'transferTo':{const to=a.to==='LINE'?lineDept():a.to;for(const id of list){if(!to){out.push('the line names nobody');break}out.push(transferMsg(id,to,tradeInto(to,id)))}break}
  case'favourite':for(const id of list){out.push(favourite(id)?`${nm(id)} becomes Stalin's right hand`:`nothing changes`)}break;
+ case'troika':{const l=S.lub.slice();if(!l.length)out.push('the Lubyanka is empty');else{for(const id of l)sentence(id,1);out.push(`${l.map(nm).join(', ')} ${l.length>1?'are':'is'} sent to the Gulag`)}break}
  case'none':out.push(a.line==='-'?'the Party line is withdrawn':'nothing happens');break;
  }
  if(a.line){const old=S.line;S.line=CARDS[M.card];M.keep=true;if(old.id!=='L0')S.disc.P.push(old.id);out.push(a.line==='-'?'the line names nobody':`the Party line now points at ${DN[a.line]}`)}
