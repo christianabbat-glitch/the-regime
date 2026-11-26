@@ -25,16 +25,11 @@ body.tall #app{flex-direction:column;height:auto}
 .bt{font-family:Oswald,sans-serif;letter-spacing:.07em;font-size:15px}
 .bs{font-size:11px;opacity:.85}
 .slotb{position:absolute;width:58px;height:24px;border-radius:5px;border:1.5px dashed}
-.tok{position:absolute;width:40px;height:26px;border-radius:5px;font-family:Oswald,sans-serif;font-weight:600;font-size:14px;letter-spacing:.04em;cursor:default;display:flex;align-items:center;justify-content:center;transition:left .8s ease,top .8s ease,background .4s,opacity .4s;box-shadow:0 1px 2px rgba(0,0,0,.4);white-space:nowrap;z-index:5}
+.tok{position:absolute;box-sizing:border-box;width:40px;height:26px;border-radius:5px;background:#f6efdc;color:#2a1d17;border:1.5px solid #1a120d;font-family:Oswald,sans-serif;font-weight:600;font-size:14px;letter-spacing:.04em;cursor:default;display:flex;align-items:center;justify-content:center;transition:left .8s ease,top .8s ease,background .4s,opacity .4s;box-shadow:0 1px 2px rgba(0,0,0,.4);white-space:nowrap;z-index:5}
 .tok span{pointer-events:none}
 #tip{position:fixed;z-index:45;background:#f8f1df;color:#2a1d17;border:2px solid #1a120d;border-radius:8px;padding:7px 10px;font-size:12.5px;line-height:1.3;max-width:240px;display:none;box-shadow:0 4px 12px rgba(0,0,0,.5)}
 #tip.on{display:block}
 #tip b{font-size:14px}
-.tok.sP{background:#e3b521;color:#3a2d00}.tok.sN{background:#2f62b0;color:#fff}.tok.sI{background:#2f7d4a;color:#fff}.tok.sR{background:#b3261e;color:#fff}.tok.sJ{background:#222;color:#fff}
-.tok.trh,.tok.tkal{background:#f8f1e1;color:#5a1311;border:2px solid #d4af37}
-.tok.tlub{background:#5d5d66;color:#f0f0f0}.tok.tshar{background:#f2f8ee;color:#1e5632;border:1px solid #2c6e43}
-.tok.tgulag{background:#c3bdb1;color:#2c2a26}.tok.tcanal{background:#dbe8f0;color:#1d3a4d;border:1px solid #7f9fb3}
-.tok.texile{background:#f3eefa;color:#4b3a63;border:1px solid #8a7a9e}.tok.tgrave{background:#3a3a3a;color:#aaa}
 .tok.mine{box-shadow:0 0 0 3px #fff200,0 0 0 5px #1a120d,0 0 12px 5px rgba(255,236,0,.85)}
 .tok.mine::after{content:'';position:absolute;right:-7px;bottom:-7px;width:13px;height:13px;border-radius:50%;background:#fff200;border:2px solid #1a120d}
 .tok .ob{position:absolute;left:-6px;top:-6px;width:13px;height:13px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 2px #000}
@@ -942,7 +937,9 @@ function buildBoard(){
  const B=(r,y,s,inner)=>`<div class="ab" style="right:${r}px;top:${y}px;text-align:right;${s}">${inner||''}</div>`;
  const X=(x,w)=>1000-x-w;
  for(let r=0;r<7;r++){const R=T0+TS*r;h+=A(1000-R,-R,`width:${2*R}px;height:${2*R}px;border-radius:50%;border:1px dashed rgba(60,40,20,.22)`)}
- h+=A(755,-245,'width:490px;height:490px;border-radius:50%;border:40px solid rgba(212,175,55,.32)');
+ for(const d of D){const th=180-ANG[d],st=T0-32,L=TS*6+64;
+  h+=`<div class="ab" style="left:1000px;top:-27px;width:${L}px;height:54px;border-radius:27px;background:${DC[d]};box-shadow:0 0 0 2px ${DK[d]},0 2px 4px rgba(0,0,0,.35);transform-origin:0 27px;transform:rotate(${th}deg) translateX(${st}px)"></div>`}
+ h+=A(755,-245,'width:490px;height:490px;border-radius:50%;border:40px solid rgba(212,175,55,.45)');
  h+=A(830,-170,'width:340px;height:340px;border-radius:50%;background:#7d1d1a;box-shadow:0 0 0 3px #5a1311');
  h+=B(14,10,'font-family:Oswald,sans-serif;font-size:26px;letter-spacing:.1em;color:#f3e9d2','STALIN');
  h+=B(15,44,'font-size:11px;color:#ecd6cd','Corner office, the Kremlin');
@@ -950,7 +947,7 @@ function buildBoard(){
  h+=`<div class="ab" style="left:864px;top:136px;transform:translate(-50%,-50%) rotate(45deg);font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.2em;color:#9c7a0c;white-space:nowrap">POLITBURO</div>`;
  h+=A(902,79,'width:40px;height:26px;border-radius:5px;border:1.5px dashed #d4af37');
  h+=A(866,64,'width:24px;height:32px;border-radius:4px;border:2px solid #d4af37;background:radial-gradient(circle at 50% 45%,#d4af37 0 5px,transparent 6px),repeating-linear-gradient(45deg,#7d1d1a,#7d1d1a 5px,#5a1311 5px,#5a1311 9px);box-shadow:0 2px 0 rgba(0,0,0,.35)','');
- for(const d of D)for(let r=0;r<7;r++){const[x,y]=seatXY(d,r);h+=A(1000-x-20,y-13,`width:40px;height:26px;border-radius:5px;border:1.5px ${r===0?'solid':'dashed'} ${r===0?'#b8901c':DK[d]};opacity:${r===0?.9:.45}`)}
+ for(const d of D)for(let r=0;r<7;r++){const[x,y]=seatXY(d,r);h+=A(1000-x-20,y-13,`box-sizing:border-box;width:40px;height:26px;border-radius:5px;${r===0?'border:2.5px solid #f1d98a;background:rgba(255,255,255,.28)':'border:1.5px dashed rgba(255,255,255,.6);background:rgba(255,255,255,.16)'}`)}
  const nums={P:1,N:2,I:3,R:4,J:5};
  for(const d of D){const a=ANG[d]*Math.PI/180,R=T0+TS*6+42;h+=`<div class="lbl" style="right:${R*Math.cos(a)}px;top:${R*Math.sin(a)-9}px;transform:rotate(${-ANG[d]}deg);transform-origin:100% 50%;font-size:15px;color:${DL[d]}">${nums[d]} · ${DN[d].toUpperCase()}</div>`}
  const arrow=(x,y,len,deg,col,dash)=>`<div class="ab" style="left:${x}px;top:${y}px;width:${len}px;${dash?`height:0;border-top:3px dashed ${col}`:`height:3px;background:${col}`};transform:rotate(${deg}deg);transform-origin:0 ${dash?'0':'50%'}"><div class="ab" style="right:-10px;top:${dash?-8.5:-5.5}px;width:0;height:0;border-left:11px solid ${col};border-top:7px solid transparent;border-bottom:7px solid transparent"></div></div>`;
