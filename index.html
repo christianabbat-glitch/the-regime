@@ -35,7 +35,8 @@ body.tall #app{flex-direction:column;height:auto}
 .tok.tlub{background:#5d5d66;color:#f0f0f0}.tok.tshar{background:#f2f8ee;color:#1e5632;border:1px solid #2c6e43}
 .tok.tgulag{background:#c3bdb1;color:#2c2a26}.tok.tcanal{background:#dbe8f0;color:#1d3a4d;border:1px solid #7f9fb3}
 .tok.texile{background:#f3eefa;color:#4b3a63;border:1px solid #8a7a9e}.tok.tgrave{background:#3a3a3a;color:#aaa}
-.tok.mine{box-shadow:0 0 0 2px #ffd84a,0 1px 3px rgba(0,0,0,.5)}
+.tok.mine{box-shadow:0 0 0 3px #fff200,0 0 0 5px #1a120d,0 0 12px 5px rgba(255,236,0,.85)}
+.tok.mine::after{content:'';position:absolute;right:-7px;bottom:-7px;width:13px;height:13px;border-radius:50%;background:#fff200;border:2px solid #1a120d}
 .tok .ob{position:absolute;left:-6px;top:-6px;width:13px;height:13px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 2px #000}
 .tok .ob.nob{background:#8a8a8a}
 .tok .md{position:absolute;right:-6px;top:-6px;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff3b0,#d4a017 60%,#8a6a00);border:1px solid #5a4500}
@@ -70,7 +71,8 @@ body.tall #app{flex-direction:column;height:auto}
 #trow{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
 .tslot{display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform .6s ease}
 .tslot .who{font-size:11px;color:#d8c9ad;max-width:96px;text-align:center}
-#tug{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;min-height:20px}
+#tug{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;min-height:20px;flex-wrap:wrap}
+#tug .fc{width:100%;font-size:13px;color:#f3e9d2;background:rgba(0,0,0,.25);border-left:3px solid #ffd84a;padding:4px 8px;border-radius:4px}
 #tug .side{display:flex;gap:3px;align-items:center}
 #tug .v{width:10px;height:14px;border-radius:2px}
 #res{margin-top:4px;font-size:14px;font-weight:700;color:#ffd84a;min-height:18px}
@@ -484,6 +486,9 @@ function aiCorridor(p){
  const pr=0.22+0.07*S.round+cand[0].score*0.3;
  return RNG()<pr?cand[0].id:null;
 }
+function aiReopen(p,d,dfr){const dc=CARDS[dfr.cid];const tmp={ag:dc.ag,named:[],subj:null,d};const ids=dc.ag.z.none?null:areaIds(dc.ag);
+ let vOld;if(ids&&!ids.length)vOld=-0.05;else{const s0=ids?(ids.includes(dfr.subj)?dfr.subj:bestSubj(p,tmp,ids)):null;vOld=agVal(p,tmp,s0,0)}
+ const b=aiLead(p,d);if(!b||vOld>=b.v)return{reopen:true};return{reopen:false,cid:b.cid,subj:b.subj}}
 function aiReveal(p,opts){return opts[rnd(opts.length)]}
 function aiDeck(p){
  const cnt={};D.forEach(d=>cnt[d]=0);P(p).hand.forEach(c=>cnt[CARDS[c].d]++);
@@ -502,7 +507,7 @@ function ask(kind,o){
  });
 }
 function autoAns(kind,o){
- if(kind==='lead'){const b=aiLead(HUMAN,o.d);return b?b.cid:o.cids[0]}
+ if(kind==='lead'){if(o.reopen){const r=aiReopen(HUMAN,o.d,S.deferred[o.d]);return r.reopen?'REOPEN':r.cid}const b=aiLead(HUMAN,o.d);return b?b.cid:o.cids[0]}
  if(kind==='resp')return aiRespond(HUMAN,S.M)||o.cids[0];
  if(kind==='man')return o.ai?o.ai():o.ids[0];
  if(kind==='corridor')return aiCorridor(HUMAN);
@@ -576,23 +581,38 @@ async function meeting(d){
  clearTable(head,`chaired by ${order[0]===HUMAN?'you':P(order[0]).name}${order[0]!==tc.p?` (${tc.p===HUMAN?'you hold':P(tc.p).name+' holds'} no ${DN[d]} card)`:''}`,d);
  let resp=order.slice(1);
  const dfr=S.deferred[d];
- if(dfr){delete S.deferred[d];M.card=dfr.cid;M.ag=CARDS[dfr.cid].ag;M.resumed=true;resp=order;
-  cap(`The ${DN[d]} meeting reopens a deferred agenda: “${M.ag.t}”`);render();
-  M.agEl=await placeCard(CARDS[dfr.cid],null,'deferred','ag',false,true);await wait(900);
-  const ids=M.ag.z.none?null:areaIds(M.ag);
-  if(ids&&ids.includes(dfr.subj))M.subj=dfr.subj;else if(ids&&ids.length)M.subj=await chooseSubject(order[0],M,ids);else if(ids)M.fizzle=true;
- }else{
-  const p=order[0];let cid,subj=null;
-  if(p===HUMAN){
-   cap(`You chair the ${DN[d]} meeting.`,'Choose an agenda: click a card in your hand, then click it again to propose it.');
-   cid=await ask('lead',{d,cids:P(p).hand.filter(c=>CARDS[c].d===d)});
-  }else{cap(`${P(p).name} chairs the ${DN[d]} meeting and proposes an agenda…`);render();await wait(700);const b=aiLead(p,d);cid=b.cid;subj=b.subj}
+ let reopen=false,preCid=null,preSubj=null;
+ if(dfr){
+  const dc=CARDS[dfr.cid],ch=order[0];
+  M.agEl=await placeCard(dc,null,'deferred agenda','ag',false,true);
+  if(ch===HUMAN){
+   cap(`A deferred agenda is waiting: “${dc.ag.t}”`,'You chair: reopen it with the button, or choose a new agenda from your hand (the deferred one is then dropped).');
+   const r=await ask('lead',{d,cids:P(ch).hand.filter(c=>CARDS[c].d===d),reopen:true});
+   if(r==='REOPEN')reopen=true;else preCid=r;
+  }else{cap(`A deferred agenda is waiting: “${dc.ag.t}”. ${P(ch).name} chairs and decides…`);render();await wait(900);const o=aiReopen(ch,d,dfr);reopen=o.reopen;preCid=o.cid;preSubj=o.subj}
+  delete S.deferred[d];
+  if(reopen){
+   M.card=dfr.cid;M.ag=dc.ag;M.resumed=true;resp=order;
+   cap(`${ch===HUMAN?'You reopen':P(ch).name+' reopens'} the deferred agenda: “${M.ag.t}”`);render();await wait(700);
+   const ids=M.ag.z.none?null:areaIds(M.ag);
+   if(ids&&ids.includes(dfr.subj))M.subj=dfr.subj;else if(ids&&ids.length)M.subj=await chooseSubject(ch,M,ids);else if(ids)M.fizzle=true;
+  }else{S.disc[d].push(dfr.cid);M.agEl.remove();M.agEl=null;cap(`${ch===HUMAN?'You drop':P(ch).name+' drops'} the deferred agenda and proposes a new one.`);render();await wait(800)}
+ }
+ if(!reopen){
+  const p=order[0];let cid=preCid,subj=preSubj;
+  if(!cid){
+   if(p===HUMAN){
+    cap(`You chair the ${DN[d]} meeting.`,'Choose an agenda: click a card in your hand, then click it again to propose it.');
+    cid=await ask('lead',{d,cids:P(p).hand.filter(c=>CARDS[c].d===d)});
+   }else{cap(`${P(p).name} chairs the ${DN[d]} meeting and proposes an agenda…`);render();await wait(700);const b=aiLead(p,d);cid=b.cid;subj=b.subj}
+  }
   takeCard(p,cid);M.card=cid;M.ag=CARDS[cid].ag;
   M.agEl=await placeCard(CARDS[cid],p,P(p).name,'ag',true,true);await wait(350);M.agEl.querySelector('.card').classList.remove('fd');await wait(600);
   const ids=M.ag.z.none?null:areaIds(M.ag);
-  if(ids){if(!ids.length){M.fizzle=true}else if(M.ag.z.fixed)M.subj=ids[0];else if(p===HUMAN)M.subj=await chooseSubject(p,M,ids);else M.subj=subj&&ids.includes(subj)?subj:ids[0]}
-  cap(`${P(p).name} propose${p===HUMAN?'':'s'}: “${M.ag.t}”`+(M.subj?` Subject: ${man(M.subj).name}.`:M.fizzle?' There is no one it can apply to.':''));
+  if(ids){if(!ids.length){M.fizzle=true}else if(M.ag.z.fixed)M.subj=ids[0];else if(p===HUMAN)M.subj=await chooseSubject(p,M,ids);else M.subj=subj&&ids.includes(subj)?subj:bestSubj(p,M,ids)}
+  cap(`${P(p).name} propose${p===HUMAN?'':'s'}: “${M.ag.t}”`+(M.subj?` Subject: ${man(M.subj).name} (${man(M.subj).ini}).`:M.fizzle?' There is no one it can apply to.':''));
  }
+ tug();
  render();await wait(1100);
  for(const p of resp){
   if(!hand(p).some(c=>c.d===d))continue;
@@ -633,6 +653,27 @@ function tally(M){
  const net=f-a;
  return{f,a,mf,ma,net,extra:net>0?Math.min(net,mf):0,soft:net<0?Math.min(-net,ma):0,fail:net<0};
 }
+function finalList(M,T){const a=M.ag;let list=agList(M,M.subj);
+ if(a.x==='next'||a.x==='up'){for(let i=0;i<T.extra;i++){const n=nextOf(list[list.length-1],a.x==='up'?-1:1);if(n&&!list.includes(n))list.push(n)}}
+ if(a.x==='name'){for(const n of M.named.slice(0,T.extra))if(!list.includes(n))list.push(n)}
+ return list}
+const KV={arrest:'arrested',expose:'exposed',medal:'given the Order of Lenin',promote:'moved up',demote:'moved down',bottom:'sent to the bottom seat',swapIR:'swapped with Industry',exileOut:'sent abroad',shoot:'shot',accident:'killed',assassin:'hunted by an assassin',draft:'recalled to the Red Army',sharBack:'returned to Industry',amnesty:'amnestied',feed:'sent to the Canal',toShar:'sent to the sharashka',canalBack:'sent back to the Gulag',transferI:'transferred to the Urals',transferTo:'transferred',favourite:"made Stalin's right hand"};
+function forecast(M){
+ const a=M.ag,T=tally(M);const lab=id=>`${man(id).ini} ${man(id).sn}`;
+ if(!a)return'';
+ if(M.defer)return`Deferred: it comes back at the next ${DN[M.d]} meeting, if the chair reopens it.`;
+ if(M.fizzle)return'There is no one it can apply to: nothing will happen.';
+ let why='';
+ if(T.f||T.a)why=` (For ${T.f}, Against ${T.a}${T.net>0&&T.net>T.extra&&a.x!=='harsh'?`; the loudest supporter is ${T.mf===2?'an Acclaim, so at most two more':'a Support, so at most one more'}`:''})`;
+ if(a.x==='harsh'){const rung=Math.max(0,Math.min(3,(a.base||0)+T.extra-T.soft));const who=a.k==='mass'?(S.lub.length?'everyone in the Lubyanka':'nobody (the Lubyanka is empty)'):(M.subj?lab(M.subj):'nobody');return`If the meeting ended now: ${who} → ${RUNG[rung]}${why}.`}
+ if(T.fail)return`If the meeting ended now: the agenda fails${why}.`;
+ if(a.k==='push')return`If the meeting ended now: the Canal moves ${(a.n||0)+T.extra} place${(a.n||0)+T.extra>1?'s':''}${why}.`;
+ if(a.k==='none')return'If the meeting ended now: '+(a.line==='-'?'the Party line is withdrawn.':'nothing happens.');
+ if(a.k==='review')return'If the meeting ended now: everyone in the Lubyanka gets the fate on the black deck.';
+ const list=finalList(M,T);if(!list.length)return'';
+ const amt=a.x==='more'?` ${(a.n||0)+T.extra} seat${(a.n||0)+T.extra>1?'s':''}`:'';
+ return`If the meeting ended now: ${list.map(lab).join(', ')} ${list.length>1?'are':'is'} ${KV[a.k]||'affected'}${amt}${why}.`;
+}
 async function resolve(M){
  const a=M.ag,d=M.d,T=tally(M);
  if(M.defer){S.deferred[d]={cid:M.card,subj:M.subj};M.keep=true;res(`Deferred. “${a.t}” comes back at the next ${DN[d]} meeting.`);await wait(1500);return}
@@ -647,10 +688,9 @@ async function resolve(M){
   render();await wait(1900);return;
  }
  if(T.fail){res(`The objections carry the room. “${a.t}” fails.`);await wait(1500);return}
- let list=agList(M,M.subj);
- if(a.x==='next'||a.x==='up'){for(let i=0;i<T.extra;i++){const n=nextOf(list[list.length-1],a.x==='up'?-1:1);if(n&&!list.includes(n))list.push(n)}}
+ let list=finalList(M,T);
  let dropNote='';
- if(a.x==='name'){for(const n of M.named.slice(0,T.extra))if(!list.includes(n))list.push(n);
+ if(a.x==='name'){
   if(M.named.length>T.extra){const dr=M.named.slice(T.extra).map(id=>`${man(id).sn} (${man(id).ini})`);dropNote=` Only ${T.extra?T.extra+' extra name'+(T.extra>1?'s':''):'the subject'} carried: the loudest supporting voice was ${T.mf===2?'an Acclaim (up to two more)':'a Support (one more)'}${T.a?', less the objections':''}. Dropped: ${dr.join(', ')}.`}}
  const amt=(a.n||0)+(a.x==='more'?T.extra:0);
  if(list.length)flashTok(list);
@@ -852,7 +892,7 @@ function tug(){const M=S.M;if(!M)return;let f='',a='';
  for(const x of M.plays){if(x.resp==='Support')f+=v(1);if(x.resp==='Acclaim')f+=v(2);if(x.resp==='Doubt')a+=v(1,1);if(x.resp==='Protest')a+=v(2,1)}
  function v(n,ag){return `<span class="v" style="background:${ag?'#c0392b':'#27ae60'};${n>1?'width:22px':''}"></span>`}
  const T=tally(M);
- $('#tug').innerHTML=`<span>For</span><span class="side">${f||'–'}</span><span style="margin:0 6px">vs</span><span class="side">${a||'–'}</span><span>Against</span>`+(M.defer?'<span style="margin-left:10px;color:#ffd84a">DEFERRED</span>':'')+(T.fail&&M.ag.x!=='harsh'?'<span style="margin-left:10px;color:#e74c3c">failing</span>':'');
+ $('#tug').innerHTML=`<span>For</span><span class="side">${f||'–'}</span><span style="margin:0 6px">vs</span><span class="side">${a||'–'}</span><span>Against</span>`+(M.defer?'<span style="margin-left:10px;color:#ffd84a">DEFERRED</span>':'')+(T.fail&&M.ag.x!=='harsh'?'<span style="margin-left:10px;color:#e74c3c">failing</span>':'')+`<div class="fc">${esc(forecast(M))}</div>`;
 }
 async function placeCard(c,p,who,mode,facedown,isAg){
  const slot=document.createElement('div');slot.className='tslot';
@@ -891,6 +931,7 @@ document.addEventListener('click',e=>{
   if(k==='new')startScreen();
   if(k==='playsel'&&SEL&&PEND)PEND.res(SEL);
   if(k==='skip'&&PEND)PEND.res(null);
+  if(k==='reopen'&&PEND&&PEND.kind==='lead'&&PEND.reopen)PEND.res('REOPEN');
   if(k==='start')startGame();
   if(k==='close'){$('#ov').classList.remove('on')}
   if(k==='np'){CHOSEN=+x.dataset.n;document.querySelectorAll('.np button').forEach(b=>b.classList.toggle('on',b===x))}
@@ -915,6 +956,7 @@ document.addEventListener('click',e=>{
 });
 const _render=render;
 render=function(){_render();if(PEND&&PEND.kind==='man'&&PEND.allowNone&&!$('#cap [data-x=skip]')){$('#cap').insertAdjacentHTML('beforeend',' <button class="btn" data-x="skip">Skip</button>')}};
+const _render2=render;render=function(){_render2();if(PEND&&PEND.kind==='lead'&&PEND.reopen&&!$('#cap [data-x=reopen]')){$('#cap').insertAdjacentHTML('beforeend',' <button class="btn" data-x="reopen" style="background:#ffd84a;color:#2a1d17;border:none;font-weight:700">Reopen the deferred agenda</button>')}};
 
 // ================= SCREENS =================
 let CHOSEN=4;
