@@ -310,6 +310,7 @@ J:{Support:'The court concurs.',Acclaim:'The evidence is overwhelming.',Doubt:'T
 };
 const FATES={Shot:9,Gulag:9,Canal:5,Sharashka:2};
 const RUNG=['the sharashka','the Gulag','the Canal','the firing squad'];
+for(const d of D)for(const a of AG[d])if(a.k==='transferTo'||a.k==='transferI')a.d+=' If that department is full, he trades places with the man in its bottom seat.';
 const LINE0={id:'L0',d:'P',ag:{t:'Vigilance against the Trotskyite conspiracy.',d:'The Party line names nobody yet.',s:'',line:'-'},resp:'Abstain'};
 
 // ================= UTIL =================
@@ -395,6 +396,18 @@ function toExile(id){if(S.exile.length>=3)return false;pull(id);S.exile.push(id)
 function moveSeat(id,delta){const w=where(id);if(w.t!=='seat')return;const a=S.seats[w.d];a.splice(w.r,1);const nr=Math.max(0,Math.min(a.length,w.r+delta));a.splice(nr,0,id)}
 function swapIR(id){const w=where(id);if(w.t!=='seat'||w.d!=='R')return false;const o=S.seats.I[w.r];if(!o)return false;S.seats.R[w.r]=o;S.seats.I[w.r]=id;return true}
 function favourite(id){const w=where(id);if(w.t!=='seat'||w.r!==0)return false;const old=S.rh;if(old){S.seats[w.d][0]=old}else S.seats[w.d].splice(0,1);S.rh=id;return true}
+// A transfer that passes always does something: into a free seat if there is one,
+// otherwise the man trades places with the target department's bottom man.
+function tradeInto(to,id){const w=where(id);const a=S.seats[to];
+ if(w.t==='seat'&&w.d===to){moveSeat(id,9);return{same:true}}
+ if(a.length<7){pull(id);a.push(id);return{moved:true}}
+ if(w.t!=='seat'){return{failed:true}}
+ const b=a[a.length-1];S.seats[w.d][w.r]=b;a[a.length-1]=id;man(id).from=w.d;man(b).from=to;return{swap:b,fromD:w.d,r:w.r}}
+function transferMsg(id,to,r){const nm=x=>`${man(x).sn} (${man(x).ini})`;
+ if(r.same)return`${nm(id)} goes to the bottom seat`;
+ if(r.moved)return`${nm(id)} moves to ${DN[to]}`;
+ if(r.swap)return`${nm(id)} moves to ${DN[to]}, trading places with its bottom man ${nm(r.swap)}, who takes his ${RANKN[r.r]} seat in ${DN[r.fromD]}`;
+ return`${nm(id)} cannot be moved`}
 function sentence(id,r){if(r<=0){if(!toShar(id))toGulag(id)}else if(r===1)toGulag(id);else if(r===2)toCanal(id);else kill(id)}
 function fateDraw(){
  if(!S.decks.J.length&&S.disc.J.length){S.decks.J=shuffle(S.disc.J);S.disc.J=[]}
@@ -751,8 +764,8 @@ async function resolve(M){
  case'review':{const l=S.lub.slice();if(!l.length)out.push('the Lubyanka is empty');for(const id of l){const f=fateFlip();sentence(id,{Sharashka:0,Gulag:1,Canal:2,Shot:3}[f]);out.push(`${nm(id)}: ${f.toUpperCase()}`)}break}
  case'toShar':for(const id of list){out.push(toShar(id)?`${nm(id)} goes to the sharashka`:`the sharashka is full`)}break;
  case'canalBack':for(const id of list){toGulag(id);out.push(`${nm(id)} goes back to the Gulag`)}break;
- case'transferI':for(const id of list){if(where(id).t==='seat'&&where(id).d==='I'){moveSeat(id,9);out.push(`${nm(id)} goes to Industry's bottom seat`)}else out.push(enter('I',id)?`${nm(id)} is transferred to the Urals`:`Industry has no seat free for ${nm(id)}`)}break;
- case'transferTo':{const to=a.to==='LINE'?lineDept():a.to;for(const id of list){if(!to){out.push('the line names nobody');break}const w=where(id);if(w.t==='seat'&&w.d===to){moveSeat(id,9);out.push(`${nm(id)} goes to the bottom seat`)}else out.push(enter(to,id)?`${nm(id)} moves to ${DN[to]}`:`${DN[to]} has no seat free for ${nm(id)}`)}break}
+ case'transferI':for(const id of list)out.push(transferMsg(id,'I',tradeInto('I',id)));break;
+ case'transferTo':{const to=a.to==='LINE'?lineDept():a.to;for(const id of list){if(!to){out.push('the line names nobody');break}out.push(transferMsg(id,to,tradeInto(to,id)))}break}
  case'favourite':for(const id of list){out.push(favourite(id)?`${nm(id)} becomes Stalin's right hand`:`nothing changes`)}break;
  case'none':out.push(a.line==='-'?'the Party line is withdrawn':'nothing happens');break;
  }
