@@ -246,10 +246,10 @@ P:[
 {c:1,t:'Lies of the Trotskyite press.',d:'Reveal who owns a man in exile.',s:'Support: each supporter names another exile.',k:'expose',z:{exile:1},x:'name'},
 ],
 N:[
-{c:12,t:'Arrest the enemies named by the Party.',d:'Arrest a man in the department named by the Party line. If it names nobody, the chair names the department by choosing the man.',s:'Support: each supporter names another man there.',k:'arrest',z:{seat:'LINE'},x:'name'},
+{c:13,t:'Arrest the enemies named by the Party.',d:'Arrest a man in the department named by the Party line. If it names nobody, the chair names the department by choosing the man.',s:'Support: each supporter names another man there.',k:'arrest',z:{seat:'LINE'},x:'name'},
 {c:11,t:'Mass operation against anti-Soviet elements.',d:'Arrest a man in the fifth, sixth or seventh seat of any department.',s:'Support: the next man down is arrested too.',k:'arrest',z:{low:1},x:'next'},
 {c:3,t:'The Politburo must be cleansed.',d:'Arrest a member of the Politburo.',s:'Support: each supporter names another Politburo man.',k:'arrest',z:{polit:1},x:'name'},
-{c:5,t:'Purge our own ranks.',d:'Arrest an NKVD man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'N'},x:'next'},
+{c:6,t:'Purge our own ranks.',d:'Arrest an NKVD man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'N'},x:'next'},
 {c:6,t:'Liquidate counter-revolutionary elements in the camps.',d:'A prisoner in the Lubyanka, the Gulag or on the Canal is shot.',s:'Support: each supporter names another prisoner.',k:'shoot',z:{pris:['lub','gulag','canal']},x:'name'},
 {c:3,t:'The long arm.',d:"Send an assassin after a man in exile. Turn over the Judiciary deck's top card: on SHOT he dies.",s:'Support: each supporter names another exile.',k:'assassin',z:{exile:1},x:'name'},
 {c:7,t:'Uncover the military-fascist plot.',d:'Arrest a Red Army man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'R'},x:'next'},
@@ -299,7 +299,7 @@ J:[
 };
 const RESPMIX={
 P:{Amend:5,Support:5,Acclaim:3,Doubt:4,Protest:2,Defer:2,Abstain:5},
-N:{Support:18,Acclaim:16,Doubt:9,Protest:2,Amend:6,Defer:2,Abstain:9},
+N:{Support:19,Acclaim:17,Doubt:10,Protest:2,Amend:6,Defer:2,Abstain:10},
 I:{Abstain:6,Defer:4,Support:7,Acclaim:3,Doubt:4,Protest:1,Amend:2},
 R:{Support:7,Acclaim:4,Doubt:4,Protest:2,Amend:3,Defer:2,Abstain:4},
 J:{Defer:3,Support:4,Acclaim:1,Doubt:7,Protest:2,Amend:3,Abstain:7},
@@ -352,7 +352,7 @@ function newState(np){
  S={np,round:0,players:[],men:{},seats:{P:[],N:[],I:[],R:[],J:[]},rh:null,kal:null,lub:[],shar:[],gulag:[],canal:Array(8).fill(null),exile:[],grave:[],
   decks:{},disc:{P:[],N:[],I:[],R:[],J:[]},line:LINE0,deferred:{},over:false,M:null,stats:{arrests:0,deaths:0,skipped:0,meetings:0,burn:0,verdicts:0,toGulag:0,toCanal:0,toShot:0,toShar:0},firstDraw:0,nkvdMet:false};
  for(const d of D)S.decks[d]=shuffle(decks[d].slice());
- S.decks.N=S.decks.N.slice(0,9*np);
+ S.decks.N=S.decks.N.slice(0,10*np);
  MEN.forEach((m,i)=>{const id='m'+i;const pts=m[2].split(' ');S.men[id]={id,home:m[0],sn:m[1],name:m[2],title:m[3],ini:pts[0][0]+pts[pts.length-1][0],owner:null,rev:false,nobody:false,medal:false,from:null};
   if(D.includes(m[0]))S.seats[m[0]].push(id);else if(m[0]==='RH')S.rh=id;else if(m[0]==='K')S.kal=id;else S.exile.push(id)});
  {const seen={};for(const k in S.men){const i=S.men[k].ini;if(seen[i])console.warn('duplicate initials',i);seen[i]=1}}
@@ -1055,7 +1055,7 @@ function rulesScreen(){
 <h2>3 · The loudest voice</h2><p>Every response card shows its voice: <b>+1</b> Support, <b>+2</b> Acclaim, <b>−1</b> Doubt, <b>−2</b> Protest, <b>0</b> Abstain. Amend (the up-and-down arrows) and Defer (the hourglass) are not votes. Add the voices up: If the room is against, the agenda fails. If it is for, the agenda grows by the margin, but never beyond its loudest supporter (Support one step, Acclaim two). Amend moves the agenda one seat up or down. Defer postpones it to the department's next meeting, unless someone in the room plays an Acclaim, which overrules it. When the chair picks the department or the camp by choosing the subject, every supporter's extra name must come from the same place. Abstain says nothing. In trials, the voices make the sentence harsher or milder instead.</p>
 <h2>4 · Prisons</h2><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first: the sharashka, the Gulag, the White Sea Canal, the firing squad. The Canal moves along whenever an agenda pushes the work, and the end kills.</p>
 <h2>5 · Drawing</h2><p>At the end of the round everyone draws back up to fifteen, one card at a time, choosing the deck in the open. Whoever chaired the Judiciary decides who draws first.</p>
-<h2>The end</h2><p>The blue NKVD deck is the clock and is never reshuffled: it holds nine cards per player. When its last card is drawn, the Terror ends. For this playtest there is no declared winner: see how it feels.</p>
+<h2>The end</h2><p>The blue NKVD deck is the clock and is never reshuffled: it holds ten cards per player. When its last card is drawn, the Terror ends. For this playtest there is no declared winner: see how it feels.</p>
 <p style="color:#d8c9ad;font-size:13px">Playtest safeguard: if the NKVD does not meet in a round, one blue card is burned, so the game cannot stall forever.</p>
 <p><button class="go" data-x="close">Close</button></p>`;
  $('#ov').classList.add('on');
