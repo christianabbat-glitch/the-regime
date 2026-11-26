@@ -49,7 +49,8 @@ body.tall #app{flex-direction:column;height:auto}
 .pile.empty{opacity:.25;box-shadow:none}
 .pcount{position:absolute;width:32px;text-align:center;font-size:11px;color:#4a3d27}
 #panel{flex:1;min-width:0;display:flex;flex-direction:column;padding:8px 12px 0;gap:8px;min-height:0;overflow:auto}
-#top{display:flex;align-items:flex-start;gap:10px}
+#top{display:flex;align-items:flex-start;gap:10px;flex-shrink:0}
+#pl,#tbl,#mine{flex-shrink:0}
 #cap{flex:1;font-size:15px;line-height:1.3;min-height:42px}
 #cap .pr{display:block;color:#ffd84a;font-weight:700}
 #ctl{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
@@ -83,7 +84,7 @@ body.tall #app{flex-direction:column;height:auto}
 .mc.pick{outline:3px solid #ff2fd0;cursor:pointer}
 .mc.dead{opacity:.45}
 .mc.blank{border-left-color:#555;background:#d8cdb6;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
-#hand{position:relative;flex:1 0 192px;margin:0 -12px;overflow:hidden}
+#hand{position:sticky;bottom:0;flex:1 0 192px;margin:0 -12px;overflow:hidden;background:linear-gradient(to bottom,rgba(42,29,23,0),#2a1d17 30%);z-index:6}
 .hcw{position:absolute;bottom:24px;transition:transform .25s ease,left .25s ease;transform-origin:50% 120%}
 .hcw.dim .card{filter:brightness(.55)}
 .hcw.can{cursor:pointer}
@@ -108,7 +109,14 @@ body.tall #app{flex-direction:column;height:auto}
 .card.big .hi{height:16px;min-width:22px;font-size:12px;border-radius:8px}
 .card .fate{position:absolute;left:5px;bottom:27px;font-size:7.5px;font-weight:700;color:#7d1d1a;text-transform:uppercase}
 .card.ag .r{opacity:.3}.card.rs .a{opacity:.3}
-.card.mid{width:150px;height:212px}
+.card.mid{width:138px;height:196px}
+.card.tb{width:80px;height:116px}
+.card.tb .a b{font-size:8.5px}
+.card.tb .h{font-size:7.5px;height:13px}
+.card.tb .r b{font-size:11px}
+.card.tb .rv{min-width:17px;height:17px;font-size:10.5px}
+.card.tb .fate{display:none}
+.nom{display:inline-block;margin:6px 0 0;padding:3px 8px;border-radius:5px;font-size:12.5px;font-weight:700}
 .card.mid .h{height:20px;font-size:11px}
 .card.mid .a{top:24px;left:8px;right:16px}
 .card.mid .a b{font-size:12.5px}
@@ -222,17 +230,18 @@ P:[
 {c:3,t:'Unmask the enemies within the organs.',d:'Reveal who owns an NKVD man. The Party line becomes the NKVD.',s:'Support: the next man down is exposed too.',k:'expose',z:{seat:'N'},x:'next',line:'N'},
 {c:2,t:'Unmask the saboteurs of Soviet justice.',d:'Reveal who owns a Judiciary man. The Party line becomes the Judiciary.',s:'Support: the next man down is exposed too.',k:'expose',z:{seat:'J'},x:'next',line:'J'},
 {c:1,t:'Bourgeois formalism in the arts.',d:'Reveal who owns a Propaganda man. The Party line becomes Propaganda.',s:'Support: the next man down is exposed too.',k:'expose',z:{seat:'P'},x:'next',line:'P'},
-{c:2,t:'Unmask the hidden enemies.',d:'Reveal who owns a man in the department named by the Party line.',s:'Support: each supporter names another man there.',k:'expose',z:{seat:'LINE'},x:'name'},
+{c:2,t:'Unmask the hidden enemies.',d:'Reveal who owns a man in the department named by the Party line. If it names nobody, the chair names the department by choosing the man.',s:'Support: each supporter names another man there.',k:'expose',z:{seat:'LINE'},x:'name'},
 {c:2,t:'The Party has erred: the line is withdrawn.',d:'The Party line names nobody.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none',line:'-'},
 {c:3,t:'The Canal reforges the enemies of the people.',d:'Send a prisoner from the Lubyanka or the Gulag to the White Sea Canal.',s:'Support: each supporter names another prisoner.',k:'feed',z:{pris:['lub','gulag']},x:'name'},
 {c:2,t:"Honour Comrade Stalin's closest companions.",d:'Pin the Order of Lenin on a member of the Politburo.',s:'Support: each supporter names another Politburo man.',k:'medal',z:{polit:1},x:'name'},
 {c:2,t:'A new favourite at the dacha.',d:"A department head trades places with Stalin's right hand.",s:'Support changes nothing.',k:'favourite',z:{heads:1},x:'none'},
 {c:2,t:'Self-criticism in the editorial office.',d:'A Propaganda man moves down two seats.',s:'Support: one seat further.',k:'demote',n:2,z:{seat:'P'},x:'more'},
 {c:2,t:'Strengthen the organs with Party cadres.',d:"A man from any other department moves to the NKVD's bottom seat.",s:'Support: each supporter names another man.',k:'transferTo',to:'N',z:{anyBut:'N'},x:'name'},
+{c:2,t:'Send a correspondent to Paris.',d:'A Propaganda man is posted abroad and stays there: he goes into exile, if a place is free.',s:'Support: the next man down goes too.',k:'exileOut',z:{seat:'P'},x:'next'},
 {c:1,t:'Lies of the Trotskyite press.',d:'Reveal who owns a man in exile.',s:'Support: each supporter names another exile.',k:'expose',z:{exile:1},x:'name'},
 ],
 N:[
-{c:10,t:'Arrest the enemies named by the Party.',d:'Arrest a man in the department named by the Party line (any department if it names nobody).',s:'Support: each supporter names another man there.',k:'arrest',z:{seat:'LINE'},x:'name'},
+{c:10,t:'Arrest the enemies named by the Party.',d:'Arrest a man in the department named by the Party line. If it names nobody, the chair names the department by choosing the man.',s:'Support: each supporter names another man there.',k:'arrest',z:{seat:'LINE'},x:'name'},
 {c:8,t:'Mass operation against anti-Soviet elements.',d:'Arrest a man in the fifth, sixth or seventh seat of any department.',s:'Support: the next man down is arrested too.',k:'arrest',z:{low:1},x:'next'},
 {c:3,t:'The Politburo must be cleansed.',d:'Arrest a member of the Politburo.',s:'Support: each supporter names another Politburo man.',k:'arrest',z:{polit:1},x:'name'},
 {c:5,t:'Purge our own ranks.',d:'Arrest an NKVD man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'N'},x:'next'},
@@ -241,17 +250,19 @@ N:[
 {c:6,t:'Uncover the military-fascist plot.',d:'Arrest a Red Army man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'R'},x:'next'},
 {c:4,t:'Wreckers on the railways.',d:'Arrest an Industry man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'I'},x:'next'},
 {c:2,t:"Send investigators to the Prosecutor's Office.",d:"A man from any other department moves to the Judiciary's bottom seat.",s:'Support: each supporter names another man.',k:'transferTo',to:'J',z:{anyBut:'J'},x:'name'},
+{c:2,t:'Recall the residents from abroad.',d:'An NKVD man ordered home decides not to come: he defects into exile, if a place is free.',s:'Support: the next man down goes too.',k:'exileOut',z:{seat:'N'},x:'next'},
 {c:3,t:'Hunt the double-dealers in the press.',d:'Arrest a Propaganda man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'P'},x:'next'},
 ],
 I:[
 {c:3,t:'Hero of Socialist Labour.',d:'Pin the Order of Lenin on an Industry man.',s:'Support: the next man down gets one too.',k:'medal',z:{seat:'I'},x:'next'},
 {c:4,t:'Storm the plan!',d:'An Industry man moves up one seat.',s:'Support: one seat further.',k:'promote',n:1,z:{seat:'I'},x:'more'},
 {c:3,t:'The plan has failed.',d:'An Industry man moves down two seats.',s:'Support: one seat further.',k:'demote',n:2,z:{seat:'I'},x:'more'},
-{c:3,t:'Transfer cadres to the Urals.',d:"A man in the department named by the Party line moves to Industry's bottom seat (any department if it names nobody).",s:'Support: each supporter names another man there.',k:'transferI',z:{seat:'LINE'},x:'name'},
+{c:3,t:'Transfer cadres to the Urals.',d:"A man in the department named by the Party line moves to Industry's bottom seat. If it names nobody, the chair names the department by choosing the man.",s:'Support: each supporter names another man there.',k:'transferI',z:{seat:'LINE'},x:'name'},
 {c:3,t:'Double the norms on the Canal.',d:'Every prisoner on the Canal moves two places along. Whoever is pushed off the end dies.',s:'Support: one place further.',k:'push',n:2,z:{none:1},x:'more'},
 {c:3,t:'Release the engineers from the sharashka.',d:"A prisoner in the sharashka returns to Industry's bottom seat.",s:'Support: each supporter names another.',k:'sharBack',z:{pris:['shar']},x:'name'},
 {c:4,t:'Report on tractor output in Kharkov.',d:'Nothing happens.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none'},
 {c:2,t:'Celebrate a Stakhanovite in the Party press.',d:"A man from any other department moves to Propaganda's bottom seat.",s:'Support: each supporter names another man.',k:'transferTo',to:'P',z:{anyBut:'P'},x:'name'},
+{c:2,t:'A trade delegation to Berlin.',d:'An Industry man goes abroad with the delegation and does not return: he goes into exile, if a place is free.',s:'Support: the next man down goes too.',k:'exileOut',z:{seat:'I'},x:'next'},
 {c:2,t:'An accident at the Magnitogorsk works.',d:"The man in Industry's bottom seat is killed.",s:'Support: the man above him dies too.',k:'accident',z:{fixed:'bottomI'},x:'up'},
 ],
 R:[
@@ -389,7 +400,7 @@ function fateFlip(){
 // ================= TARGETS =================
 function areaIds(a){
  const z=a.z;if(z.none)return null;let ids=[];
- if(z.seat){const ld=z.seat==='LINE'?lineDept():z.seat;ids=(ld?[ld]:D).flatMap(d=>S.seats[d])}
+ if(z.seat){const ld=z.seat==='LINE'?(lineDept()||(S.M&&S.M.ag===a&&S.M.nom)||null):z.seat;ids=(ld?[ld]:D).flatMap(d=>S.seats[d])}
  else if(z.anyBut){const ex=z.anyBut==='LINE'?lineDept():z.anyBut;if(z.anyBut==='LINE'&&!ex)return[];ids=D.filter(d=>d!==ex).flatMap(d=>S.seats[d])}
  else if(z.low)ids=D.flatMap(d=>S.seats[d].slice(4));
  else if(z.polit)ids=D.map(d=>S.seats[d][0]).filter(Boolean).concat(S.rh?[S.rh]:[]);
@@ -603,6 +614,7 @@ async function meeting(d){
    cap(`${ch===HUMAN?'You reopen':P(ch).name+' reopens'} the deferred agenda: “${M.ag.t}”`);render();await wait(700);
    const ids=M.ag.z.none?null:areaIds(M.ag);
    if(ids&&ids.includes(dfr.subj))M.subj=dfr.subj;else if(ids&&ids.length)M.subj=await chooseSubject(ch,M,ids);else if(ids)M.fizzle=true;
+   setNom(M);
   }else{S.disc[d].push(dfr.cid);M.agEl.remove();M.agEl=null;cap(`${ch===HUMAN?'You drop':P(ch).name+' drops'} the deferred agenda and proposes a new one.`);render();await wait(800)}
  }
  if(!reopen){
@@ -617,6 +629,7 @@ async function meeting(d){
   M.agEl=await placeCard(CARDS[cid],p,P(p).name,'ag',true,true);await wait(350);M.agEl.querySelector('.card').classList.remove('fd');await wait(600);
   const ids=M.ag.z.none?null:areaIds(M.ag);
   if(ids){if(!ids.length){M.fizzle=true}else if(M.ag.z.fixed)M.subj=ids[0];else if(p===HUMAN)M.subj=await chooseSubject(p,M,ids);else M.subj=subj&&ids.includes(subj)?subj:bestSubj(p,M,ids)}
+  setNom(M);
   cap(`${P(p).name} propose${p===HUMAN?'':'s'}: “${M.ag.t}”`+(M.subj?` Subject: ${man(M.subj).name} (${man(M.subj).ini}).`:M.fizzle?' There is no one it can apply to.':''));
  }
  tug();
@@ -649,6 +662,7 @@ async function meeting(d){
  for(const c of [M.card,...M.plays.map(x=>x.cid)]){if(!c)continue;if(c===M.card&&(M.keep))continue;S.disc[d].push(c)}
  S.M=null;render();await wait(400);
 }
+function setNom(M){if(M.ag&&M.ag.z.seat==='LINE'&&!lineDept()&&M.subj){const w=where(M.subj);if(w.t==='seat')M.nom=w.d}}
 function bestSubj(p,M,ids){let best=ids[0],bv=-1e9;for(const id of ids){const v=agVal(p,M,id,0)+RNG()*0.03;if(v>bv){bv=v;best=id}}return best}
 async function chooseSubject(p,M,ids){
  if(p===HUMAN){cap(`Agenda: “${M.ag.t}”`,'Choose the subject: click one of the highlighted men.');return await ask('man',{ids,ai:()=>bestSubj(HUMAN,M,ids)})}
@@ -898,15 +912,16 @@ function clearTable(title,sub,d){
  $('#trow').innerHTML='';$('#tug').innerHTML='';$('#res').textContent='';
 }
 function res(t){$('#res').textContent=t;cap(t)}
+function nomChip(M){if(!M.ag||M.ag.z.seat!=='LINE')return'';const ld=lineDept();const d=ld||M.nom;if(!d)return'';return `<div style="width:100%"><span class="nom" style="background:${DC[d]};color:${DT[d]}">Target department: ${DN[d]}</span> <span style="font-size:12px;color:#d8c9ad">${ld?'named by the Party line':'the line names nobody, so the chair chose it'}</span></div>`}
 function tug(){const M=S.M;if(!M)return;let f='',a='';
  for(const x of M.plays){if(x.resp==='Support')f+=v(1);if(x.resp==='Acclaim')f+=v(2);if(x.resp==='Doubt')a+=v(1,1);if(x.resp==='Protest')a+=v(2,1)}
  function v(n,ag){return `<span class="v" style="background:${ag?'#c0392b':'#27ae60'};${n>1?'width:22px':''}"></span>`}
  const T=tally(M);
- $('#tug').innerHTML=`<span>For</span><span class="side">${f||'–'}</span><span style="margin:0 6px">vs</span><span class="side">${a||'–'}</span><span>Against</span>`+(M.defer?'<span style="margin-left:10px;color:#ffd84a">DEFERRED</span>':'')+(T.fail&&M.ag.x!=='harsh'?'<span style="margin-left:10px;color:#e74c3c">failing</span>':'')+`<div class="fc">${esc(forecast(M))}</div>`;
+ $('#tug').innerHTML=`<span>For</span><span class="side">${f||'–'}</span><span style="margin:0 6px">vs</span><span class="side">${a||'–'}</span><span>Against</span>`+(M.defer?'<span style="margin-left:10px;color:#ffd84a">DEFERRED</span>':'')+(T.fail&&M.ag.x!=='harsh'?'<span style="margin-left:10px;color:#e74c3c">failing</span>':'')+nomChip(M)+`<div class="fc">${esc(forecast(M))}</div>`;
 }
 async function placeCard(c,p,who,mode,facedown,isAg){
  const slot=document.createElement('div');slot.className='tslot';
- const inner=c.chr?charHTML(c,'fd'):cardHTML(c,(isAg?'mid ':'')+mode+(facedown?' fd':''));
+ const inner=c.chr?charHTML(c,'fd'):cardHTML(c,(isAg?'mid ':'tb ')+mode+(facedown?' fd':''));
  slot.innerHTML=inner+`<div class="who">${esc(who||'')}</div>`;
  $('#trow').appendChild(slot);
  if(c.chr&&!facedown)slot.querySelector('.card').classList.remove('fd');
