@@ -1192,7 +1192,7 @@ const _render2=render;render=function(){_render2();if(PEND&&PEND.kind==='dir'&&!
 const FB_CONFIG={apiKey:"AIzaSyCw7Fz1zSK0lujBfkv6clY3kwBdwIKryuA",authDomain:"the-regime-26978.firebaseapp.com",databaseURL:"https://the-regime-26978-default-rtdb.firebaseio.com",projectId:"the-regime-26978",storageBucket:"the-regime-26978.firebasestorage.app",messagingSenderId:"814859846908",appId:"1:814859846908:web:1467c7a47566f9c69bc379"};
 const FB_SDK="https://www.gstatic.com/firebasejs/10.12.2/";
 const COMPNAMES=['Masha','Pyotr','Sasha','Olga','Ivan','Anya'];
-let NET=null,DECN=0;
+let NET=null,DECN=0;const NET_LATE={};
 function stateHash(){if(!S)return'';const t=S.round+'|'+D.map(d=>S.seats[d].join(',')).join(';')+'|'+S.lub.join(',')+'|'+S.gulag.join(',')+'|'+S.players.map(p=>p.hand.length).join(',')+'|'+D.map(d=>S.decks[d].length).join(',');
  let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return(h>>>0).toString(36)}
 async function oneDecision(k,p,ui,ai,waitMsg){
@@ -1200,7 +1200,9 @@ async function oneDecision(k,p,ui,ai,waitMsg){
  const h=stateHash();
  if(NET.moves.has(k))return NET.take(k,h);
  if(p===HUMAN){const v=await ui();if(NET.moves.has(k))return NET.take(k,h);NET.put(k,p,v,h);return v}
- if(NET.host&&!NET.humans.includes(p)){const v=ai();NET.put(k,p,v,h);return v}
+ if(!NET.humans.includes(p)){ // a computer seat: the host decides; if the host is slow (a locked phone), anyone may
+  if(!NET.host){const got=await Promise.race([NET.wait(k),new Promise(r=>setTimeout(()=>r(NET_LATE),5000))]);if(got!==NET_LATE)return NET.take(k,h,got)}
+  return await NET.claim(k,p,ai(),h)}
  if(waitMsg){cap(waitMsg);render()}
  NET.waitingFor=p;onlineBar();const v=await NET.wait(k);NET.waitingFor=null;onlineBar();return NET.take(k,h,v)}
 // one decision, made by seat p: ui() asks this browser's player, ai() decides for a computer seat
@@ -1262,6 +1264,7 @@ const ONL={B:null,code:null,meta:null,seats:{},offs:[],fake:false,started:false,
   if(meta.ver!==GAME_VER)return lobbyMsg('This room was made with a different version of the game. Refresh this page; if that does not help, ask the host to refresh and make a new room.');
   this.setURL(code);
   const seats=(await this.B.get(this.R('seats')))||{};for(const i in seats)if(seats[i]&&seats[i].cid===this.cid){this.watch();return}
+  if(meta.lineup&&Object.values(meta.lineup).some(x=>x&&x.cid===this.cid)){this.watch();return}
   if(meta.status!=='lobby')return lobbyMsg('That game has already started.');
   for(let i=1;i<meta.np;i++){const r=await this.B.claim(this.R('seats/'+i),cur=>cur?undefined:{cid:this.cid,name});if(r.ok){this.remember();this.watch();return}}
   lobbyMsg('That room is full.')},
@@ -1280,6 +1283,10 @@ const ONL={B:null,code:null,meta:null,seats:{},offs:[],fake:false,started:false,
   NET={code:this.code,me,host:m.host===this.cid,humans,moves:new Map(),hashes:new Map(),waiters:{},known:0,desync:null,
    put(k,p,v,h){this.moves.set(k,v);this.known=Math.max(this.known,k+1);ONL.B.set(ONL.R('moves/'+k),{p,h,v:JSON.stringify(v===undefined?null:v)})},
    got(k,o){if(this.moves.has(k))return;const v=JSON.parse(o.v);this.moves.set(k,v);this.hashes.set(k,o.h);this.known=Math.max(this.known,k+1);const w=this.waiters[k];if(w){delete this.waiters[k];w(v)}},
+   // the first answer written for a computer seat wins; everyone uses that one
+   async claim(k,p,v,h){const o={p,h,v:JSON.stringify(v===undefined?null:v)};const r=await ONL.B.claim(ONL.R('moves/'+k),cur=>cur?undefined:o);
+    if(r.ok){this.moves.set(k,v);this.known=Math.max(this.known,k+1);return v}
+    const w=r.v||o;this.got(k,w);return this.moves.get(k)},
    wait(k){return this.moves.has(k)?Promise.resolve(this.moves.get(k)):new Promise(r=>{this.waiters[k]=r})},
    take(k,h,v){const theirs=this.hashes.get(k);if(theirs&&h&&theirs!==h&&!this.desync){this.desync=k;document.body.dataset.desync=k;onlineBar()}return v!==undefined?v:this.moves.get(k)}};
   for(const k in known)NET.got(+k,known[k]);
@@ -1333,7 +1340,7 @@ async function onlineBoot(){const code=(ONL.q.get('room')||'').toUpperCase().rep
   const need=+(ONL.q.get('startwhen')||1);const t0=Date.now();const iv=setInterval(()=>{const n=Object.values(ONL.seats||{}).filter(Boolean).length;if(n>=need||Date.now()-t0>20000){clearInterval(iv);ONL.start()}},200);return true}
  if(!code)return false;
  try{await ONL.connect();ONL.code=code;ONL.adopt(code);let meta=null;for(let t=0;t<6&&!meta;t++){meta=await ONL.B.get(ONL.R('meta'));if(!meta)await new Promise(r=>setTimeout(r,500))}const seats=(await ONL.B.get(ONL.R('seats')))||{};
-  const mine=Object.values(seats).some(s=>s&&s.cid===ONL.cid);
+  const mine=Object.values(seats).some(s=>s&&s.cid===ONL.cid)||!!(meta&&meta.lineup&&Object.values(meta.lineup).some(s=>s&&s.cid===ONL.cid));
   if(mine){ONL.watch();return true}
   if(ONL.q.get('name')){await ONL.join(code,ONL.q.get('name'));return true}
   if(!meta){lobbyMsg(`There is no room called ${code}.`);return true}
