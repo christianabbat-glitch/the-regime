@@ -102,7 +102,7 @@ body.tall #app{flex-direction:column;height:auto}
 .card .r b{font-family:Oswald,sans-serif;font-size:12px;letter-spacing:.04em;vertical-align:middle}
 .rv{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;border-radius:10px;font-family:Oswald,sans-serif;font-size:11.5px;font-weight:600;color:#fff;padding:0 4px;vertical-align:middle;margin-right:3px;letter-spacing:0}
 .hi{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:12px;border-radius:6px;font-family:Oswald,sans-serif;font-size:9.5px;font-weight:600;color:#fff;padding:0 3px;margin-right:5px;letter-spacing:0;box-shadow:0 0 0 1px rgba(255,255,255,.85)}
-.rv.pos,.hi.pos{background:#2e8b57}.rv.neg,.hi.neg{background:#c0392b}.rv.zero,.hi.zero{background:#7d7d7d}.rv.def,.hi.def{background:#3d6b8a}.rv.amd,.hi.amd{background:#7b4fa0}
+.rv.pos,.hi.pos{background:#2e8b57}.rv.pmv{background:linear-gradient(90deg,#2e8b57 0 50%,#c0392b 50% 100%)}.rv.neg,.hi.neg{background:#c0392b}.rv.zero,.hi.zero{background:#7d7d7d}.rv.def,.hi.def{background:#3d6b8a}.rv.amd,.hi.amd{background:#7b4fa0}
 .hi svg{width:8px;height:10px}
 .card.mid .rv{min-width:24px;height:24px;font-size:14px;border-radius:12px}
 .card.big .rv{min-width:28px;height:28px;font-size:16px;border-radius:14px}
@@ -308,18 +308,18 @@ J:[
 ],
 };
 const RESPMIX={
-P:{Amend:5,Support:5,Acclaim:3,Doubt:4,Protest:2,Defer:2,Abstain:5},
-N:{Support:24,Acclaim:21,Doubt:5,Protest:1,Amend:6,Defer:1,Abstain:8},
-I:{Abstain:6,Defer:4,Support:7,Acclaim:3,Doubt:4,Protest:1,Amend:2},
-R:{Support:7,Acclaim:4,Doubt:4,Protest:2,Amend:3,Defer:2,Abstain:4},
-J:{Defer:3,Support:8,Acclaim:4,Doubt:3,Protest:1,Amend:3,Abstain:4},
+P:{Amend:5,Support:5,Acclaim:3,Doubt:4,Protest:2,Defer:2,Abstain:4,Either:1},
+N:{Support:23,Acclaim:21,Doubt:5,Protest:1,Amend:6,Defer:1,Abstain:6,Either:3},
+I:{Abstain:5,Defer:4,Support:7,Acclaim:3,Doubt:4,Protest:1,Amend:2,Either:1},
+R:{Support:7,Acclaim:4,Doubt:4,Protest:2,Amend:3,Defer:2,Abstain:3,Either:1},
+J:{Defer:3,Support:8,Acclaim:4,Doubt:3,Protest:1,Amend:3,Abstain:3,Either:1},
 };
 const FLAV={
-P:{Support:'Pravda will print it on the front page.',Acclaim:'Thunderous applause, rising to an ovation.',Doubt:'The masses may not understand this.',Protest:'This is a slander against the Party!',Amend:'Let us correct the wording, comrades.',Defer:'Let the editors look at it again.',Abstain:'Pravda has no comment.'},
-N:{Support:'The organs concur.',Acclaim:'The organs will see to it tonight.',Doubt:'The file is incomplete.',Protest:'The organs know better.',Amend:"Wrong man. It's his neighbour.",Defer:'The investigation continues.',Abstain:'The organs are listening.'},
-I:{Support:'The factory committee agrees.',Acclaim:'We will fulfil it ahead of schedule!',Doubt:'The plan cannot spare him.',Protest:'Production would collapse!',Amend:'Wrong shift, comrade. Check the roster.',Defer:'Refer it to Gosplan.',Abstain:'A report on tractor output in Kharkov.'},
-R:{Support:'The Army stands ready.',Acclaim:'Hurrah! For the Motherland, for Stalin!',Doubt:'The men will not like it.',Protest:'This insults the Red Army!',Amend:'Not him. His deputy signed the order.',Defer:'The General Staff will study it.',Abstain:'Manoeuvres in the Kiev district continue.'},
-J:{Support:'The court concurs.',Acclaim:'The evidence is overwhelming.',Doubt:'The court has reservations.',Protest:'This is irregular, even for us.',Amend:'The clerk has mixed up the files.',Defer:'The case is adjourned.',Abstain:'Documents are missing.'},
+P:{Support:'Pravda will print it on the front page.',Acclaim:'Thunderous applause, rising to an ovation.',Doubt:'The masses may not understand this.',Protest:'This is a slander against the Party!',Amend:'Let us correct the wording, comrades.',Defer:'Let the editors look at it again.',Abstain:'Pravda has no comment.',Either:'As the Party decides.'},
+N:{Support:'The organs concur.',Acclaim:'The organs will see to it tonight.',Doubt:'The file is incomplete.',Protest:'The organs know better.',Amend:"Wrong man. It's his neighbour.",Defer:'The investigation continues.',Abstain:'The organs are listening.',Either:'As the organs see fit.'},
+I:{Support:'The factory committee agrees.',Acclaim:'We will fulfil it ahead of schedule!',Doubt:'The plan cannot spare him.',Protest:'Production would collapse!',Amend:'Wrong shift, comrade. Check the roster.',Defer:'Refer it to Gosplan.',Abstain:'A report on tractor output in Kharkov.',Either:'Whichever way the plan requires.'},
+R:{Support:'The Army stands ready.',Acclaim:'Hurrah! For the Motherland, for Stalin!',Doubt:'The men will not like it.',Protest:'This insults the Red Army!',Amend:'Not him. His deputy signed the order.',Defer:'The General Staff will study it.',Abstain:'Manoeuvres in the Kiev district continue.',Either:'As the General Staff commands.'},
+J:{Support:'The court concurs.',Acclaim:'The evidence is overwhelming.',Doubt:'The court has reservations.',Protest:'This is irregular, even for us.',Amend:'The clerk has mixed up the files.',Defer:'The case is adjourned.',Abstain:'Documents are missing.',Either:'The court will follow the law, whichever way it points.'},
 };
 const FATES={Shot:9,Gulag:9,Canal:5,Sharashka:2};
 const RUNG=['the sharashka','the Gulag','the Canal','the firing squad'];
@@ -542,6 +542,7 @@ function aiLead(p,d){
 }
 function respUtil(p,M,resp){
  const a=M.ag;const acc=M.plays.some(x=>x.resp==='Acclaim');if(resp==='Defer'&&acc)return 0;if(deferActive(M)&&resp!=='Defer'&&resp!=='Acclaim')return 0;
+ if(resp==='Either')return Math.max(respUtil(p,M,'Support'),respUtil(p,M,'Doubt'))+0.01;
  const v0=agVal(p,M,M.subj,0),vp=agVal(p,M,M.subj,1),vp2=agVal(p,M,M.subj,2);
  if(a.x==='harsh'){const vm=agVal(p,M,M.subj,-1);
   return{Support:0.6*(vp-v0),Acclaim:0.9*(vp2-v0),Doubt:0.6*(vm-v0),Protest:0.9*(vm-v0),Defer:-0.5*v0,Abstain:0,Amend:amendGain(p,M)}[resp]}
@@ -709,9 +710,14 @@ async function meeting(d){
   else{cap(`${P(p).name} speaks…`);render();await wait(500);cid=aiRespond(p,M)}
   takeCard(p,cid);const c=CARDS[cid];
   const el=await placeCard(c,p,P(p).name,'rs',true);await wait(300);el.querySelector('.card').classList.remove('fd');
-  M.plays.push({p,cid,resp:c.resp});
+  let resp=c.resp,pmNote='';
+  if(resp==='Either'){let sg;
+   if(p===HUMAN){cap(`Your ±1: “${FLAV[d].Either}”`,'Choose which way it counts.');sg=await ask('dir',{labels:['−1 (against)','+1 (for)']})}
+   else sg=respUtil(p,M,'Support')>=respUtil(p,M,'Doubt')?1:-1;
+   resp=sg>0?'Support':'Doubt';pmNote=` (±1 played as ${sg>0?'+1':'−1'})`}
+  M.plays.push({p,cid,resp,pm:c.resp==='Either'});
   await wait(500);
-  let note=`${P(p).name}: ${c.resp.toUpperCase()}. “${FLAV[d][c.resp]}”`;
+  let note=`${P(p).name}: ${c.resp==='Either'?'±1':c.resp.toUpperCase()}${pmNote}. “${FLAV[d][c.resp]}”`;
   if(c.resp==='Amend'&&M.subj&&!deferActive(M)){
    const nb=neighbours(M.subj).filter(n=>!M.named.includes(n)&&canTake(M.ag,n));
    if(nb.length){let n;
@@ -726,8 +732,8 @@ async function meeting(d){
   }
   if(c.resp==='Defer'){M.defer=true;note+=M.plays.some(x=>x.resp==='Acclaim')?' But the room has already broken into applause: an Acclaim overrules the Defer.':' The agenda will be deferred, unless someone answers with an Acclaim.'}
   if(c.resp==='Acclaim'&&M.defer&&M.plays.filter(x=>x.resp==='Acclaim').length===1)note+=' The ovation overrules the Defer.';
-  if((c.resp==='Support'||c.resp==='Acclaim')&&M.ag.x==='name'&&!deferActive(M)&&!M.fizzle){
-   for(let k=0;k<(c.resp==='Acclaim'?2:1);k++){const opts=nameable(M);if(!opts.length)break;let n;
+  if((resp==='Support'||resp==='Acclaim')&&M.ag.x==='name'&&!deferActive(M)&&!M.fizzle){
+   for(let k=0;k<(resp==='Acclaim'?2:1);k++){const opts=nameable(M);if(!opts.length)break;let n;
     if(p===HUMAN){cap(note,'Name another man to add to the agenda (or skip).');n=await ask('man',{ids:opts,allowNone:true,ai:()=>aiName(HUMAN,M,opts)})}else n=aiName(p,M,opts);
     if(!n)break;M.named.push(n);note+=` Proposes adding ${man(n).sn} (${man(n).ini}).`}
   }
@@ -745,12 +751,9 @@ async function chooseSubject(p,M,ids){
  if(p===HUMAN){cap(`Agenda: “${M.ag.t}”`,'Choose the subject: click one of the highlighted men.');return await ask('man',{ids,ai:()=>bestSubj(HUMAN,M,ids)})}
  return bestSubj(p,M,ids);
 }
-function tally(M){
- let f=0,a=0,mf=0,ma=0;
- for(const x of M.plays){if(x.resp==='Support'){f+=1;mf=Math.max(mf,1)}if(x.resp==='Acclaim'){f+=2;mf=Math.max(mf,2)}if(x.resp==='Doubt'){a+=1;ma=Math.max(ma,1)}if(x.resp==='Protest'){a+=2;ma=Math.max(ma,2)}}
- const net=f-a;
- return{f,a,mf,ma,net,extra:net>0?Math.min(net,mf):0,soft:net<0?Math.min(-net,ma):0,fail:net<0};
-}
+const VOICE={Support:1,Acclaim:2,Doubt:-1,Protest:-2};
+function tally(M){let f=0,a=0;for(const x of M.plays){const v=VOICE[x.resp]||0;if(v>0)f+=v;else a-=v}
+ const net=f-a;return{f,a,net,extra:Math.max(0,net),soft:Math.max(0,-net),fail:net<0}}
 function finalList(M,T){const a=M.ag;let list=agList(M,M.subj);
  if(a.x==='next'||a.x==='up'){for(let i=0;i<T.extra;i++){const n=nextOf(list[list.length-1],a.x==='up'?-1:1);if(n&&!list.includes(n))list.push(n)}}
  if(a.x==='name'){for(const n of M.named.slice(0,T.extra))if(!list.includes(n))list.push(n)}
@@ -763,7 +766,7 @@ function forecast(M){
  if(deferActive(M))return`Deferred: it comes back at the next ${DN[M.d]} meeting, if the chair reopens it. Only an Acclaim can overrule the Defer.`;
  if(M.fizzle)return'There is no one it can apply to: nothing will happen.';
  let why='';
- if(T.f||T.a)why=` (For ${T.f}, Against ${T.a}${T.net>0&&T.net>T.extra&&a.x!=='harsh'?`; the loudest supporter is ${T.mf===2?'an Acclaim, so at most two more':'a Support, so at most one more'}`:''})`;
+ if(T.f||T.a)why=` (total ${T.net>0?'+':''}${T.net}: for ${T.f}, against ${T.a})`;
  if(a.x==='harsh'){const rung=Math.max(0,Math.min(3,baseOf(M)+T.extra-T.soft+(M.nudge||0)));const who=a.k==='mass'?(S.lub.length?'everyone in the Lubyanka':'nobody (the Lubyanka is empty)'):(M.subj?lab(M.subj):'nobody');return`If the meeting ended now: ${who} → ${RUNG[rung]}${why}.`}
  if(T.fail)return`If the meeting ended now: the agenda fails${why}.`;
  if(a.k==='push'){const pm=Math.max(0,(a.n||0)+T.extra+(M.nudge||0));return`If the meeting ended now: the Canal moves ${pm} place${pm!==1?'s':''}${why}.`}
@@ -790,7 +793,7 @@ async function resolve(M){
  let list=finalList(M,T);
  let dropNote='';
  if(a.x==='name'){
-  if(M.named.length>T.extra){const dr=M.named.slice(T.extra).map(id=>`${man(id).sn} (${man(id).ini})`);dropNote=` Only ${T.extra?T.extra+' extra name'+(T.extra>1?'s':''):'the subject'} carried: the loudest supporting voice was ${T.mf===2?'an Acclaim (up to two more)':'a Support (one more)'}${T.a?', less the objections':''}. Dropped: ${dr.join(', ')}.`}}
+  if(M.named.length>T.extra){const dr=M.named.slice(T.extra).map(id=>`${man(id).sn} (${man(id).ini})`);dropNote=` The total was ${T.net>0?'+':''}${T.net}, so ${T.extra?'only the first '+T.extra+' extra name'+(T.extra>1?'s':''):'no extra names'} carried. Dropped: ${dr.join(', ')}.`}}
  const amt=Math.max(0,(a.n||0)+(a.x==='more'?T.extra:0)+(a.k==='push'?(M.nudge||0):0));
  if(list.length)flashTok(list);
  await wait(450);
@@ -969,12 +972,12 @@ function renderMine(){
 }
 const IC_DEF='<svg viewBox="0 0 12 14" width="10" height="12" aria-label="Defer"><path d="M2 1h8M2 13h8M3 1c0 4 6 4 6 6s-6 2-6 6M9 1c0 4-6 4-6 6s6 2 6 6" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
 const IC_AMD='<svg viewBox="0 0 12 14" width="10" height="12" aria-label="Amend"><path d="M6 1v12M2.5 4.5L6 1l3.5 3.5M2.5 9.5L6 13l3.5-3.5" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>';
-const RV={Support:['+1','pos'],Acclaim:['+2','pos'],Doubt:['−1','neg'],Protest:['−2','neg'],Abstain:['0','zero'],Defer:[IC_DEF,'def'],Amend:[IC_AMD,'amd']};
+const RV={Either:['±1','pmv'],Support:['+1','pos'],Acclaim:['+2','pos'],Doubt:['−1','neg'],Protest:['−2','neg'],Abstain:['0','zero'],Defer:[IC_DEF,'def'],Amend:[IC_AMD,'amd']};
 function cardHTML(c,cls){
  if(!c)return'';
  const a=c.ag;const rv=RV[c.resp]||['','zero'];const hd=`<div class="h" style="background:${DC[c.d]};color:${DT[c.d]}">${DN[c.d].toUpperCase()}</div>`;
  const fate=c.fate?`<div class="fate">Fate: ${c.fate}</div>`:'';
- return `<div class="card ${cls||''}" data-cid="${c.id}"><div class="f">${hd}<div class="a"><b>${esc(a.t)}</b><span class="ad">${esc(a.d)}</span><span class="as">${esc(a.s)}</span></div><div class="r"><span class="rv ${rv[1]}">${rv[0]}</span><b>${c.resp.toUpperCase()}</b><span class="rf">${esc(FLAV[c.d][c.resp]||'')}</span></div>${fate}</div><div class="b" style="background:repeating-linear-gradient(45deg,${DC[c.d]},${DC[c.d]} 7px,${DK[c.d]} 7px,${DK[c.d]} 13px)"></div></div>`;
+ return `<div class="card ${cls||''}" data-cid="${c.id}"><div class="f">${hd}<div class="a"><b>${esc(a.t)}</b><span class="ad">${esc(a.d)}</span><span class="as">${esc(a.s)}</span></div><div class="r"><span class="rv ${rv[1]}">${rv[0]}</span><b>${c.resp==='Either'?'EITHER WAY':c.resp.toUpperCase()}</b><span class="rf">${esc(FLAV[c.d][c.resp]||'')}</span></div>${fate}</div><div class="b" style="background:repeating-linear-gradient(45deg,${DC[c.d]},${DC[c.d]} 7px,${DK[c.d]} 7px,${DK[c.d]} 13px)"></div></div>`;
 }
 function charCard(id){return{chr:true,id}}
 function charHTML(o,cls){
@@ -1117,7 +1120,7 @@ function rulesScreen(){
 <h2>1 · The corridor</h2><p>Everyone lays one card face down: one of his men, or the blank. They flip together, and anyone who came forward is revealed for good.</p>
 <h2>2 · Five meetings</h2><p>Propaganda, NKVD, Industry, Red Army, Judiciary, in that order. A department meets only if someone has a revealed man in it. The owner of its highest revealed man chairs and goes first, then play goes clockwise. If you hold a card of that colour, you must play exactly one.</p>
 <p>The chair's card is read as an <b>agenda</b> (top left). Everyone else's card is read as a <b>response</b> (bottom right).</p>
-<h2>3 · The loudest voice</h2><p>Every response card shows its voice: <b>+1</b> Support, <b>+2</b> Acclaim, <b>−1</b> Doubt, <b>−2</b> Protest, <b>0</b> Abstain. Amend (the up-and-down arrows) and Defer (the hourglass) are not votes. Add the voices up: If the room is against, the agenda fails. If it is for, the agenda grows by the margin, but never beyond its loudest supporter (Support one step, Acclaim two). Amend moves the agenda one seat up or down; on an agenda without a single subject (a mass trial, a troika, a Canal push) it makes it one step milder or harsher, smaller or bigger, as the amender chooses. Defer postpones it to the department's next meeting, unless someone in the room plays an Acclaim, which overrules it. When the chair picks the department or the camp by choosing the subject, every supporter's extra name must come from the same place. Abstain says nothing. In trials, the voices make the sentence harsher or milder instead.</p>
+<h2>3 · The vote</h2><p>Every response card shows its voice: <b>+1</b> Support, <b>+2</b> Acclaim, <b>−1</b> Doubt, <b>−2</b> Protest, <b>0</b> Abstain, and the rare <b>±1</b> Either Way, whose sign you choose when you play it. Stalin's card counts too. Add them all up. If the total is below zero, the agenda fails. If it is zero or more, it passes, and every point above zero makes it bigger: one more man (the next man down, or the next name a supporter put forward, in order), one more seat, one more place on the Canal. In a trial, the total moves the sentence along the track instead: each point harsher or milder. Amend moves the agenda one seat up or down; on an agenda without a single subject (a mass trial, a troika, a Canal push) it makes it one step milder or harsher, smaller or bigger, as the amender chooses. Defer postpones it to the department's next meeting, unless someone in the room plays an Acclaim, which overrules it. When the chair picks the department or the camp by choosing the subject, every supporter's extra name must come from the same place. Abstain says nothing. In trials, the voices make the sentence harsher or milder instead.</p>
 <h2>Stalin's chair</h2><p>At every meeting a card from Stalin's own small deck is dealt face down to his chair, and turned over after everyone else has spoken. It is pure weight: +2, +1, 0, −1 or −2 on the scales, and it never names anyone. His Defer cannot be overruled, not even by an Acclaim. Whoever owns the man in Stalin's right-hand seat may secretly look at Stalin's card before the meeting.</p>
 <h2>4 · Prisons</h2><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first, as shown on the track under the Lubyanka: the sharashka (safe, and the way back into Industry), the Gulag (alive, and may come back), the White Sea Canal (alive for now, but every department can push it along) and the firing squad. During a trial the current sentence glows on the track. The Canal moves along whenever an agenda pushes the work, and the end kills.</p>
 <h2>5 · Drawing</h2><p>At the end of the round everyone draws back up to fifteen, one card at a time, choosing the deck in the open. Whoever chaired the Judiciary decides who draws first.</p>
