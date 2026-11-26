@@ -267,6 +267,7 @@ N:[
 {c:4,t:'Wreckers on the railways.',d:'Arrest an Industry man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'I'},x:'next'},
 {c:3,t:"Send investigators to the Prosecutor's Office.",d:"A man from any other department moves to the Judiciary's bottom seat.",s:'Support: each supporter names another man.',k:'transferTo',to:'J',z:{anyBut:'J'},x:'name'},
 {c:3,t:'Plenipotentiaries for the Army.',d:"An NKVD man moves to the Red Army's bottom seat.",s:'Support: the next man down goes too.',k:'transferTo',to:'R',z:{seat:'N'},x:'next'},
+{c:4,t:'Sentence by the Special Board.',d:'Arrest a man in the department named by the Party line and send him straight to the Gulag, with no trial. If it names nobody, the chair names the department by choosing the man.',s:'Support: each supporter names another man there.',k:'oso',z:{seat:'LINE'},x:'name'},
 {c:2,t:'Recall the residents from abroad.',d:'An NKVD man ordered home decides not to come: he defects into exile, if a place is free.',s:'Support: the next man down goes too.',k:'exileOut',z:{seat:'N'},x:'next'},
 {c:6,t:'Troika: sentence by special procedure.',d:'Three NKVD officers, no court: everyone in the Lubyanka is sentenced to the Gulag.',s:'Support changes nothing. Objections can still stop it.',k:'troika',z:{none:1},x:'none'},
 {c:3,t:'Hunt the double-dealers in the press.',d:'Arrest a Propaganda man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'P'},x:'next'},
@@ -297,11 +298,12 @@ R:[
 {c:4,t:'Expose the conspiracy in the General Staff.',d:'Arrest a man in one of the top three seats of the Red Army.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'R',top:3},x:'next'},
 {c:3,t:'Political commissars for the Army.',d:"A man from any other department moves to the Red Army's bottom seat.",s:'Support: each supporter names another man.',k:'transferTo',to:'R',z:{anyBut:'R'},x:'name'},
 {c:2,t:'Second officers to the defence industry.',d:"A Red Army man moves to Industry's bottom seat.",s:'Support: the next man down goes too.',k:'transferTo',to:'I',z:{seat:'R'},x:'next'},
+{c:3,t:'Build the railway to the Far East.',d:'A prisoner in the Lubyanka is sent to the Gulag to build the Baikal–Amur line.',s:'Support: each supporter names another prisoner.',k:'toGulag',z:{pris:['lub']},x:'name'},
 {c:2,t:'Manoeuvres in the Kiev district.',d:'Nothing happens.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none'},
 ],
 J:[
 {c:10,t:'Try the Trotskyite-Zinovievite centre.',d:'Try a prisoner in the Lubyanka. Sentence: the Gulag.',s:'Support: each supporter names another prisoner in the Lubyanka to stand trial with him. Objections can stop the trial.',k:'verdict',base:1,z:{pris:['lub']},x:'name'},
-{c:3,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to the Gulag.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',base:1,z:{none:1},x:'harsh'},
+{c:2,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to the Gulag.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',base:1,z:{none:1},x:'harsh'},
 {c:2,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka. Sentence: the Canal.',s:'Support: each supporter names an accomplice from the Lubyanka to share his sentence. Objections can stop the trial.',k:'verdict',base:2,z:{pris:['lub']},x:'name'},
 {c:2,t:'Review the case files.',d:'Turn over the top card of the black deck. The fate in its corner becomes the proposed sentence for everyone in the Lubyanka.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',fateBase:1,z:{none:1},x:'harsh'},
 {c:2,t:'Assign specialists to the sharashka.',d:'A prisoner in the Lubyanka goes to the sharashka, if a place is free.',s:'Support: each supporter names another prisoner.',k:'toShar',z:{pris:['lub']},x:'name'},
@@ -313,10 +315,10 @@ J:[
 };
 const RESPMIX={
 P:{Amend:5,Support:6,Acclaim:3,Doubt:7,Defer:2,Abstain:4,Either:1},
-N:{Support:25,Acclaim:23,Doubt:6,Amend:6,Defer:1,Abstain:6,Either:3},
+N:{Support:27,Acclaim:25,Doubt:6,Amend:6,Defer:1,Abstain:6,Either:3},
 I:{Abstain:5,Defer:4,Support:10,Acclaim:3,Doubt:5,Amend:2,Either:1},
-R:{Support:8,Acclaim:4,Doubt:7,Amend:3,Defer:2,Abstain:4,Either:1},
-J:{Defer:3,Support:9,Acclaim:4,Doubt:7,Abstain:3,Either:1},
+R:{Support:10,Acclaim:4,Doubt:7,Amend:3,Defer:2,Abstain:4,Either:1},
+J:{Defer:3,Support:8,Acclaim:4,Doubt:7,Abstain:3,Either:1},
 };
 const FLAV={
 P:{Support:'Pravda will print it on the front page.',Acclaim:'Thunderous applause, rising to an ovation.',Doubt:'The masses may not understand this.',Protest:'This is a slander against the Party!',Amend:'Let us correct the wording, comrades.',Defer:'Let the editors look at it again.',Abstain:'Pravda has no comment.',Either:'As the Party decides.'},
@@ -412,6 +414,7 @@ function kill(id){pull(id);S.grave.push(id);S.stats.deaths++}
 function arrest(id){const m=man(id);if(m.medal>0){m.medal--;return'medal'}pull(id);S.lub.push(id);S.stats.arrests++;return'ok'}
 function enter(d,id){if(S.seats[d].length>=7)return false;pull(id);S.seats[d].push(id);return true}
 function toGulag(id){pull(id);S.gulag.push(id)}
+function osoArrest(id){const m=man(id);if(m.medal>0){m.medal--;return'medal'}toGulag(id);S.stats.arrests++;S.stats.toGulag++;return'ok'}
 function canalPush(n){for(let k=0;k<n;k++){const last=S.canal[7];if(last){S.canal[7]=null;S.grave.push(last);S.stats.deaths++}for(let i=7;i>0;i--)S.canal[i]=S.canal[i-1];S.canal[0]=null}}
 function toCanal(id){pull(id);let i=S.canal.indexOf(null);if(i<0){canalPush(1);i=0}S.canal[i]=id}
 function toShar(id){if(S.shar.length>=3)return false;pull(id);S.shar.push(id);return true}
@@ -509,6 +512,7 @@ function val(p,k,ids,amt,rung){
   case'feed':v-=w*0.6;break;
   case'toShar':v+=w*0.5;break;
   case'toGulag':v+=w*0.15+0.03;break;
+  case'oso':v-=w*(m.medal?0.05:0.6);break;
   case'canalBack':v+=w*0.45;break;
   case'transferI':v-=w*0.1;break;
   case'transferTo':v+=w*(topClaimOf(amt)?-0.05:0.25);break;
@@ -782,7 +786,7 @@ function finalList(M,T){const a=M.ag;let list=agList(M,M.subj);
  if(a.x==='next'||a.x==='up'){for(let i=0;i<T.extra;i++){const n=nextOf(list[list.length-1],a.x==='up'?-1:1);if(n&&!list.includes(n))list.push(n)}}
  if(a.x==='name'){for(const n of M.named.slice(0,T.extra))if(!list.includes(n))list.push(n)}
  return list}
-const KV={arrest:'arrested',expose:'exposed',medal:'given the Order of Lenin',promote:'moved up',demote:'moved down',bottom:'sent to the bottom seat',swapIR:'swapped with Industry',exileOut:'sent abroad',shoot:'shot',accident:'killed',assassin:'hunted by an assassin',draft:'recalled to the Red Army',sharBack:'returned to Industry',amnesty:'amnestied',feed:'sent to the Canal',toShar:'sent to the sharashka',toGulag:'sent to the Gulag',canalBack:'sent back to the Gulag',transferI:'transferred to the Urals',transferTo:'transferred',reshuffle:'reshuffled',favourite:"made Stalin's right hand"};
+const KV={arrest:'arrested',expose:'exposed',medal:'given the Order of Lenin',promote:'moved up',demote:'moved down',bottom:'sent to the bottom seat',swapIR:'swapped with Industry',exileOut:'sent abroad',shoot:'shot',accident:'killed',assassin:'hunted by an assassin',draft:'recalled to the Red Army',sharBack:'returned to Industry',amnesty:'amnestied',feed:'sent to the Canal',toShar:'sent to the sharashka',toGulag:'sent to the Gulag',oso:'sent straight to the Gulag',canalBack:'sent back to the Gulag',transferI:'transferred to the Urals',transferTo:'transferred',reshuffle:'reshuffled',favourite:"made Stalin's right hand"};
 function forecast(M){
  const a=M.ag,T=tally(M);const lab=id=>`${man(id).ini} ${man(id).sn}`;
  if(!a)return'';
@@ -841,6 +845,7 @@ async function resolve(M){
  case'feed':for(const id of list){toCanal(id);out.push(`${nm(id)} is sent to dig the Canal`)}break;
  case'push':{const before=S.stats.deaths;canalPush(amt);const k=S.stats.deaths-before;out.push(`the Canal moves ${amt} place${amt>1?'s':''} along`+(k?`, and ${k} prisoner${k>1?'s':''} die${k>1?'':'s'} at the end`:''));break}
  case'review':{const l=S.lub.slice();if(!l.length)out.push('the Lubyanka is empty');for(const id of l){const f=fateFlip();sentence(id,{Sharashka:0,Gulag:1,Canal:2,Shot:3}[f]);out.push(`${nm(id)}: ${f.toUpperCase()}`)}break}
+ case'oso':for(const id of list){const r=osoArrest(id);out.push(r==='medal'?`${nm(id)}'s Order of Lenin saves him this time (one medal is lost${man(id).medal?`; ${man(id).medal} left`:''})`:`${nm(id)} is sent straight to the Gulag`)}break;
  case'toGulag':for(const id of list){toGulag(id);S.stats.toGulag++;out.push(`${nm(id)} is sent to the Gulag`)}break;
  case'toShar':for(const id of list){out.push(toShar(id)?`${nm(id)} goes to the sharashka`:`the sharashka is full`)}break;
  case'canalBack':for(const id of list){toGulag(id);out.push(`${nm(id)} goes back to the Gulag`)}break;
