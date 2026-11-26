@@ -311,6 +311,7 @@ J:{Support:'The court concurs.',Acclaim:'The evidence is overwhelming.',Doubt:'T
 const FATES={Shot:9,Gulag:9,Canal:5,Sharashka:2};
 const RUNG=['the sharashka','the Gulag','the Canal','the firing squad'];
 for(const d of D)for(const a of AG[d])if(a.k==='transferTo'||a.k==='transferI')a.d+=' If that department is full, he trades places with the man in its bottom seat.';
+for(const d of D)for(const a of AG[d])if(['draft','sharBack','amnesty'].includes(a.k))a.d+=' If that department is full, the chair seats him in any department with a free seat.';
 const LINE0={id:'L0',d:'P',ag:{t:'Vigilance against the Trotskyite conspiracy.',d:'The Party line names nobody yet.',s:'',line:'-'},resp:'Abstain'};
 
 // ================= UTIL =================
@@ -408,6 +409,18 @@ function transferMsg(id,to,r){const nm=x=>`${man(x).sn} (${man(x).ini})`;
  if(r.moved)return`${nm(id)} moves to ${DN[to]}`;
  if(r.swap)return`${nm(id)} moves to ${DN[to]}, trading places with its bottom man ${nm(r.swap)}, who takes his ${RANKN[r.r]} seat in ${DN[r.fromD]}`;
  return`${nm(id)} cannot be moved`}
+// A freed prisoner goes to his card's department; if it is full, the chair seats him wherever there is room.
+async function freeInto(M,id,pref,verb){const nm=x=>`${man(x).sn} (${man(x).ini})`;
+ if(enter(pref,id))return`${nm(id)} ${verb} ${DN[pref]}`;
+ const opts=D.filter(d=>S.seats[d].length<7);
+ if(!opts.length)return`no department has a free seat, so ${nm(id)} stays where he is`;
+ const ch=M.lead;let d;
+ if(ch===HUMAN){cap(`${DN[pref]} is full.`,`You chair: choose a department with a free seat for ${man(id).name} (${man(id).ini}).`);d=await ask('dept',{opts,id})}
+ else d=aiFreeDept(ch,id,opts);
+ enter(d,id);render();
+ return`${DN[pref]} is full, so ${ch===HUMAN?'you seat':P(ch).name+' seats'} ${nm(id)} in ${DN[d]}`}
+function aiFreeDept(p,id,opts){const mine=man(id).owner===p;let best=opts[0],bv=-1e9;
+ for(const d of opts){const tc=topClaim(d);let v=RNG()*0.1+(7-S.seats[d].length)*0.02;if(mine&&tc&&tc.p===p)v+=0.3;if(mine&&!tc)v+=0.2;if(!mine&&tc&&tc.p===p)v-=0.1;if(v>bv){bv=v;best=d}}return best}
 function sentence(id,r){if(r<=0){if(!toShar(id))toGulag(id)}else if(r===1)toGulag(id);else if(r===2)toCanal(id);else kill(id)}
 function fateDraw(){
  if(!S.decks.J.length&&S.disc.J.length){S.decks.J=shuffle(S.disc.J);S.disc.J=[]}
@@ -558,6 +571,7 @@ function autoAns(kind,o){
  if(kind==='reveal')return aiReveal(HUMAN,o.ids);
  if(kind==='deck')return aiDeck(HUMAN);
  if(kind==='player')return aiFirst(HUMAN);
+ if(kind==='dept')return aiFreeDept(HUMAN,o.id,o.opts);
 }
 
 // ================= GAME FLOW =================
@@ -756,9 +770,9 @@ async function resolve(M){
  case'arrest':for(const id of list){const r=arrest(id);out.push(r==='medal'?`${nm(id)}'s Order of Lenin saves him this time (the medal is lost)`:`${nm(id)} is arrested`)}break;
  case'shoot':case'accident':for(const id of list){kill(id);out.push(`${nm(id)} is dead`)}break;
  case'assassin':for(const id of list){const fl=fateDraw();const f=fl.f;await showFate(fl,'Fate for '+man(id).ini);if(f==='Shot'){kill(id);out.push(`the assassin finds ${nm(id)} (fate: SHOT)`)}else out.push(`${nm(id)} escapes the assassin (fate: ${f.toUpperCase()})`)}break;
- case'draft':for(const id of list){out.push(enter('R',id)?`${nm(id)} is recalled into the Red Army`:`the Red Army has no seat free for ${nm(id)}`)}break;
- case'sharBack':for(const id of list){out.push(enter('I',id)?`${nm(id)} returns to Industry`:`Industry has no seat free for ${nm(id)}`)}break;
- case'amnesty':for(const id of list){const fd=lineDept()||'I';out.push(enter(fd,id)?`${nm(id)} returns to ${DN[fd]}`:`${DN[fd]} has no seat free for ${nm(id)}`)}break;
+ case'draft':for(const id of list)out.push(await freeInto(M,id,'R','is recalled into'));break;
+ case'sharBack':for(const id of list)out.push(await freeInto(M,id,'I','returns to'));break;
+ case'amnesty':for(const id of list)out.push(await freeInto(M,id,lineDept()||'I','is amnestied into'));break;
  case'feed':for(const id of list){toCanal(id);out.push(`${nm(id)} is sent to dig the Canal`)}break;
  case'push':{const before=S.stats.deaths;canalPush(amt);const k=S.stats.deaths-before;out.push(`the Canal moves ${amt} place${amt>1?'s':''} along`+(k?`, and ${k} prisoner${k>1?'s':''} die${k>1?'':'s'} at the end`:''));break}
  case'review':{const l=S.lub.slice();if(!l.length)out.push('the Lubyanka is empty');for(const id of l){const f=fateFlip();sentence(id,{Sharashka:0,Gulag:1,Canal:2,Shot:3}[f]);out.push(`${nm(id)}: ${f.toUpperCase()}`)}break}
@@ -993,6 +1007,7 @@ document.addEventListener('click',e=>{
   if(k==='new')startScreen();
   if(k==='playsel'&&SEL&&PEND)PEND.res(SEL);
   if(k==='skip'&&PEND)PEND.res(null);
+  if(k==='dept'&&PEND&&PEND.kind==='dept'&&PEND.opts.includes(x.dataset.d))PEND.res(x.dataset.d);
   if(k==='reopen'&&PEND&&PEND.kind==='lead'&&PEND.reopen)PEND.res('REOPEN');
   if(k==='start')startGame();
   if(k==='close'){$('#ov').classList.remove('on')}
@@ -1018,7 +1033,7 @@ document.addEventListener('click',e=>{
 });
 const _render=render;
 render=function(){_render();if(PEND&&PEND.kind==='man'&&PEND.allowNone&&!$('#cap [data-x=skip]')){$('#cap').insertAdjacentHTML('beforeend',' <button class="btn" data-x="skip">Skip</button>')}};
-const _render2=render;render=function(){_render2();if(PEND&&PEND.kind==='lead'&&PEND.reopen&&!$('#cap [data-x=reopen]')){$('#cap').insertAdjacentHTML('beforeend',' <button class="btn" data-x="reopen" style="background:#ffd84a;color:#2a1d17;border:none;font-weight:700">Reopen the deferred agenda</button>')}};
+const _render2=render;render=function(){_render2();if(PEND&&PEND.kind==='dept'&&!$('#cap [data-x=dept]')){$('#cap').insertAdjacentHTML('beforeend',' '+PEND.opts.map(d=>`<button class="btn" data-x="dept" data-d="${d}" style="background:${DC[d]};color:${DT[d]};border:none;font-weight:700;margin:3px 3px 0 0">${DN[d]}</button>`).join(''))}if(PEND&&PEND.kind==='lead'&&PEND.reopen&&!$('#cap [data-x=reopen]')){$('#cap').insertAdjacentHTML('beforeend',' <button class="btn" data-x="reopen" style="background:#ffd84a;color:#2a1d17;border:none;font-weight:700">Reopen the deferred agenda</button>')}};
 
 // ================= SCREENS =================
 let CHOSEN=4;
