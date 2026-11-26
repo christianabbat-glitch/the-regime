@@ -31,10 +31,9 @@ body.tall #app{flex-direction:column;height:auto}
 #tip.on{display:block}
 #tip b{font-size:14px}
 .tok.mine{box-shadow:0 0 0 3px #fff200,0 0 0 5px #1a120d,0 0 12px 5px rgba(255,236,0,.85)}
-.tok.mine::after{content:'';position:absolute;right:-7px;bottom:-7px;width:13px;height:13px;border-radius:50%;background:#fff200;border:2px solid #1a120d}
 .tok .ob{position:absolute;left:-6px;top:-6px;width:13px;height:13px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 2px #000}
 .tok .ob.nob{width:15px;height:15px;left:-7px;top:-7px;background:linear-gradient(45deg,transparent 40%,#c0392b 40%,#c0392b 60%,transparent 60%),#fff;border:2px solid #c0392b;box-shadow:0 0 2px #000}
-.tok .md{position:absolute;right:-7px;top:-7px;min-width:14px;height:14px;font-style:normal;font-family:Oswald,sans-serif;font-size:9.5px;font-weight:600;color:#3a2a00;display:flex;align-items:center;justify-content:center;border-radius:7px;background:radial-gradient(circle at 40% 35%,#fff3b0,#d4a017 60%,#8a6a00);border:1px solid #5a4500}
+.tok .md{position:absolute;right:-9px;top:-11px;font-style:normal;font-size:15px;line-height:15px;letter-spacing:-2px;color:#ffd23f;text-shadow:0 0 1px #000,0 0 1px #000,1px 1px 0 #5a3d00,-1px -1px 0 #5a3d00,1px -1px 0 #5a3d00,-1px 1px 0 #5a3d00;white-space:nowrap;pointer-events:none;z-index:2}
 .tok.pick{outline:3px solid #ff2fd0;outline-offset:2px;cursor:pointer;z-index:9;animation:pk 1s infinite}
 .tok.hl{outline:3px solid #e8412f;outline-offset:2px;z-index:8}
 .tok.subj{outline:2px dashed #e8412f;outline-offset:3px;z-index:8}
@@ -188,7 +187,7 @@ const DK={P:'#9c7a0c',N:'#1d4280',I:'#1e5632',R:'#7c1912',J:'#000000'};
 const DT={P:'#3a2d00',N:'#ffffff',I:'#ffffff',R:'#ffffff',J:'#ffffff'};
 const DL={P:'#7a5c00',N:'#2456a6',I:'#2c6e43',R:'#a3221b',J:'#1b1b1b'};
 const ANG={P:9,N:27,I:45,R:63,J:81};
-const PCOL=['#8e44ad','#e67e22','#16a085','#d6336c','#8a5a2b','#5b6b7a'];
+const PCOL=['#8e24ff','#ff8f00','#00b8d9','#ff2e93','#7cc22a','#a0522d'];
 const PNAMES=['You','Masha','Pyotr','Sasha','Olga','Ivan'];
 const HAND=15;
 const RANKN=['head','second','third','fourth','fifth','sixth','seventh'];
@@ -988,7 +987,8 @@ function render(){
   const w=where(id),[x,y]=posOf(id);el.style.left=(x-20)+'px';el.style.top=(y-13)+'px';
   el.className='tok '+(w.t==='seat'?'s'+w.d:'t'+w.t)+(m.owner===HUMAN?' mine':'')+(pick.has(id)?' pick':'')+(HL.has(id)?' hl':S.M&&(S.M.subj===id||S.M.named.includes(id)||partnerOf(S.M)===id)?' subj':'');
   el.style.zIndex=w.t==='grave'?3:5;
-  el.innerHTML=(m.rev&&m.owner!=null?`<i class="ob" style="background:${PCOL[m.owner]}"></i>`:m.nobody?'<i class="ob nob"></i>':'')+`<span>${m.ini}</span>`+(m.medal?`<i class="md">${m.medal>1?m.medal:''}</i>`:'');
+  el.innerHTML=(m.nobody?'<i class="ob nob"></i>':'')+`<span>${m.ini}</span>`+(m.medal?`<i class="md">${'★'.repeat(Math.min(m.medal,3))}${m.medal>3?'+':''}</i>`:'');
+  el.style.border=m.rev&&m.owner!=null?`3px solid ${PCOL[m.owner]}`:'';el.style.borderBottomWidth=m.rev&&m.owner!=null?'7px':'';el.style.lineHeight=m.rev&&m.owner!=null?'12px':'';
   el.title=`${m.name}\n${m.title?m.title+'\n':''}${locName(id)}`+(m.owner===HUMAN?'\nYours'+(m.rev?' (revealed)':' (secret)'):m.rev&&m.owner!=null?`\nBelongs to ${P(m.owner).name}`:m.nobody?'\nBelongs to nobody':'')+(m.medal?`\nOrder of Lenin${m.medal>1?' ×'+m.medal:''}`:'');
  }
  // piles
