@@ -192,22 +192,20 @@ const PCOL=['#8e44ad','#e67e22','#16a085','#d6336c','#8a5a2b','#5b6b7a'];
 const PNAMES=['You','Masha','Pyotr','Sasha','Olga','Ivan'];
 const HAND=15;
 const RANKN=['head','second','third','fourth','fifth','sixth','seventh'];
-// Harry's list of names (Kalinin, Petrovsky and Trotsky out; Pyatakov, Yakir, Uborevich, Rudzutak, Chubar, Koltsov and Tupolev in). The old guard always start at the head of their departments and Molotov at
-// Stalin's right hand; everyone else is dealt into the remaining seats at random, so the cast changes from game to game.
-const NAMELIST=[["Andrei","Bubnov","AB"],["Sergo","Ordzhonikidze","SO"],["Karl","Radek","KR"],["Alexei","Rykov","AR"],["Grigory","Zinoviev","GZ"],["Nikolai","Bukharin","NB"],["Ivan","Smirnov","IS"],["Jekabs","Peterss","JP"],["Gaya","Gai","GG"],["Valentin","Trifonov","VT"],
-["Lazar","Kaganovich","LK"],["Nikita","Khrushchev","NK"],["Vyacheslav","Molotov","VM"],["Kliment","Voroshilov","KV"],["Anastas","Mikoyan","AM"],["Andrey","Vyshinsky","AV"],["Lavrenti","Beria","LB"],["Lev","Mekhlis","LM"],["Andrei","Zhdanov","AZ"],
-["Mikhail","Tukhachevsky","MT"],["Vasily","Bluykher","VB"],["Semyon","Budyonny","SB"],["Alexander","Yegorov","AY"],["Genrikh","Yagoda","GY"],["Nikolai","Yezhov","NY"],["Ivan","Akulov","IA"],["Mikhail","Frinovsky","MF"],["Nestor","Lakoba","NL"],["Robert","Eikhe","RE"],["Ivan","Golyakov","IG"],["Vasiliy","Ulrikh","VU"],["Evgeny","Pashukanis","EP"],["Ivan","Bakayev","IB"],["Pavel","Postyshev","PP"],["Pyotr","Zalutsky","PZ"],["Nikolai","Uglanov","NU"],["Artur","Artuzov","AA"],["Isaak","Zelensky","IZ"],["Akmal","Ikramov","AI"],["Sultan","Afandiyev","SA"],["Trofim","Lysenko","TL"],["Georgy","Pyatakov","GP"],["Boris","Shaposhnikov","BS"],["Georgy","Malenkov","GM"],["Semyon","Timoshenko","ST"],["Stanislaw","Kosior","SK"],["Yakov","Sheko","YS"],["Yan","Berzin","YB"],["Yefim","Yevdokimov","YY"],
-["Iona","Yakir","IY"],["Ieronim","Uborevich","IU"],["Jan","Rudzutak","JR"],["Vlas","Chubar","VC"],["Mikhail","Koltsov","MK"],["Andrei","Tupolev","AT"]];
-const FIXED={LM:['P',0],GY:['N',0],NY:['N',1],SO:['I',0],KV:['R',0]};
+// The starting chart: Harry's cast of 36, each in roughly the post he held in 1936. Seat 1 is the department head.
+// Ownership is still dealt at random; only the seating is fixed.
+const CHART={
+P:[["Andrei","Zhdanov","AZ","Party secretary for ideology"],["Lev","Mekhlis","LM","Editor of Pravda"],["Nikolai","Bukharin","NB","Editor of Izvestia"],["Andrei","Bubnov","AB","Commissar of Education"],["Karl","Radek","KR","Izvestia's star commentator"],["Grigory","Zinoviev","GZ","Former head of the Comintern"],["Mikhail","Koltsov","MK","Pravda's star reporter"]],
+N:[["Genrikh","Yagoda","GY","Commissar of Internal Affairs"],["Nikolai","Yezhov","NY","Party secretary watching the NKVD"],["Mikhail","Frinovsky","MF","Border and internal troops"],["Yefim","Yevdokimov","YY","Veteran Chekist"],["Artur","Artuzov","AA","Former foreign intelligence chief"],["Jekabs","Peterss","JP","Co-founder of the Cheka"],["Lavrenti","Beria","LB","Party boss of the Caucasus"]],
+I:[["Sergo","Ordzhonikidze","SO","Commissar of Heavy Industry"],["Lazar","Kaganovich","LK","Commissar of Railways"],["Vlas","Chubar","VC","Deputy Premier"],["Georgy","Pyatakov","GP","Deputy Commissar of Heavy Industry"],["Alexei","Rykov","AR","Commissar of Communications"],["Nikita","Khrushchev","NK","Moscow party chief, builder of the Metro"],["Andrei","Tupolev","AT","Chief aircraft designer"]],
+R:[["Kliment","Voroshilov","KV","Commissar of Defence"],["Mikhail","Tukhachevsky","MT","Deputy Commissar of Defence"],["Alexander","Yegorov","AY","Chief of the General Staff"],["Vasily","Bluykher","VB","Commander of the Far Eastern Army"],["Semyon","Budyonny","SB","Marshal of the cavalry"],["Iona","Yakir","IY","Commander, Kiev Military District"],["Ieronim","Uborevich","IU","Commander, Belorussian Military District"]],
+J:[["Andrey","Vyshinsky","AV","Prosecutor General"],["Vasiliy","Ulrikh","VU","Chairman of the Military Collegium"],["Ivan","Akulov","IA","Former Prosecutor General"],["Jan","Rudzutak","JR","Former head of Party Control"],["Evgeny","Pashukanis","EP","Deputy Commissar of Justice"],["Valentin","Trifonov","VT","Old Bolshevik military judge"],["Ivan","Golyakov","IG","Future head of the Supreme Court"]],
+};
+const RIGHTHAND=["Vyacheslav","Molotov","VM","Chairman of the Council of People's Commissars"];
 function castMen(){
- const byIni={};NAMELIST.forEach(n=>byIni[n[2]]=n);
- const row=(home,n)=>[home,n[1],n[0]+' '+n[1],'',n[2]];
- const seat={P:[],N:[],I:[],R:[],J:[]};
- for(const ini in FIXED){const[d,r]=FIXED[ini];seat[d][r]=byIni[ini]}
- const pool=shuffle(NAMELIST.filter(n=>!FIXED[n[2]]&&n[2]!=='VM'));
- for(const d of D)for(let r=0;r<7;r++)if(!seat[d][r])seat[d][r]=pool.shift();
- const out=[];for(const d of D)for(const n of seat[d])out.push(row(d,n));
- out.push(row('RH',byIni.VM));
+ const row=(home,n)=>[home,n[1],n[0]+' '+n[1],n[3],n[2]];
+ const out=[];for(const d of D)for(const n of CHART[d])out.push(row(d,n));
+ out.push(row('RH',RIGHTHAND));
  return out}
 
 // Agendas. k = effect, z = who it can be aimed at, x = what Support adds, c = copies in the deck.
