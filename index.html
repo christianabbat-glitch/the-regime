@@ -348,11 +348,12 @@ function buildDecks(){
  const r=seeded(1937);const keep=RNG;RNG=r;
  const decks={};CARDS={};let n=0;
  for(const d of D){
-  const ags=[];AG[d].forEach((a,i)=>{for(let c=0;c<a.c;c++)ags.push(i)});
-  const rs=[];for(const k in RESPMIX[d])for(let c=0;c<RESPMIX[d][k];c++)rs.push(k);
+  const mult=d==='N'?1:2; // the four everyday decks are printed twice over, so they never run dry
+  const ags=[];AG[d].forEach((a,i)=>{for(let c=0;c<a.c*mult;c++)ags.push(i)});
+  const rs=[];for(const k in RESPMIX[d])for(let c=0;c<RESPMIX[d][k]*mult;c++)rs.push(k);
   while(rs.length<ags.length)rs.push('Abstain');
   shuffle(rs);
-  const fates=[];for(const k in FATES)for(let c=0;c<FATES[k];c++)fates.push(k);shuffle(fates);
+  const fates=[];for(const k in FATES)for(let c=0;c<FATES[k]*mult;c++)fates.push(k);shuffle(fates);
   decks[d]=ags.map((ai,j)=>{const id='c'+(n++);const c={id,d,ag:AG[d][ai],resp:rs[j]};if(d==='J')c.fate=fates[j%fates.length];CARDS[id]=c;return id});
  }
  RNG=keep;return decks;
@@ -722,7 +723,7 @@ async function meeting(d){
  await resolve(M);
  if(M.scard)S.sdisc.push(M.scard);
  for(const c of [M.card,...M.plays.filter(x=>x.p!=='S').map(x=>x.cid)]){if(!c)continue;if(c===M.card&&(M.keep))continue;S.disc[d].push(c)}
- S.M=null;render();await wait(400);
+ refill();S.M=null;render();await wait(400);
 }
 function setNom(M){if(M.ag&&M.ag.z.seat==='LINE'&&!lineDept()&&M.subj){const w=where(M.subj);if(w.t==='seat')M.nom=w.d}}
 function bestSubj(p,M,ids){let best=ids[0],bv=-1e9;for(const id of ids){const v=agVal(p,M,id,0)+RNG()*0.03;if(v>bv){bv=v;best=id}}return best}
@@ -831,7 +832,8 @@ async function drawPhase(){
  }
 }
 function canDraw(d){return S.decks[d].length>0||(d!=='N'&&S.disc[d].length>0)}
-function drawCard(p,d){if(!S.decks[d].length&&d!=='N'){S.decks[d]=shuffle(S.disc[d]);S.disc[d]=[]}const c=S.decks[d].pop();if(c)P(p).hand.push(c)}
+function refill(){for(const d of D){if(d!=='N'&&!S.decks[d].length&&S.disc[d].length){S.decks[d]=shuffle(S.disc[d]);S.disc[d]=[]}}}
+function drawCard(p,d){if(!S.decks[d].length&&d!=='N'){S.decks[d]=shuffle(S.disc[d]);S.disc[d]=[]}const c=S.decks[d].pop();if(c)P(p).hand.push(c);refill()}
 function takeCard(p,cid){const h=P(p).hand;const i=h.indexOf(cid);if(i>=0)h.splice(i,1);if(S.M&&S.M.d==='J'&&S.M.lead===p)S.lastJ=p}
 
 // ================= BOARD =================
