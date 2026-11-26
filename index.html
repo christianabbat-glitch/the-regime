@@ -235,41 +235,47 @@ const MEN=[
 // Agendas. k = effect, z = who it can be aimed at, x = what Support adds, c = copies in the deck.
 const AG={
 P:[
-{c:2,t:'Expose the wreckers in the coal trust.',d:'Reveal who owns an Industry man. The Party line becomes Industry.',k:'expose',z:{seat:'I'},x:'one',line:'I'},
-{c:2,t:'Vigilance in the Red Army!',d:'Reveal who owns a Red Army man. The Party line becomes the Red Army.',k:'expose',z:{seat:'R'},x:'one',line:'R'},
+{c:1,t:'Expose the wreckers in the coal trust.',d:'Reveal who owns an Industry man. The Party line becomes Industry.',k:'expose',z:{seat:'I'},x:'one',line:'I'},
+{c:3,t:'Vigilance in the Red Army!',d:'Reveal who owns a Red Army man. The Party line becomes the Red Army.',k:'expose',z:{seat:'R'},x:'one',line:'R'},
 {c:2,t:'Unmask the enemies within the organs.',d:'Reveal who owns an NKVD man. The Party line becomes the NKVD.',k:'expose',z:{seat:'N'},x:'one',line:'N'},
 {c:2,t:'Unmask the saboteurs of Soviet justice.',d:'Reveal who owns a Judiciary man. The Party line becomes the Judiciary.',k:'expose',z:{seat:'J'},x:'one',line:'J'},
 {c:1,t:'Bourgeois formalism in the arts.',d:'Reveal who owns a Propaganda man. The Party line becomes Propaganda.',k:'expose',z:{seat:'P'},x:'one',line:'P'},
-{c:1,t:'Unmask the hidden enemies.',d:'Reveal who owns two men in the Party line’s department. If it names nobody, the chair picks the department.',k:'expose',z:{seat:'LINE'},x:'pick',pk:2},
+{c:1,t:'Unmask the hidden enemies.',d:'Reveal who owns a man in the Party line’s department and the man below him. If it names nobody, the chair picks the department.',k:'expose',z:{seat:'LINE'},x:'next',nx:1},
 {c:2,t:'The Party has erred: the line is withdrawn.',d:'The Party line names nobody.',k:'none',z:{none:1},x:'none',line:'-'},
 {c:3,t:'The Canal reforges the enemies of the people.',d:'Send a prisoner from the Lubyanka to the White Sea Canal.',k:'feed',z:{pris:['lub']},x:'one'},
 {c:2,t:"Honour Comrade Stalin's closest companions.",d:'Pin the Order of Lenin on a member of the Politburo.',k:'medal',z:{polit:1},x:'one'},
 {c:2,t:'A new favourite at the dacha.',d:"A department head trades places with Stalin's right hand.",k:'favourite',z:{heads:1},x:'one'},
 {c:2,t:'Self-criticism in the editorial office.',d:'A Propaganda man moves down two seats.',k:'demote',n:2,z:{seat:'P'},x:'one'},
-{c:4,t:'Strengthen the organs with Party cadres.',d:"Two men from other departments move to the NKVD's bottom seats.",k:'transferTo',to:'N',z:{anyBut:'N'},x:'pick',pk:2},
+{c:4,t:'Strengthen the organs with Party cadres.',d:"A man from any other department moves to the NKVD's bottom seat.",k:'transferTo',to:'N',z:{anyBut:'N'},x:'one'},
 {c:2,t:'Send a correspondent to Paris.',d:'A Propaganda man is posted abroad and stays there: he goes into exile, if a place is free.',k:'exileOut',z:{seat:'P'},x:'one'},
-{c:3,t:'Cadres decide everything.',d:"Two men from other departments move to Industry's bottom seats.",k:'transferTo',to:'I',z:{anyBut:'I'},x:'pick',pk:2},
-{c:2,t:'Party organisers for the Army.',d:"A Propaganda man moves to the Red Army's bottom seat.",k:'transferTo',to:'R',z:{seat:'P'},x:'one'},
+{c:3,t:'Cadres decide everything.',d:"A man from any other department moves to Industry's bottom seat.",k:'transferTo',to:'I',z:{anyBut:'I'},x:'one'},
+{c:2,t:'Party organisers for the Army.',d:"A man from any other department moves to the Red Army's bottom seat.",k:'transferTo',to:'R',z:{anyBut:'R'},x:'one'},
 {c:2,t:'Exchange cadres with the organs.',d:'A Propaganda man trades places with the NKVD man in the same rank.',k:'swap',with:'N',z:{seat:'P'},x:'one'},
 {c:1,t:'Lies of the Trotskyite press.',d:'Reveal who owns a man in exile.',k:'expose',z:{exile:1},x:'one'},
 ],
 N:[
-{c:6,t:'Arrest the enemies named by the Party.',d:'Arrest two men in the Party line’s department. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'pick',pk:2},
-{c:7,t:'Root out the whole nest.',d:'Arrest a man in the Party line’s department and the two men below him. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'next',nx:2},
-{c:11,t:'Mass operation against anti-Soviet elements.',d:'Arrest a man in the fifth, sixth or seventh seat of any department, and the man below him.',k:'arrest',z:{low:1},x:'next',nx:1},
+{c:9,t:'Arrest the enemies named by the Party.',d:'Arrest a man in the Party line’s department. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'one'},
+{c:3,t:'Root out the whole nest.',d:'Arrest a man in the Party line’s department and the two men below him. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'next',nx:2},
+{c:9,t:'Mass operation against anti-Soviet elements.',d:'Arrest a man in the fifth, sixth or seventh seat of any department.',k:'arrest',z:{low:1},x:'one'},
 {c:3,t:'The Politburo must be cleansed.',d:'Arrest a member of the Politburo.',k:'arrest',z:{polit:1},x:'one'},
-{c:6,t:'Purge our own ranks.',d:'Arrest an NKVD man and the man below him.',k:'arrest',z:{seat:'N'},x:'next',nx:1},
-{c:6,t:'Liquidate counter-revolutionary elements in the camps.',d:'A prisoner in the Lubyanka, the Gulag or on the Canal is shot.',k:'shoot',z:{pris:['lub','gulag','canal']},x:'one'},
+{c:5,t:'Purge our own ranks.',d:'Arrest an NKVD man and the man below him.',k:'arrest',z:{seat:'N'},x:'next',nx:1},
+{c:2,t:"Purge Yagoda's men.",d:'Arrest an NKVD man and the two men below him.',k:'arrest',z:{seat:'N'},x:'next',nx:2},
+{c:1,t:'The Yezhov men are unmasked.',d:'Arrest the men in the top four seats of the NKVD.',k:'arrest',z:{fixed:'headN'},x:'next',nx:3},
+{c:5,t:'Liquidate counter-revolutionary elements in the camps.',d:'A prisoner in the Lubyanka, the Gulag or on the Canal is shot.',k:'shoot',z:{pris:['lub','gulag','canal']},x:'one'},
 {c:3,t:'The long arm.',d:"Send an assassin after a man in exile. Turn over the Judiciary deck's top card: on SHOT he dies.",k:'assassin',z:{exile:1},x:'one'},
-{c:7,t:'Uncover the military-fascist plot.',d:'Arrest a Red Army man and the man below him.',k:'arrest',z:{seat:'R'},x:'next',nx:1},
-{c:4,t:'Wreckers on the railways.',d:'Arrest an Industry man.',k:'arrest',z:{seat:'I'},x:'one'},
+{c:2,t:'Uncover the military-fascist plot.',d:'Arrest the men in the top four seats of the Red Army.',k:'arrest',z:{fixed:'headR'},x:'next',nx:3},
+{c:4,t:'Purge the military districts.',d:'Arrest a Red Army man and the man below him.',k:'arrest',z:{seat:'R'},x:'next',nx:1},
+{c:2,t:'Arrest the political commissars.',d:'Arrest a Red Army man and the two men below him.',k:'arrest',z:{seat:'R'},x:'next',nx:2},
+{c:3,t:'Wreckers on the railways.',d:'Arrest an Industry man and the man below him.',k:'arrest',z:{seat:'I'},x:'next',nx:1},
+{c:2,t:'The parallel centre in Heavy Industry.',d:'Arrest an Industry man and the two men below him.',k:'arrest',z:{seat:'I'},x:'next',nx:2},
+{c:3,t:'Hunt the double-dealers in the press.',d:'Arrest a Propaganda man and the man below him.',k:'arrest',z:{seat:'P'},x:'next',nx:1},
+{c:3,t:"Purge the Prosecutor's Office.",d:'Arrest a Judiciary man and the man below him.',k:'arrest',z:{seat:'J'},x:'next',nx:1},
 {c:4,t:"Send investigators to the Prosecutor's Office.",d:"A man from any other department moves to the Judiciary's bottom seat.",k:'transferTo',to:'J',z:{anyBut:'J'},x:'one'},
 {c:3,t:'Place informers in the editorial offices.',d:"A man from any other department moves to Propaganda's bottom seat.",k:'transferTo',to:'P',z:{anyBut:'P'},x:'one'},
-{c:3,t:'Plenipotentiaries for the Army.',d:"An NKVD man moves to the Red Army's bottom seat.",k:'transferTo',to:'R',z:{seat:'N'},x:'one'},
-{c:4,t:'Sentence by the Special Board.',d:'Arrest two men in the Party line’s department. They go straight to the Gulag, with no trial. If it names nobody, the chair picks the department.',k:'oso',z:{seat:'LINE'},x:'pick',pk:2},
+{c:3,t:'Plenipotentiaries for the Army.',d:"A man from any other department moves to the Red Army's bottom seat.",k:'transferTo',to:'R',z:{anyBut:'R'},x:'one'},
+{c:3,t:'Sentence by the Special Board.',d:'Arrest a man in the Party line’s department and the two men below him. They go straight to the Gulag, with no trial. If it names nobody, the chair picks the department.',k:'oso',z:{seat:'LINE'},x:'next',nx:2},
 {c:2,t:'Recall the residents from abroad.',d:'An NKVD man ordered home decides not to come: he defects into exile, if a place is free.',k:'exileOut',z:{seat:'N'},x:'one'},
 {c:6,t:'Troika: sentence by special procedure.',d:'Three NKVD officers, no court: everyone in the Lubyanka is sentenced to the Gulag.',k:'troika',z:{none:1},x:'none'},
-{c:3,t:'Hunt the double-dealers in the press.',d:'Arrest a Propaganda man.',k:'arrest',z:{seat:'P'},x:'one'},
 ],
 I:[
 {c:3,t:'Hero of Socialist Labour.',d:'Pin the Order of Lenin on an Industry man.',k:'medal',z:{seat:'I'},x:'one'},
@@ -278,32 +284,35 @@ I:[
 {c:3,t:'Transfer cadres to the Urals.',d:"A man in the Party line’s department moves to Industry's bottom seat. If it names nobody, the chair picks the department.",k:'transferI',z:{seat:'LINE'},x:'one'},
 {c:3,t:'Double the norms on the Canal.',d:'Every prisoner on the Canal moves two places along. Whoever is pushed off the end dies.',k:'push',n:2,z:{none:1},x:'none'},
 {c:3,t:'Release the engineers from the sharashka.',d:"A prisoner in the sharashka returns to Industry's bottom seat.",k:'sharBack',z:{pris:['shar']},x:'one'},
-{c:3,t:'Dalstroy needs hands for the Kolyma goldfields.',d:'Two prisoners in the Lubyanka are sent to the Gulag.',k:'toGulag',z:{pris:['lub']},x:'pick',pk:2},
+{c:3,t:'Dalstroy needs hands for the Kolyma goldfields.',d:'A prisoner in the Lubyanka and the next prisoner after him are sent to the Gulag.',k:'toGulag',z:{pris:['lub']},x:'next',nx:1},
 {c:2,t:'Report on tractor output in Kharkov.',d:'Nothing happens.',k:'none',z:{none:1},x:'none'},
-{c:4,t:'Celebrate a Stakhanovite in the Party press.',d:"Two men from other departments move to Propaganda's bottom seats.",k:'transferTo',to:'P',z:{anyBut:'P'},x:'pick',pk:2},
+{c:4,t:'Celebrate a Stakhanovite in the Party press.',d:"A man from any other department moves to Propaganda's bottom seat.",k:'transferTo',to:'P',z:{anyBut:'P'},x:'one'},
 {c:2,t:"Elect workers as people's assessors.",d:"A man from any other department moves to the Judiciary's bottom seat.",k:'transferTo',to:'J',z:{anyBut:'J'},x:'one'},
+{c:2,t:'Engineers for the tank divisions.',d:"A man from any other department moves to the Red Army's bottom seat.",k:'transferTo',to:'R',z:{anyBut:'R'},x:'one'},
 {c:2,t:'A trade delegation to Berlin.',d:'An Industry man goes abroad with the delegation and does not return: he goes into exile, if a place is free.',k:'exileOut',z:{seat:'I'},x:'one'},
-{c:4,t:'Unmask the wreckers in our factories.',d:'Arrest an Industry man and the man below him.',k:'arrest',z:{seat:'I'},x:'next',nx:1},
+{c:2,t:'Unmask the wreckers in our factories.',d:'Arrest an Industry man.',k:'arrest',z:{seat:'I'},x:'one'},
 {c:2,t:'An “accident” at the Magnitogorsk works.',d:"The man in Industry's bottom seat is killed.",k:'accident',z:{fixed:'bottomI'},x:'one'},
 ],
 R:[
 {c:3,t:'Replace the General Staff.',d:'The head of the Red Army is sent to its bottom seat. Everyone below moves up.',k:'bottom',z:{fixed:'headR'},x:'one'},
 {c:3,t:'Increase tank production.',d:'A Red Army man trades places with the Industry man in the same rank.',k:'swap',with:'I',z:{seat:'R'},x:'one'},
 {c:4,t:'We honour the victorious battle against the fascists in Finland.',d:'Pin the Order of Lenin on a Red Army man.',k:'medal',z:{seat:'R'},x:'one'},
-{c:2,t:'Recall experienced officers from the camps.',d:"The first prisoner in the Gulag queue takes the Red Army's bottom seat.",k:'draft',z:{fixed:'frontGulag'},x:'one'},
+{c:3,t:'Recall experienced officers from the camps.',d:"The first prisoner in the Gulag queue takes the Red Army's bottom seat.",k:'draft',z:{fixed:'frontGulag'},x:'one'},
 {c:3,t:'Deepen the Canal for the Navy.',d:'Every prisoner on the Canal moves one place along. Whoever is pushed off the end dies.',k:'push',n:1,z:{none:1},x:'none'},
 {c:2,t:'Military advisers to Spain.',d:'A Red Army man goes abroad into exile, if a place is free.',k:'exileOut',z:{seat:'R'},x:'one'},
 {c:2,t:'Defend the Far East.',d:'A Red Army man is posted to its bottom seat.',k:'bottom',z:{seat:'R'},x:'one'},
 {c:2,t:'Promote the young commanders.',d:'A Red Army man moves up one seat.',k:'promote',n:1,z:{seat:'R'},x:'one'},
-{c:4,t:'Expose the conspiracy in the General Staff.',d:'Arrest a man in one of the top three seats of the Red Army.',k:'arrest',z:{seat:'R',top:3},x:'one'},
-{c:4,t:'Political commissars for the Army.',d:"Two men from other departments move to the Red Army's bottom seats.",k:'transferTo',to:'R',z:{anyBut:'R'},x:'pick',pk:2},
+{c:3,t:'Expose the conspiracy in the General Staff.',d:'Arrest a man in one of the top three seats of the Red Army and the man below him.',k:'arrest',z:{seat:'R',top:3},x:'next',nx:1},
+{c:1,t:'Arrest the corps commanders.',d:'Arrest a Red Army man and the two men below him.',k:'arrest',z:{seat:'R'},x:'next',nx:2},
+{c:1,t:'Purge the Far Eastern Army.',d:'Arrest a Red Army man and the three men below him.',k:'arrest',z:{seat:'R'},x:'next',nx:3},
+{c:4,t:'Political commissars for the Army.',d:"A man from any other department and the man below him move to the Red Army's bottom seats.",k:'transferTo',to:'R',z:{anyBut:'R'},x:'next',nx:1},
 {c:2,t:'Second officers to the defence industry.',d:"A Red Army man moves to Industry's bottom seat.",k:'transferTo',to:'I',z:{seat:'R'},x:'one'},
-{c:3,t:'Build the railway to the Far East.',d:'Two prisoners in the Lubyanka are sent to the Gulag to build the Baikal–Amur line.',k:'toGulag',z:{pris:['lub']},x:'pick',pk:2},
+{c:3,t:'Build the railway to the Far East.',d:'A prisoner in the Lubyanka and the next prisoner after him are sent to the Gulag to build the Baikal–Amur line.',k:'toGulag',z:{pris:['lub']},x:'next',nx:1},
 {c:2,t:'Officers for the NKVD border troops.',d:"A Red Army man moves to the NKVD's bottom seat.",k:'transferTo',to:'N',z:{seat:'R'},x:'one'},
 {c:2,t:'Manoeuvres in the Kiev district.',d:'Nothing happens.',k:'none',z:{none:1},x:'none'},
 ],
 J:[
-{c:10,t:'Try the Trotskyite-Zinovievite centre.',d:'Try two prisoners in the Lubyanka. Sentence: the Gulag.',k:'verdict',base:1,z:{pris:['lub']},x:'pick',pk:2},
+{c:10,t:'Try the Trotskyite-Zinovievite centre.',d:'Try a prisoner in the Lubyanka and the next prisoner after him. Sentence: the Gulag.',k:'verdict',base:1,z:{pris:['lub']},x:'next',nx:1},
 {c:2,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to be shot.',k:'mass',base:3,z:{none:1},x:'harsh'},
 {c:2,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka. Sentence: the Canal.',k:'verdict',base:2,z:{pris:['lub']},x:'one'},
 {c:2,t:'Review the case files.',d:'Turn over the top card of the black deck before the vote. The fate in its corner is the sentence for everyone in the Lubyanka.',k:'mass',fateBase:1,z:{none:1},x:'harsh'},
@@ -317,9 +326,9 @@ J:[
 };
 const RESPMIX={
 P:{Amend:1,Support:16,Acclaim:1,Doubt:10,Defer:1,Abstain:5,Either:1},
-N:{Support:56,Acclaim:2,Doubt:8,Amend:2,Defer:1,Abstain:6,Either:3},
-I:{Abstain:5,Defer:2,Support:18,Acclaim:1,Doubt:8,Amend:1,Either:1},
-R:{Support:19,Acclaim:1,Doubt:10,Amend:1,Defer:1,Abstain:4,Either:1},
+N:{Support:57,Acclaim:2,Doubt:9,Amend:2,Defer:1,Abstain:6,Either:3},
+I:{Abstain:6,Defer:2,Support:18,Acclaim:1,Doubt:9,Amend:1,Either:1},
+R:{Support:21,Acclaim:1,Doubt:11,Amend:1,Defer:1,Abstain:4,Either:1},
 J:{Defer:2,Support:14,Acclaim:1,Doubt:8,Abstain:3,Either:1},
 };
 const FLAV={
@@ -331,7 +340,7 @@ J:{Support:'The court concurs.',Acclaim:'The evidence is overwhelming.',Doubt:'T
 };
 const FATES={Shot:9,Gulag:9,Canal:5,Sharashka:2};
 const RUNG=['the sharashka','the Gulag','the Canal','the firing squad'];
-for(const d of D)for(const a of AG[d])if(['transferTo','transferI'].includes(a.k))a.d+=a.pk>1?' If it is full, they swap places with its bottom men.':' If it is full, he swaps places with its bottom man.';
+for(const d of D)for(const a of AG[d])if(['transferTo','transferI'].includes(a.k))a.d+=(a.nx||0)>0?' If it is full, they swap places with its bottom men.':' If it is full, he swaps places with its bottom man.';
 for(const d of D)for(const a of AG[d])if(['draft','sharBack','amnesty'].includes(a.k))a.d+=` If it is full, he swaps places with its bottom man, who goes to ${a.k==='sharBack'?'the sharashka':'the Gulag'} in his place.`;
 // Stalin's voice: his own small deck. Pure weight on the scales: it never names anyone.
 const SVOICE=[['Support','+1','Stalin nods.',3],['Acclaim','+1','Comrade Stalin is pleased.',2],['Support','+1','Stalin puffs his pipe.',6],['Doubt','−1','Stalin frowns.',3],['Doubt','−1','Stalin taps his pipe on the table.',1],['Abstain','0','Stalin says nothing.',3],['Defer','','“We will come back to this.” Cannot be overruled.',2]];
@@ -483,7 +492,7 @@ function areaIds(a){
 }
 // A man the agenda could not actually change is never a valid subject: no promoting a head, no demoting the bottom man.
 function canTake(a,id){const w=where(id);if(a.k==='swap')return !!swapPartner(a,id);if(a.k==='vacancy'){if(w.t!=='seat')return false;const o=D.filter(d=>d!==w.d).map(d=>S.seats[d].length);return S.seats[w.d].length>=Math.min(...o)+2}if(a.k==='reshuffle')return w.t==='seat'&&partnerCands(id).length>0;if(w.t!=='seat')return true;if(a.k==='promote')return w.r>0;if(a.k==='demote'||a.k==='bottom')return w.r<S.seats[w.d].length-1;return true}
-function fixedSubj(f){if(f==='headR')return S.seats.R[0]||null;if(f==='frontGulag')return S.gulag[0]||null;if(f==='bottomI'){const a=S.seats.I;return a[a.length-1]||null}return null}
+function fixedSubj(f){if(f==='headR')return S.seats.R[0]||null;if(f==='headN')return S.seats.N[0]||null;if(f==='frontGulag')return S.gulag[0]||null;if(f==='bottomI'){const a=S.seats.I;return a[a.length-1]||null}return null}
 function nextOf(id,dir){const w=where(id);
  if(w.t==='seat')return S.seats[w.d][w.r+dir]||null;
  if(['lub','gulag','shar','exile'].includes(w.t))return S[w.t][w.i+dir]||null;
