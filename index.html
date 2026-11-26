@@ -547,7 +547,12 @@ function respUtil(p,M,resp){
   return{Support:0.6*(vp-v0),Acclaim:0.9*(vp2-v0),Doubt:0.6*(vm-v0),Protest:0.9*(vm-v0),Defer:-0.5*v0,Abstain:0,Amend:amendGain(p,M)}[resp]}
  return{Support:0.5*v0+0.5*(vp-v0),Acclaim:0.7*v0+0.8*(vp2-v0),Doubt:-0.6*v0,Protest:-0.9*v0,Defer:-0.7*v0,Abstain:0,Amend:amendGain(p,M)}[resp];
 }
-function amendGain(p,M){if(!M.subj||M.ag.k==='mass'||M.ag.k==='review')return -0.01;const v0=agVal(p,M,M.subj,0);let b=-0.01;for(const n of neighbours(M.subj)){if(M.named.includes(n)||!canTake(M.ag,n))continue;b=Math.max(b,agVal(p,M,n,0)-v0)}return b}
+function nudgeable(M){return !M.subj&&!!M.ag&&['mass','troika','push'].includes(M.ag.k)}
+function nudgeVal(p,M,dir){const a=M.ag,T=tally(M),nd=(M.nudge||0)+dir;
+ if(a.k==='push')return val(p,'push',[],Math.max(0,(a.n||0)+T.extra+nd),0);
+ const base=a.k==='troika'?1:baseOf(M)+T.extra-T.soft+(M.nudge||0);return val(p,'mass',S.lub.slice(),0,Math.max(0,Math.min(3,base+nd)))}
+function aiDir(p,M){return nudgeVal(p,M,1)>=nudgeVal(p,M,-1)?1:-1}
+function amendGain(p,M){if(nudgeable(M))return Math.max(nudgeVal(p,M,1),nudgeVal(p,M,-1))-nudgeVal(p,M,0);if(!M.subj||M.ag.k==='mass'||M.ag.k==='review')return -0.01;const v0=agVal(p,M,M.subj,0);let b=-0.01;for(const n of neighbours(M.subj)){if(M.named.includes(n)||!canTake(M.ag,n))continue;b=Math.max(b,agVal(p,M,n,0)-v0)}return b}
 function aiRespond(p,M){
  let best=null;
  for(const cid of P(p).hand){const c=CARDS[cid];if(c.d!==M.d)continue;const u=respUtil(p,M,c.resp)+RNG()*0.04;if(!best||u>best.u)best={cid,u}}
@@ -592,6 +597,7 @@ function autoAns(kind,o){
  if(kind==='reveal')return aiReveal(HUMAN,o.ids);
  if(kind==='deck')return aiDeck(HUMAN);
  if(kind==='player')return aiFirst(HUMAN);
+ if(kind==='dir')return aiDir(HUMAN,S.M);
  if(kind==='dept')return aiFreeDept(HUMAN,o.id,o.opts);
 }
 
@@ -712,6 +718,12 @@ async function meeting(d){
     if(p===HUMAN){cap(note,'Amend: click the man next to the subject to move the agenda onto him.');n=await ask('man',{ids:nb,ai:()=>aiAmend(HUMAN,M)})}else n=aiAmend(p,M);
     if(n){note+=` The agenda moves from ${man(M.subj).sn} to ${man(n).sn}.`;M.subj=n}}
   }
+  else if(c.resp==='Amend'&&nudgeable(M)&&!deferActive(M)){
+   const tr=M.ag.k!=='push';let dir;
+   if(p===HUMAN){cap(note,tr?'Amend: make the sentence one step milder or harsher.':'Amend: make the Canal move one place less or one place more.');dir=await ask('dir',{labels:tr?['One step milder','One step harsher']:['One place less','One place more']})}
+   else dir=aiDir(p,M);
+   M.nudge=(M.nudge||0)+dir;note+=tr?` The sentence is amended one step ${dir>0?'harsher':'milder'}.`:` The Canal is amended to move one place ${dir>0?'more':'less'}.`;
+  }
   if(c.resp==='Defer'){M.defer=true;note+=M.plays.some(x=>x.resp==='Acclaim')?' But the room has already broken into applause: an Acclaim overrules the Defer.':' The agenda will be deferred, unless someone answers with an Acclaim.'}
   if(c.resp==='Acclaim'&&M.defer&&M.plays.filter(x=>x.resp==='Acclaim').length===1)note+=' The ovation overrules the Defer.';
   if((c.resp==='Support'||c.resp==='Acclaim')&&M.ag.x==='name'&&!deferActive(M)&&!M.fizzle){
@@ -752,11 +764,11 @@ function forecast(M){
  if(M.fizzle)return'There is no one it can apply to: nothing will happen.';
  let why='';
  if(T.f||T.a)why=` (For ${T.f}, Against ${T.a}${T.net>0&&T.net>T.extra&&a.x!=='harsh'?`; the loudest supporter is ${T.mf===2?'an Acclaim, so at most two more':'a Support, so at most one more'}`:''})`;
- if(a.x==='harsh'){const rung=Math.max(0,Math.min(3,baseOf(M)+T.extra-T.soft));const who=a.k==='mass'?(S.lub.length?'everyone in the Lubyanka':'nobody (the Lubyanka is empty)'):(M.subj?lab(M.subj):'nobody');return`If the meeting ended now: ${who} → ${RUNG[rung]}${why}.`}
+ if(a.x==='harsh'){const rung=Math.max(0,Math.min(3,baseOf(M)+T.extra-T.soft+(M.nudge||0)));const who=a.k==='mass'?(S.lub.length?'everyone in the Lubyanka':'nobody (the Lubyanka is empty)'):(M.subj?lab(M.subj):'nobody');return`If the meeting ended now: ${who} → ${RUNG[rung]}${why}.`}
  if(T.fail)return`If the meeting ended now: the agenda fails${why}.`;
- if(a.k==='push')return`If the meeting ended now: the Canal moves ${(a.n||0)+T.extra} place${(a.n||0)+T.extra>1?'s':''}${why}.`;
+ if(a.k==='push'){const pm=Math.max(0,(a.n||0)+T.extra+(M.nudge||0));return`If the meeting ended now: the Canal moves ${pm} place${pm!==1?'s':''}${why}.`}
  if(a.k==='none')return'If the meeting ended now: '+(a.line==='-'?'the Party line is withdrawn.':'nothing happens.');
- if(a.k==='troika')return`If the meeting ended now: ${S.lub.length?'everyone in the Lubyanka goes to the Gulag':'nothing (the Lubyanka is empty)'}${why}.`;
+ if(a.k==='troika')return`If the meeting ended now: ${S.lub.length?'everyone in the Lubyanka → '+RUNG[Math.max(0,Math.min(3,1+(M.nudge||0)))]:'nothing (the Lubyanka is empty)'}${why}.`;
  const list=finalList(M,T);if(!list.length)return'';
  const amt=a.x==='more'?` ${(a.n||0)+T.extra} seat${(a.n||0)+T.extra>1?'s':''}`:'';
  return`If the meeting ended now: ${list.map(lab).join(', ')} ${list.length>1?'are':'is'} ${a.k==='verdict'?'sentenced to '+RUNG[a.base||1]:(KV[a.k]||'affected')}${amt}${why}.`;
@@ -766,7 +778,7 @@ async function resolve(M){
  if(deferActive(M)){S.deferred[d]={cid:M.card,subj:M.subj,base:M.base};M.keep=true;res(`Deferred. “${a.t}” comes back at the next ${DN[d]} meeting.`);await wait(1500);return}
  if(M.fizzle){res('The agenda has no one to act on. Nothing happens.');await wait(1300);return}
  if(a.x==='harsh'){
-  const rung=Math.max(0,Math.min(3,baseOf(M)+T.extra-T.soft));
+  const rung=Math.max(0,Math.min(3,baseOf(M)+T.extra-T.soft+(M.nudge||0)));
   const list=a.k==='mass'?S.lub.slice():[M.subj];
   if(!list.length||!list[0]){res('There is nobody in the Lubyanka to try.');await wait(1300);return}
   flashTok(list);await wait(500);
@@ -779,7 +791,7 @@ async function resolve(M){
  let dropNote='';
  if(a.x==='name'){
   if(M.named.length>T.extra){const dr=M.named.slice(T.extra).map(id=>`${man(id).sn} (${man(id).ini})`);dropNote=` Only ${T.extra?T.extra+' extra name'+(T.extra>1?'s':''):'the subject'} carried: the loudest supporting voice was ${T.mf===2?'an Acclaim (up to two more)':'a Support (one more)'}${T.a?', less the objections':''}. Dropped: ${dr.join(', ')}.`}}
- const amt=(a.n||0)+(a.x==='more'?T.extra:0);
+ const amt=Math.max(0,(a.n||0)+(a.x==='more'?T.extra:0)+(a.k==='push'?(M.nudge||0):0));
  if(list.length)flashTok(list);
  await wait(450);
  const out=[];
@@ -806,7 +818,7 @@ async function resolve(M){
  case'transferI':for(const id of list)out.push(transferMsg(id,'I',tradeInto('I',id)));break;
  case'transferTo':{const to=a.to==='LINE'?lineDept():a.to;for(const id of list){if(!to){out.push('the line names nobody');break}out.push(transferMsg(id,to,tradeInto(to,id)))}break}
  case'favourite':for(const id of list){out.push(favourite(id)?`${nm(id)} becomes Stalin's right hand`:`nothing changes`)}break;
- case'troika':{const l=S.lub.slice();if(!l.length)out.push('the Lubyanka is empty');else{for(const id of l)sentence(id,1);out.push(`${l.map(nm).join(', ')} ${l.length>1?'are':'is'} sent to the Gulag`)}break}
+ case'troika':{const l=S.lub.slice();const tr=Math.max(0,Math.min(3,1+(M.nudge||0)));if(!l.length)out.push('the Lubyanka is empty');else{for(const id of l)sentence(id,tr);out.push(`${l.map(nm).join(', ')} ${l.length>1?'are':'is'} sentenced to ${RUNG[tr]}`)}break}
  case'verdict':for(const id of list){sentence(id,a.base||1);out.push(`${nm(id)} is sentenced to ${RUNG[a.base||1]}`)}break;
  case'none':out.push(a.line==='-'?'the Party line is withdrawn':'nothing happens');break;
  }
@@ -943,8 +955,8 @@ function render(){
  $('#pl').innerHTML=ph;
  renderMine();renderHand();
 }
-function trialRung(M){if(!M||!M.ag||M.fizzle)return null;const a=M.ag;if(a.k==='troika')return 1;if(a.k!=='verdict'&&a.k!=='mass')return null;
- if(a.x==='harsh'){const T=tally(M);return Math.max(0,Math.min(3,baseOf(M)+T.extra-T.soft))}return a.base||1}
+function trialRung(M){if(!M||!M.ag||M.fizzle)return null;const a=M.ag;if(a.k==='troika')return Math.max(0,Math.min(3,1+(M.nudge||0)));if(a.k!=='verdict'&&a.k!=='mass')return null;
+ if(a.x==='harsh'){const T=tally(M);return Math.max(0,Math.min(3,baseOf(M)+T.extra-T.soft+(M.nudge||0)))}return a.base||1}
 function lineCardHTML(){const c=S.line;const ld=lineDept();
  return `<div style="background:#f8f1df;border:2px solid #9c7a0c;border-radius:6px;padding:6px 8px;color:#2a1d17;font-size:11.5px;line-height:1.25" class="linecard" data-cid="${c.id}"><b>${esc(c.ag.t)}</b><div style="margin-top:5px;font-weight:700;color:${ld?DL[ld]:'#555'}">Names: ${ld?DN[ld]:'nobody'}</div></div>`}
 function renderMine(){
@@ -1064,6 +1076,7 @@ document.addEventListener('click',e=>{
   if(k==='new')startScreen();
   if(k==='playsel'&&SEL&&PEND)PEND.res(SEL);
   if(k==='skip'&&PEND)PEND.res(null);
+  if(k==='dir'&&PEND&&PEND.kind==='dir')PEND.res(+x.dataset.v);
   if(k==='dept'&&PEND&&PEND.kind==='dept'&&PEND.opts.includes(x.dataset.d))PEND.res(x.dataset.d);
   if(k==='reopen'&&PEND&&PEND.kind==='lead'&&PEND.reopen)PEND.res('REOPEN');
   if(k==='start')startGame();
@@ -1090,7 +1103,7 @@ document.addEventListener('click',e=>{
 });
 const _render=render;
 render=function(){_render();if(PEND&&PEND.kind==='man'&&PEND.allowNone&&!$('#cap [data-x=skip]')){$('#cap').insertAdjacentHTML('beforeend',' <button class="btn" data-x="skip">Skip</button>')}};
-const _render2=render;render=function(){_render2();if(PEND&&PEND.kind==='dept'&&!$('#cap [data-x=dept]')){$('#cap').insertAdjacentHTML('beforeend',' '+PEND.opts.map(d=>`<button class="btn" data-x="dept" data-d="${d}" style="background:${DC[d]};color:${DT[d]};border:none;font-weight:700;margin:3px 3px 0 0">${DN[d]}</button>`).join(''))}if(PEND&&PEND.kind==='lead'&&PEND.reopen&&!$('#cap [data-x=reopen]')){$('#cap').insertAdjacentHTML('beforeend',' <button class="btn" data-x="reopen" style="background:#ffd84a;color:#2a1d17;border:none;font-weight:700">Reopen the deferred agenda</button>')}};
+const _render2=render;render=function(){_render2();if(PEND&&PEND.kind==='dir'&&!$('#cap [data-x=dir]')){$('#cap').insertAdjacentHTML('beforeend',' '+[-1,1].map((v,i)=>`<button class="btn" data-x="dir" data-v="${v}" style="background:#7b4fa0;border:none;font-weight:700;margin:3px 3px 0 0">${PEND.labels[i]}</button>`).join(''))}if(PEND&&PEND.kind==='dept'&&!$('#cap [data-x=dept]')){$('#cap').insertAdjacentHTML('beforeend',' '+PEND.opts.map(d=>`<button class="btn" data-x="dept" data-d="${d}" style="background:${DC[d]};color:${DT[d]};border:none;font-weight:700;margin:3px 3px 0 0">${DN[d]}</button>`).join(''))}if(PEND&&PEND.kind==='lead'&&PEND.reopen&&!$('#cap [data-x=reopen]')){$('#cap').insertAdjacentHTML('beforeend',' <button class="btn" data-x="reopen" style="background:#ffd84a;color:#2a1d17;border:none;font-weight:700">Reopen the deferred agenda</button>')}};
 
 // ================= SCREENS =================
 let CHOSEN=4;
@@ -1104,7 +1117,7 @@ function rulesScreen(){
 <h2>1 · The corridor</h2><p>Everyone lays one card face down: one of his men, or the blank. They flip together, and anyone who came forward is revealed for good.</p>
 <h2>2 · Five meetings</h2><p>Propaganda, NKVD, Industry, Red Army, Judiciary, in that order. A department meets only if someone has a revealed man in it. The owner of its highest revealed man chairs and goes first, then play goes clockwise. If you hold a card of that colour, you must play exactly one.</p>
 <p>The chair's card is read as an <b>agenda</b> (top left). Everyone else's card is read as a <b>response</b> (bottom right).</p>
-<h2>3 · The loudest voice</h2><p>Every response card shows its voice: <b>+1</b> Support, <b>+2</b> Acclaim, <b>−1</b> Doubt, <b>−2</b> Protest, <b>0</b> Abstain. Amend (the up-and-down arrows) and Defer (the hourglass) are not votes. Add the voices up: If the room is against, the agenda fails. If it is for, the agenda grows by the margin, but never beyond its loudest supporter (Support one step, Acclaim two). Amend moves the agenda one seat up or down. Defer postpones it to the department's next meeting, unless someone in the room plays an Acclaim, which overrules it. When the chair picks the department or the camp by choosing the subject, every supporter's extra name must come from the same place. Abstain says nothing. In trials, the voices make the sentence harsher or milder instead.</p>
+<h2>3 · The loudest voice</h2><p>Every response card shows its voice: <b>+1</b> Support, <b>+2</b> Acclaim, <b>−1</b> Doubt, <b>−2</b> Protest, <b>0</b> Abstain. Amend (the up-and-down arrows) and Defer (the hourglass) are not votes. Add the voices up: If the room is against, the agenda fails. If it is for, the agenda grows by the margin, but never beyond its loudest supporter (Support one step, Acclaim two). Amend moves the agenda one seat up or down; on an agenda without a single subject (a mass trial, a troika, a Canal push) it makes it one step milder or harsher, smaller or bigger, as the amender chooses. Defer postpones it to the department's next meeting, unless someone in the room plays an Acclaim, which overrules it. When the chair picks the department or the camp by choosing the subject, every supporter's extra name must come from the same place. Abstain says nothing. In trials, the voices make the sentence harsher or milder instead.</p>
 <h2>Stalin's chair</h2><p>At every meeting a card from Stalin's own small deck is dealt face down to his chair, and turned over after everyone else has spoken. It is pure weight: +2, +1, 0, −1 or −2 on the scales, and it never names anyone. His Defer cannot be overruled, not even by an Acclaim. Whoever owns the man in Stalin's right-hand seat may secretly look at Stalin's card before the meeting.</p>
 <h2>4 · Prisons</h2><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first, as shown on the track under the Lubyanka: the sharashka (safe, and the way back into Industry), the Gulag (alive, and may come back), the White Sea Canal (alive for now, but every department can push it along) and the firing squad. During a trial the current sentence glows on the track. The Canal moves along whenever an agenda pushes the work, and the end kills.</p>
 <h2>5 · Drawing</h2><p>At the end of the round everyone draws back up to fifteen, one card at a time, choosing the deck in the open. Whoever chaired the Judiciary decides who draws first.</p>
