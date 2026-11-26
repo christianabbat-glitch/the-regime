@@ -197,15 +197,16 @@ const ANG={P:9,N:27,I:45,R:63,J:81};
 const PCOL=['#8e24ff','#ff8f00','#00b8d9','#ff2e93','#7cc22a','#a0522d'];
 const PNAMES=['You','Masha','Pyotr','Sasha','Olga','Ivan'];
 const HAND=15;
-const RANKN=['head','second','third','fourth','fifth','sixth','seventh'];
-// The starting chart: Harry's cast of 36, each in roughly the post he held in 1936. Seat 1 is the department head.
+const SEATS=8; // seats in each department
+const RANKN=['head','second','third','fourth','fifth','sixth','seventh','eighth'];
+// The starting chart: Harry's cast of 41, each in roughly the post he held in 1936. Seat 1 is the department head.
 // Ownership is still dealt at random; only the seating is fixed.
 const CHART={
-P:[["Andrei","Zhdanov","AZ","Party secretary for ideology"],["Lev","Mekhlis","LM","Editor of Pravda"],["Nikolai","Bukharin","NB","Editor of Izvestia"],["Andrei","Bubnov","AB","Commissar of Education"],["Karl","Radek","KR","Izvestia's star commentator"],["Grigory","Zinoviev","GZ","Former head of the Comintern"],["Mikhail","Koltsov","MK","Pravda's star reporter"]],
-N:[["Genrikh","Yagoda","GY","Commissar of Internal Affairs"],["Nikolai","Yezhov","NY","Party secretary watching the NKVD"],["Mikhail","Frinovsky","MF","Border and internal troops"],["Yefim","Yevdokimov","YY","Veteran Chekist"],["Artur","Artuzov","AA","Former foreign intelligence chief"],["Jekabs","Peterss","JP","Co-founder of the Cheka"],["Lavrenti","Beria","LB","Party boss of the Caucasus"]],
-I:[["Sergo","Ordzhonikidze","SO","Commissar of Heavy Industry"],["Lazar","Kaganovich","LK","Commissar of Railways"],["Vlas","Chubar","VC","Deputy Premier"],["Georgy","Pyatakov","GP","Deputy Commissar of Heavy Industry"],["Alexei","Rykov","AR","Commissar of Communications"],["Nikita","Khrushchev","NK","Moscow party chief, builder of the Metro"],["Andrei","Tupolev","AT","Chief aircraft designer"]],
-R:[["Kliment","Voroshilov","KV","Commissar of Defence"],["Mikhail","Tukhachevsky","MT","Deputy Commissar of Defence"],["Alexander","Yegorov","AY","Chief of the General Staff"],["Vasily","Bluykher","VB","Commander of the Far Eastern Army"],["Semyon","Budyonny","SB","Marshal of the cavalry"],["Iona","Yakir","IY","Commander, Kiev Military District"],["Ieronim","Uborevich","IU","Commander, Belorussian Military District"]],
-J:[["Andrey","Vyshinsky","AV","Prosecutor General"],["Vasiliy","Ulrikh","VU","Chairman of the Military Collegium"],["Ivan","Akulov","IA","Former Prosecutor General"],["Jan","Rudzutak","JR","Former head of Party Control"],["Evgeny","Pashukanis","EP","Deputy Commissar of Justice"],["Valentin","Trifonov","VT","Old Bolshevik military judge"],["Ivan","Golyakov","IG","Future head of the Supreme Court"]],
+P:[["Andrei","Zhdanov","AZ","Party secretary for ideology"],["Lev","Mekhlis","LM","Editor of Pravda"],["Nikolai","Bukharin","NB","Editor of Izvestia"],["Andrei","Bubnov","AB","Commissar of Education"],["Karl","Radek","KR","Izvestia's star commentator"],["Grigory","Zinoviev","GZ","Former head of the Comintern"],["Mikhail","Koltsov","MK","Pravda's star reporter"],["Pavel","Postyshev","PP","Party secretary who brought back the New Year tree"]],
+N:[["Genrikh","Yagoda","GY","Commissar of Internal Affairs"],["Nikolai","Yezhov","NY","Party secretary watching the NKVD"],["Mikhail","Frinovsky","MF","Border and internal troops"],["Yefim","Yevdokimov","YY","Veteran Chekist"],["Artur","Artuzov","AA","Former foreign intelligence chief"],["Jekabs","Peterss","JP","Co-founder of the Cheka"],["Ivan","Bakayev","IB","Former Cheka chief of Petrograd"],["Lavrenti","Beria","LB","Party boss of the Caucasus"]],
+I:[["Sergo","Ordzhonikidze","SO","Commissar of Heavy Industry"],["Lazar","Kaganovich","LK","Commissar of Railways"],["Vlas","Chubar","VC","Deputy Premier"],["Georgy","Pyatakov","GP","Deputy Commissar of Heavy Industry"],["Alexei","Rykov","AR","Commissar of Communications"],["Nikita","Khrushchev","NK","Moscow party chief, builder of the Metro"],["Robert","Eikhe","RE","Party boss of West Siberia"],["Andrei","Tupolev","AT","Chief aircraft designer"]],
+R:[["Kliment","Voroshilov","KV","Commissar of Defence"],["Mikhail","Tukhachevsky","MT","Deputy Commissar of Defence"],["Alexander","Yegorov","AY","Chief of the General Staff"],["Vasily","Bluykher","VB","Commander of the Far Eastern Army"],["Semyon","Budyonny","SB","Marshal of the cavalry"],["Iona","Yakir","IY","Commander, Kiev Military District"],["Ieronim","Uborevich","IU","Commander, Belorussian Military District"],["Yan","Berzin","YB","Chief of military intelligence"]],
+J:[["Andrey","Vyshinsky","AV","Prosecutor General"],["Vasiliy","Ulrikh","VU","Chairman of the Military Collegium"],["Ivan","Akulov","IA","Former Prosecutor General"],["Jan","Rudzutak","JR","Former head of Party Control"],["Evgeny","Pashukanis","EP","Deputy Commissar of Justice"],["Valentin","Trifonov","VT","Old Bolshevik military judge"],["Ivan","Golyakov","IG","Future head of the Supreme Court"],["Georgy","Malenkov","GM","Head of the Party's cadres department"]],
 };
 const RIGHTHAND=["Vyacheslav","Molotov","VM","Chairman of the Council of People's Commissars"];
 function castMen(){
@@ -240,7 +241,7 @@ P:[
 N:[
 {c:9,t:'Arrest the enemies named by the Party.',d:'Arrest a man in the Party line’s department. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'one'},
 {c:4,t:'Root out the whole nest.',d:'Arrest a man in the Party line’s department and the two men below him. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'next',nx:2},
-{c:9,t:'Mass operation against anti-Soviet elements.',d:'Arrest a man in the fifth, sixth or seventh seat of any department.',k:'arrest',z:{low:1},x:'one'},
+{c:9,t:'Mass operation against anti-Soviet elements.',d:'Arrest a man in the fifth to eighth seat of any department.',k:'arrest',z:{low:1},x:'one'},
 {c:3,t:'The Politburo must be cleansed.',d:'Arrest a member of the Politburo.',k:'arrest',z:{polit:1},x:'one'},
 {c:5,t:'Purge our own ranks.',d:'Arrest an NKVD man and the man below him.',k:'arrest',z:{seat:'N'},x:'next',nx:1},
 {c:3,t:"Purge Yagoda's men.",d:'Arrest an NKVD man and the two men below him.',k:'arrest',z:{seat:'N'},x:'next',nx:2},
@@ -315,7 +316,7 @@ J:[
 // about one meeting in ten deferred. Halves are single cards in the twice-printed decks.
 const RESPMIX={
 P:{Amend:1,Support:14,Acclaim:1,Doubt:15,Defer:0.5,Abstain:5.5,Either:1},
-N:{Support:58,Acclaim:2,Doubt:20,Amend:2,Defer:1,Abstain:3,Either:3},
+N:{Support:56,Acclaim:2,Doubt:22,Amend:2,Defer:1,Abstain:3,Either:3},
 I:{Abstain:6.5,Defer:0.5,Support:13,Acclaim:1,Doubt:15,Amend:1,Either:1},
 R:{Support:26,Acclaim:1,Doubt:10,Amend:1,Defer:0.5,Abstain:2.5,Either:1},
 J:{Defer:0.5,Support:15,Acclaim:1,Doubt:13,Abstain:3.5,Either:1},
@@ -414,7 +415,7 @@ function pull(id){
 }
 function kill(id){pull(id);S.grave.push(id);S.stats.deaths++}
 function arrest(id){const m=man(id);if(m.medal>0){m.medal--;return'medal'}pull(id);S.lub.push(id);S.stats.arrests++;return'ok'}
-function enter(d,id){if(S.seats[d].length>=7)return false;pull(id);S.seats[d].push(id);return true}
+function enter(d,id){if(S.seats[d].length>=SEATS)return false;pull(id);S.seats[d].push(id);return true}
 function toGulag(id){pull(id);S.gulag.push(id)}
 function osoArrest(id){const m=man(id);if(m.medal>0){m.medal--;return'medal'}toGulag(id);S.stats.arrests++;S.stats.toGulag++;return'ok'}
 const CANAL_N=5; // places on the White Sea Canal; whoever is pushed off the last one dies
@@ -435,7 +436,7 @@ function favourite(id){const w=where(id);if(w.t!=='seat'||w.r!==0)return false;c
 // otherwise the man trades places with the target department's bottom man.
 function tradeInto(to,id,done){const w=where(id);const a=S.seats[to];done=done||[];
  if(w.t==='seat'&&w.d===to){moveSeat(id,9);return{same:true}}
- if(a.length<7){pull(id);a.push(id);done.push(id);return{moved:true}}
+ if(a.length<SEATS){pull(id);a.push(id);done.push(id);return{moved:true}}
  if(w.t!=='seat'){return{failed:true}}
  let k=a.length-1;while(k>0&&done.includes(a[k]))k--; // the man who just arrived is not sent straight back
  const b=a[k];S.seats[w.d][w.r]=b;a[k]=id;man(id).from=w.d;man(b).from=to;done.push(id);return{swap:b,fromD:w.d,r:w.r,k}}
@@ -453,7 +454,7 @@ async function freeInto(M,id,pref,verb){const nm=x=>`${man(x).sn} (${man(x).ini}
  const place={gulag:'the Gulag',shar:'the sharashka',lub:'the Lubyanka',canal:'the Canal'}[w.t];
  return`${DN[pref]} is full, so ${nm(id)} takes its bottom seat and ${nm(bm)} goes to ${place} in his place`}
 function aiFreeDept(p,id,opts){const mine=man(id).owner===p;let best=opts[0],bv=-1e9;
- for(const d of opts){const tc=topClaim(d);let v=RNG()*0.1+(7-S.seats[d].length)*0.02;if(mine&&tc&&tc.p===p)v+=0.3;if(mine&&!tc)v+=0.2;if(!mine&&tc&&tc.p===p)v-=0.1;if(v>bv){bv=v;best=d}}return best}
+ for(const d of opts){const tc=topClaim(d);let v=RNG()*0.1+(SEATS-S.seats[d].length)*0.02;if(mine&&tc&&tc.p===p)v+=0.3;if(mine&&!tc)v+=0.2;if(!mine&&tc&&tc.p===p)v-=0.1;if(v>bv){bv=v;best=d}}return best}
 function sentence(id,r){S.stats.verdicts++;if(r<=0){if(toShar(id))S.stats.toShar++;else{toGulag(id);S.stats.toGulag++}}else if(r===1){toGulag(id);S.stats.toGulag++}else if(r===2){toCanal(id);S.stats.toCanal++}else{kill(id);S.stats.toShot++}}
 function fateDraw(){
  if(!S.decks.J.length&&S.disc.J.length){S.decks.J=shuffle(S.disc.J);S.disc.J=[]}
@@ -542,7 +543,7 @@ function boardScore(p){let v=0;for(const d of D){const t=topClaim(d);if(t)v+=t.p
  const ld=lineDept();if(ld)for(const id of S.seats[ld])v-=0.3*wt(p,id);return v}
 function simSeats(p,fn){const save={};for(const d of D)save[d]=S.seats[d].slice();const b0=boardScore(p);fn();const b1=boardScore(p);for(const d of D)S.seats[d]=save[d];return b1-b0}
 function moveVal(p,id,to){const w=where(id);if(!to||w.t!=='seat')return 0;return simSeats(p,()=>{const a=S.seats[to];
- if(w.d===to){a.splice(w.r,1);a.push(id)}else if(a.length<7){S.seats[w.d].splice(w.r,1);a.push(id)}else{const b=a[a.length-1];S.seats[w.d][w.r]=b;a[a.length-1]=id}})}
+ if(w.d===to){a.splice(w.r,1);a.push(id)}else if(a.length<SEATS){S.seats[w.d].splice(w.r,1);a.push(id)}else{const b=a[a.length-1];S.seats[w.d][w.r]=b;a[a.length-1]=id}})}
 function reshVal(p,a,b){const wa=where(a),wb=where(b);return simSeats(p,()=>{S.seats[wa.d][wa.r]=b;S.seats[wb.d][wb.r]=a})}
 const MOVEK=['transferTo','transferI','vacancy','cadres'];
 function destOpts(a,id){const w=where(id);if(w.t!=='seat')return[];const o=D.filter(d=>d!==w.d);if(a.k==='cadres')return o;const m=Math.min(...o.map(d=>S.seats[d].length));if(S.seats[w.d].length<m+2)return[];return o.filter(d=>S.seats[d].length===m)}
@@ -905,7 +906,7 @@ function drawCard(p,d){if(!S.decks[d].length&&d!=='N'){S.decks[d]=shuffle(S.disc
 function takeCard(p,cid){const h=P(p).hand;const i=h.indexOf(cid);if(i>=0)h.splice(i,1);if(S.M&&S.M.d==='J'&&S.M.lead===p)S.lastJ=p}
 
 // ================= BOARD =================
-const T0=225,TS=62;
+const T0=225,TS=56;
 function seatXY(d,r){const a=ANG[d]*Math.PI/180,rr=T0+TS*r;return[rr*Math.cos(a),rr*Math.sin(a)]}
 const CS=[800,440],CE=[930,95];
 function canalXY(i){return[CS[0]+(CE[0]-CS[0])*i/(CANAL_N-1),CS[1]+(CE[1]-CS[1])*i/(CANAL_N-1)]}
@@ -931,8 +932,8 @@ function buildBoard(){
  let h='';const A=(x,y,s,inner)=>`<div class="ab" style="left:${x}px;top:${y}px;${s}">${inner||''}</div>`;
  const B=(r,y,s,inner)=>`<div class="ab" style="right:${r}px;top:${y}px;text-align:right;${s}">${inner||''}</div>`;
  const X=(x,w)=>1000-x-w;
- for(let r=0;r<7;r++){const R=T0+TS*r;h+=A(1000-R,-R,`width:${2*R}px;height:${2*R}px;border-radius:50%;border:1px dashed rgba(60,40,20,.22)`)}
- for(const d of D){const th=180-ANG[d],st=T0-32,L=TS*6+64;
+ for(let r=0;r<SEATS;r++){const R=T0+TS*r;h+=A(1000-R,-R,`width:${2*R}px;height:${2*R}px;border-radius:50%;border:1px dashed rgba(60,40,20,.22)`)}
+ for(const d of D){const th=180-ANG[d],st=T0-32,L=TS*(SEATS-1)+64;
   h+=`<div class="ab" style="left:1000px;top:-27px;width:${L}px;height:54px;box-sizing:border-box;border-radius:27px;background:#f7f1e1;border:5px solid ${d==='P'?'#c99a10':DC[d]};box-shadow:0 1px 3px rgba(0,0,0,.25);transform-origin:0 27px;transform:rotate(${th}deg) translateX(${st}px)"></div>`}
  h+=A(755,-245,'width:490px;height:490px;border-radius:50%;border:40px solid rgba(212,175,55,.45)');
  h+=A(830,-170,'width:340px;height:340px;border-radius:50%;background:#7d1d1a;box-shadow:0 0 0 3px #5a1311');
@@ -942,9 +943,9 @@ function buildBoard(){
  h+=`<div class="ab" style="left:864px;top:136px;transform:translate(-50%,-50%) rotate(45deg);font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.2em;color:#9c7a0c;white-space:nowrap">POLITBURO</div>`;
  h+=A(902,79,'width:40px;height:26px;border-radius:5px;border:1.5px dashed #d4af37');
  h+=A(866,64,'width:24px;height:32px;border-radius:4px;border:2px solid #d4af37;background:radial-gradient(circle at 50% 45%,#d4af37 0 5px,transparent 6px),repeating-linear-gradient(45deg,#7d1d1a,#7d1d1a 5px,#5a1311 5px,#5a1311 9px);box-shadow:0 2px 0 rgba(0,0,0,.35)','');
- for(const d of D)for(let r=0;r<7;r++){const[x,y]=seatXY(d,r);h+=A(1000-x-20,y-13,`box-sizing:border-box;width:40px;height:26px;border-radius:5px;${r===0?'border:2.5px solid #c9a227;background:rgba(212,175,55,.18)':`border:1.5px dashed ${DK[d]};opacity:.55`}`)}
+ for(const d of D)for(let r=0;r<SEATS;r++){const[x,y]=seatXY(d,r);h+=A(1000-x-20,y-13,`box-sizing:border-box;width:40px;height:26px;border-radius:5px;${r===0?'border:2.5px solid #c9a227;background:rgba(212,175,55,.18)':`border:1.5px dashed ${DK[d]};opacity:.55`}`)}
  const nums={P:1,N:2,I:3,R:4,J:5};
- for(const d of D){const a=ANG[d]*Math.PI/180,R=T0+TS*6+42;h+=`<div class="lbl" style="right:${R*Math.cos(a)}px;top:${R*Math.sin(a)-9}px;transform:rotate(${-ANG[d]}deg);transform-origin:100% 50%;font-size:15px;color:${DL[d]}">${nums[d]} · ${DN[d].toUpperCase()}</div>`}
+ for(const d of D){const a=ANG[d]*Math.PI/180,R=T0+TS*(SEATS-1)+42;h+=`<div class="lbl" style="right:${R*Math.cos(a)}px;top:${R*Math.sin(a)-9}px;transform:rotate(${-ANG[d]}deg);transform-origin:100% 50%;font-size:15px;color:${DL[d]}">${nums[d]} · ${DN[d].toUpperCase()}</div>`}
  const arrow=(x,y,len,deg,col,dash)=>`<div class="ab" style="left:${x}px;top:${y}px;width:${len}px;${dash?`height:0;border-top:3px dashed ${col}`:`height:3px;background:${col}`};transform:rotate(${deg}deg);transform-origin:0 ${dash?'0':'50%'}"><div class="ab" style="right:-10px;top:${dash?-8.5:-5.5}px;width:0;height:0;border-left:11px solid ${col};border-top:7px solid transparent;border-bottom:7px solid transparent"></div></div>`;
  h+=arrow(468,286,215,120.1,'#2456a6',true);
  h+=B(612,364,'font-size:11px;font-style:italic;color:#2456a6','arrests');
