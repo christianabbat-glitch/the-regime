@@ -107,7 +107,7 @@ body.tall #app{flex-direction:column;height:auto}
 .card.mid .rv{min-width:24px;height:24px;font-size:14px;border-radius:12px}
 .card.big .rv{min-width:28px;height:28px;font-size:16px;border-radius:14px}
 .card.big .hi{height:16px;min-width:22px;font-size:12px;border-radius:8px}
-.card .fate{position:absolute;left:5px;bottom:27px;font-size:7.5px;font-weight:700;color:#7d1d1a;text-transform:uppercase}
+.card .fate{display:none;position:absolute;left:5px;bottom:27px;font-size:7.5px;font-weight:700;color:#7d1d1a;text-transform:uppercase}
 .card.ag .r{opacity:.3}.card.rs .a{opacity:.3}
 .card.mid{width:138px;height:196px}
 .card.tb{width:80px;height:116px}
@@ -185,6 +185,7 @@ const DL={P:'#7a5c00',N:'#2456a6',I:'#2c6e43',R:'#a3221b',J:'#1b1b1b'};
 const ANG={P:9,N:27,I:45,R:63,J:81};
 const PCOL=['#8e44ad','#e67e22','#16a085','#d6336c','#8a5a2b','#5b6b7a'];
 const PNAMES=['You','Masha','Pyotr','Sasha','Olga','Ivan'];
+const HAND=15;
 const RANKN=['head','second','third','fourth','fifth','sixth','seventh'];
 const MEN=[
 ['P','Zhdanov','Andrei Zhdanov','Secretary for Ideology'],
@@ -245,13 +246,13 @@ P:[
 {c:1,t:'Lies of the Trotskyite press.',d:'Reveal who owns a man in exile.',s:'Support: each supporter names another exile.',k:'expose',z:{exile:1},x:'name'},
 ],
 N:[
-{c:10,t:'Arrest the enemies named by the Party.',d:'Arrest a man in the department named by the Party line. If it names nobody, the chair names the department by choosing the man.',s:'Support: each supporter names another man there.',k:'arrest',z:{seat:'LINE'},x:'name'},
-{c:8,t:'Mass operation against anti-Soviet elements.',d:'Arrest a man in the fifth, sixth or seventh seat of any department.',s:'Support: the next man down is arrested too.',k:'arrest',z:{low:1},x:'next'},
+{c:12,t:'Arrest the enemies named by the Party.',d:'Arrest a man in the department named by the Party line. If it names nobody, the chair names the department by choosing the man.',s:'Support: each supporter names another man there.',k:'arrest',z:{seat:'LINE'},x:'name'},
+{c:9,t:'Mass operation against anti-Soviet elements.',d:'Arrest a man in the fifth, sixth or seventh seat of any department.',s:'Support: the next man down is arrested too.',k:'arrest',z:{low:1},x:'next'},
 {c:3,t:'The Politburo must be cleansed.',d:'Arrest a member of the Politburo.',s:'Support: each supporter names another Politburo man.',k:'arrest',z:{polit:1},x:'name'},
 {c:5,t:'Purge our own ranks.',d:'Arrest an NKVD man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'N'},x:'next'},
 {c:6,t:'Liquidate counter-revolutionary elements in the camps.',d:'A prisoner in the Lubyanka, the Gulag or on the Canal is shot.',s:'Support: each supporter names another prisoner.',k:'shoot',z:{pris:['lub','gulag','canal']},x:'name'},
 {c:3,t:'The long arm.',d:"Send an assassin after a man in exile. Turn over the Judiciary deck's top card: on SHOT he dies.",s:'Support: each supporter names another exile.',k:'assassin',z:{exile:1},x:'name'},
-{c:6,t:'Uncover the military-fascist plot.',d:'Arrest a Red Army man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'R'},x:'next'},
+{c:7,t:'Uncover the military-fascist plot.',d:'Arrest a Red Army man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'R'},x:'next'},
 {c:4,t:'Wreckers on the railways.',d:'Arrest an Industry man.',s:'Support: the next man down is arrested too.',k:'arrest',z:{seat:'I'},x:'next'},
 {c:2,t:"Send investigators to the Prosecutor's Office.",d:"A man from any other department moves to the Judiciary's bottom seat.",s:'Support: each supporter names another man.',k:'transferTo',to:'J',z:{anyBut:'J'},x:'name'},
 {c:2,t:'Recall the residents from abroad.',d:'An NKVD man ordered home decides not to come: he defects into exile, if a place is free.',s:'Support: the next man down goes too.',k:'exileOut',z:{seat:'N'},x:'next'},
@@ -284,18 +285,18 @@ R:[
 J:[
 {c:5,t:'Try the Trotskyite-Zinovievite centre.',d:'Try a prisoner in the Lubyanka. Sentence: the Gulag.',s:'Support: a harsher sentence. Objections: a milder one.',k:'verdict',base:1,z:{pris:['lub']},x:'harsh'},
 {c:5,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to the Gulag.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',base:1,z:{none:1},x:'harsh'},
-{c:2,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka who was taken from the department named by the Party line. Sentence: the Canal.',s:'Support: a harsher sentence. Objections: a milder one.',k:'verdict',base:2,z:{lubLine:1},x:'harsh'},
+{c:2,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka. Sentence: the Canal.',s:'Support: a harsher sentence. Objections: a milder one.',k:'verdict',base:2,z:{pris:['lub']},x:'harsh'},
 {c:3,t:'Review the case files.',d:'Turn over the top card of the black deck. The fate in its corner becomes the proposed sentence for everyone in the Lubyanka.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',fateBase:1,z:{none:1},x:'harsh'},
 {c:3,t:'Assign specialists to the sharashka.',d:'A prisoner in the Lubyanka or the Gulag goes to the sharashka, if a place is free.',s:'Support: each supporter names another prisoner.',k:'toShar',z:{pris:['lub','gulag']},x:'name'},
 {c:2,t:'The wrong file was sent.',d:'A prisoner on the Canal is sent back to the end of the Gulag queue.',s:'Support: each supporter names another.',k:'canalBack',z:{pris:['canal']},x:'name'},
-{c:2,t:'Amnesty for the repentant.',d:'The prisoner at the front of the Gulag queue goes back to the bottom seat of his old department.',s:'Support: the next prisoner in line too.',k:'amnesty',z:{fixed:'frontGulag'},x:'next'},
+{c:2,t:'Amnesty for the repentant.',d:"The prisoner at the front of the Gulag queue goes to the bottom seat of the department named by the Party line (Industry's if it names nobody).",s:'Support: the next prisoner in line too.',k:'amnesty',z:{fixed:'frontGulag'},x:'next'},
 {c:2,t:'Recall a cadre to Moscow.',d:'A man moves to the bottom seat of the department named by the Party line. Nothing happens if it names nobody.',s:'Support: each supporter names another man.',k:'transferTo',to:'LINE',z:{anyBut:'LINE'},x:'name'},
 {c:3,t:'Approve the new procedural code.',d:'Nothing happens.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none'},
 ],
 };
 const RESPMIX={
 P:{Amend:5,Support:5,Acclaim:3,Doubt:4,Protest:2,Defer:2,Abstain:5},
-N:{Support:14,Acclaim:12,Doubt:7,Protest:2,Amend:5,Defer:1,Abstain:7},
+N:{Support:16,Acclaim:13,Doubt:9,Protest:2,Amend:6,Defer:2,Abstain:8},
 I:{Abstain:7,Defer:5,Support:5,Acclaim:1,Doubt:4,Protest:1,Amend:2},
 R:{Support:6,Acclaim:4,Doubt:4,Protest:3,Amend:3,Defer:2,Abstain:4},
 J:{Defer:6,Support:5,Acclaim:3,Doubt:4,Protest:2,Amend:2,Abstain:3},
@@ -346,14 +347,14 @@ function newState(np){
  S={np,round:0,players:[],men:{},seats:{P:[],N:[],I:[],R:[],J:[]},rh:null,kal:null,lub:[],shar:[],gulag:[],canal:Array(8).fill(null),exile:[],grave:[],
   decks:{},disc:{P:[],N:[],I:[],R:[],J:[]},line:LINE0,deferred:{},over:false,M:null,stats:{arrests:0,deaths:0,skipped:0,meetings:0,burn:0},firstDraw:0,nkvdMet:false};
  for(const d of D)S.decks[d]=shuffle(decks[d].slice());
- S.decks.N=S.decks.N.slice(0,8*np);
+ S.decks.N=S.decks.N.slice(0,9*np);
  MEN.forEach((m,i)=>{const id='m'+i;const pts=m[2].split(' ');S.men[id]={id,home:m[0],sn:m[1],name:m[2],title:m[3],ini:pts[0][0]+pts[pts.length-1][0],owner:null,rev:false,nobody:false,medal:false,from:null};
   if(D.includes(m[0]))S.seats[m[0]].push(id);else if(m[0]==='RH')S.rh=id;else if(m[0]==='K')S.kal=id;else S.exile.push(id)});
  {const seen={};for(const k in S.men){const i=S.men[k].ini;if(seen[i])console.warn('duplicate initials',i);seen[i]=1}}
  for(let p=0;p<np;p++)S.players.push({i:p,name:PNAMES[p],ai:p!==HUMAN,hand:[]});
  const ids=shuffle(Object.keys(S.men));
  for(let p=0;p<np;p++)for(let k=0;k<6;k++){S.men[ids[p*6+k]].owner=p}
- for(const p of S.players)for(const d of D)for(let k=0;k<2;k++)p.hand.push(S.decks[d].pop());
+ for(const p of S.players)for(const d of D)for(let k=0;k<3;k++)p.hand.push(S.decks[d].pop());
 }
 const P=i=>S.players[i];
 const man=id=>S.men[id];
@@ -744,7 +745,7 @@ async function resolve(M){
  case'assassin':for(const id of list){const fl=fateDraw();const f=fl.f;await showFate(fl,'Fate for '+man(id).ini);if(f==='Shot'){kill(id);out.push(`the assassin finds ${nm(id)} (fate: SHOT)`)}else out.push(`${nm(id)} escapes the assassin (fate: ${f.toUpperCase()})`)}break;
  case'draft':for(const id of list){out.push(enter('R',id)?`${nm(id)} is recalled into the Red Army`:`the Red Army has no seat free for ${nm(id)}`)}break;
  case'sharBack':for(const id of list){out.push(enter('I',id)?`${nm(id)} returns to Industry`:`Industry has no seat free for ${nm(id)}`)}break;
- case'amnesty':for(const id of list){const fd=D.includes(man(id).from)?man(id).from:'I';out.push(enter(fd,id)?`${nm(id)} returns to ${DN[fd]}`:`${DN[fd]} has no seat free for ${nm(id)}`)}break;
+ case'amnesty':for(const id of list){const fd=lineDept()||'I';out.push(enter(fd,id)?`${nm(id)} returns to ${DN[fd]}`:`${DN[fd]} has no seat free for ${nm(id)}`)}break;
  case'feed':for(const id of list){toCanal(id);out.push(`${nm(id)} is sent to dig the Canal`)}break;
  case'push':{const before=S.stats.deaths;canalPush(amt);const k=S.stats.deaths-before;out.push(`the Canal moves ${amt} place${amt>1?'s':''} along`+(k?`, and ${k} prisoner${k>1?'s':''} die${k>1?'':'s'} at the end`:''));break}
  case'review':{const l=S.lub.slice();if(!l.length)out.push('the Lubyanka is empty');for(const id of l){const f=fateFlip();sentence(id,{Sharashka:0,Gulag:1,Canal:2,Shot:3}[f]);out.push(`${nm(id)}: ${f.toUpperCase()}`)}break}
@@ -760,7 +761,7 @@ async function resolve(M){
  render();await wait(2100);
 }
 async function drawPhase(){
- clearTable(`End of round ${S.round}`,'Everyone draws back up to ten cards, one at a time, in the open.');
+ clearTable(`End of round ${S.round}`,`Everyone draws back up to ${HAND} cards, one at a time, in the open.`);
  let first;
  if(S.lastJ!=null){const j=S.lastJ;
   if(j===HUMAN){cap('You chaired the Judiciary, so you decide who draws first.','Click the player who should draw first.');first=await ask('player',{})}
@@ -769,8 +770,8 @@ async function drawPhase(){
  S.lastJ=null;S.firstDraw=(first+1)%S.np;
  const order=cw(first);
  let guard=0;
- while(order.some(p=>P(p).hand.length<10)&&D.some(canDraw)&&guard++<80){
-  for(const p of order){if(P(p).hand.length>=10)continue;if(!D.some(canDraw))break;
+ while(order.some(p=>P(p).hand.length<HAND)&&D.some(canDraw)&&guard++<120){
+  for(const p of order){if(P(p).hand.length>=HAND)continue;if(!D.some(canDraw))break;
    let d;
    if(p===HUMAN){cap(`Draw: you have ${P(p).hand.length} cards.`,'Click one of Stalin’s decks on the board to draw from it.');d=await ask('deck',{})}
    else{d=aiDeck(p);await wait(260)}
@@ -912,11 +913,18 @@ function charHTML(o,cls){
 function renderHand(){
  const hEl=$('#hand');const me=P(HUMAN);const cs=me.hand.slice().sort((a,b)=>D.indexOf(CARDS[a].d)-D.indexOf(CARDS[b].d));
  const W=hEl.clientWidth||500,n=cs.length,cw_=92;
- const sp=n>1?Math.min(78,(W-cw_-56)/(n-1)):0;const x0=Math.max(28,(W-(cw_+sp*(n-1)))/2);
  const play=PEND&&(PEND.kind==='lead'||PEND.kind==='resp');
+ const el=cs.map(cid=>!!(play&&PEND.cids.includes(cid)));
+ const avail=Math.max(60,W-cw_-40);const gaps=[];
+ if(n>1){const ne=el.slice(0,-1).filter(Boolean).length,no=n-1-ne;let narrow=Math.min(78,avail/(n-1)),wide=narrow;
+  if(play&&ne){wide=Math.min(98,(avail-no*10)/ne);narrow=no?Math.max(8,Math.min(narrow,(avail-wide*ne)/no)):0}
+  for(let i=0;i<n-1;i++)gaps.push(el[i]?wide:narrow)}
+ const total=gaps.reduce((a,b)=>a+b,0)+cw_;let x=Math.max(20,(W-total)/2);
+ const tilt=n>10?0.8:1.8;
  let h='';
- cs.forEach((cid,i)=>{const c=CARDS[cid];const can=play&&PEND.cids.includes(cid);const rot=(i-(n-1)/2)*1.8;const lift=Math.abs(i-(n-1)/2)*1.4;
-  h+=`<div class="hcw${play&&!can?' dim':''}${can?' can':''}${SEL===cid?' sel':''}" data-h="${cid}" style="left:${x0+i*sp}px;transform:translateY(${SEL===cid?-30:lift}px) rotate(${SEL===cid?0:rot}deg);z-index:${SEL===cid?50:i}">${cardHTML(c,play?(PEND.kind==='lead'?'ag':'rs'):'')}</div>`});
+ cs.forEach((cid,i)=>{const c=CARDS[cid];const can=el[i];const rot=(i-(n-1)/2)*tilt;const lift=Math.abs(i-(n-1)/2)*tilt*0.8;
+  h+=`<div class="hcw${play&&!can?' dim':''}${can?' can':''}${SEL===cid?' sel':''}" data-h="${cid}" style="left:${x}px;transform:translateY(${SEL===cid?-30:can?-14:lift}px) rotate(${SEL===cid||can?0:rot}deg);z-index:${SEL===cid?50:i}">${cardHTML(c,play?(PEND.kind==='lead'?'ag':'rs'):'')}</div>`;
+  x+=gaps[i]||0});
  hEl.innerHTML=h;
 }
 // ===== table =====
@@ -1013,8 +1021,8 @@ function rulesScreen(){
 <p>The chair's card is read as an <b>agenda</b> (top left). Everyone else's card is read as a <b>response</b> (bottom right).</p>
 <h2>3 · The loudest voice</h2><p>Every response card shows its voice: <b>+1</b> Support, <b>+2</b> Acclaim, <b>−1</b> Doubt, <b>−2</b> Protest, <b>0</b> Abstain. Amend (the up-and-down arrows) and Defer (the hourglass) are not votes. Add the voices up: If the room is against, the agenda fails. If it is for, the agenda grows by the margin, but never beyond its loudest supporter (Support one step, Acclaim two). Amend moves the agenda one seat up or down. Defer postpones it to the department's next meeting, unless someone in the room plays an Acclaim, which overrules it. When the chair picks the department or the camp by choosing the subject, every supporter's extra name must come from the same place. Abstain says nothing. In trials, the voices make the sentence harsher or milder instead.</p>
 <h2>4 · Prisons</h2><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first: the sharashka, the Gulag, the White Sea Canal, the firing squad. The Canal moves along whenever an agenda pushes the work, and the end kills.</p>
-<h2>5 · Drawing</h2><p>At the end of the round everyone draws back up to ten, one card at a time, choosing the deck in the open. Whoever chaired the Judiciary decides who draws first.</p>
-<h2>The end</h2><p>The blue NKVD deck is the clock and is never reshuffled: it holds eight cards per player. When its last card is drawn, the Terror ends. For this playtest there is no declared winner: see how it feels.</p>
+<h2>5 · Drawing</h2><p>At the end of the round everyone draws back up to fifteen, one card at a time, choosing the deck in the open. Whoever chaired the Judiciary decides who draws first.</p>
+<h2>The end</h2><p>The blue NKVD deck is the clock and is never reshuffled: it holds nine cards per player. When its last card is drawn, the Terror ends. For this playtest there is no declared winner: see how it feels.</p>
 <p style="color:#d8c9ad;font-size:13px">Playtest safeguard: if the NKVD does not meet in a round, one blue card is burned, so the game cannot stall forever.</p>
 <p><button class="go" data-x="close">Close</button></p>`;
  $('#ov').classList.add('on');
