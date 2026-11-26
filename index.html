@@ -25,7 +25,7 @@ body.tall #app{flex-direction:column;height:auto}
 .bt{font-family:Oswald,sans-serif;letter-spacing:.07em;font-size:15px}
 .bs{font-size:11px;opacity:.85}
 .slotb{position:absolute;width:58px;height:24px;border-radius:5px;border:1.5px dashed}
-.tok{position:absolute;box-sizing:border-box;width:40px;height:26px;border-radius:5px;background:#f6efdc;color:#2a1d17;border:1.5px solid #1a120d;font-family:Oswald,sans-serif;font-weight:600;font-size:14px;letter-spacing:.04em;cursor:default;display:flex;align-items:center;justify-content:center;transition:left .8s ease,top .8s ease,background .4s,opacity .4s;box-shadow:0 1px 2px rgba(0,0,0,.4);white-space:nowrap;z-index:5}
+.tok{position:absolute;box-sizing:border-box;width:40px;height:26px;border-radius:5px;background:#f6efdc;color:#1a120d;border:1.5px solid #1a120d;font-family:'PT Sans',Arial,sans-serif;font-weight:700;font-size:17px;letter-spacing:.01em;cursor:default;display:flex;align-items:center;justify-content:center;transition:left .8s ease,top .8s ease,background .4s,opacity .4s;box-shadow:0 1px 2px rgba(0,0,0,.4);white-space:nowrap;z-index:5}
 .tok span{pointer-events:none}
 #tip{position:fixed;z-index:45;background:#f8f1df;color:#2a1d17;border:2px solid #1a120d;border-radius:8px;padding:7px 10px;font-size:12.5px;line-height:1.3;max-width:240px;display:none;box-shadow:0 4px 12px rgba(0,0,0,.5)}
 #tip.on{display:block}
@@ -234,30 +234,30 @@ P:[
 {c:2,t:'Party organisers for the Army.',d:"A man from any other department moves to the Red Army's bottom seat.",k:'transferTo',to:'R',z:{anyBut:'R'},x:'one'},
 {c:2,t:'Exchange cadres with the organs.',d:'A Propaganda man trades places with the NKVD man in the same rank.',k:'swap',with:'N',z:{seat:'P'},x:'one'},
 {c:1,t:'A denunciation in Pravda.',d:'Arrest a man in the Party line’s department. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'one'},
-{c:1,t:'The workers demand the supreme penalty.',d:'Factory rallies demand blood: a prisoner in the Lubyanka is shot.',k:'shoot',z:{pris:['lub']},x:'one'},
+{c:2,t:'The workers demand the supreme penalty.',d:'Factory rallies demand blood: a prisoner in the Lubyanka is shot.',k:'shoot',z:{pris:['lub']},x:'one'},
 {c:1,t:'Lies of the Trotskyite press.',d:'Reveal who owns a man in exile.',k:'expose',z:{exile:1},x:'one'},
 ],
 N:[
 {c:9,t:'Arrest the enemies named by the Party.',d:'Arrest a man in the Party line’s department. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'one'},
-{c:3,t:'Root out the whole nest.',d:'Arrest a man in the Party line’s department and the two men below him. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'next',nx:2},
+{c:4,t:'Root out the whole nest.',d:'Arrest a man in the Party line’s department and the two men below him. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'next',nx:2},
 {c:9,t:'Mass operation against anti-Soviet elements.',d:'Arrest a man in the fifth, sixth or seventh seat of any department.',k:'arrest',z:{low:1},x:'one'},
 {c:3,t:'The Politburo must be cleansed.',d:'Arrest a member of the Politburo.',k:'arrest',z:{polit:1},x:'one'},
 {c:5,t:'Purge our own ranks.',d:'Arrest an NKVD man and the man below him.',k:'arrest',z:{seat:'N'},x:'next',nx:1},
-{c:2,t:"Purge Yagoda's men.",d:'Arrest an NKVD man and the two men below him.',k:'arrest',z:{seat:'N'},x:'next',nx:2},
-{c:1,t:'The Yezhov men are unmasked.',d:'Arrest the men in the top four seats of the NKVD.',k:'arrest',z:{fixed:'headN'},x:'next',nx:3},
-{c:5,t:'Liquidate counter-revolutionary elements in the camps.',d:'A prisoner in the Lubyanka, the Gulag or on the Canal is shot.',k:'shoot',z:{pris:['lub','gulag','canal']},x:'one'},
+{c:3,t:"Purge Yagoda's men.",d:'Arrest an NKVD man and the two men below him.',k:'arrest',z:{seat:'N'},x:'next',nx:2},
+{c:2,t:'The Yezhov men are unmasked.',d:'Arrest the men in the top four seats of the NKVD.',k:'arrest',z:{fixed:'headN'},x:'next',nx:3},
+{c:7,t:'Liquidate counter-revolutionary elements in the camps.',d:'A prisoner in the Lubyanka, the Gulag or on the Canal is shot.',k:'shoot',z:{pris:['lub','gulag','canal']},x:'one'},
 {c:3,t:'The long arm.',d:"Send an assassin after a man in exile. Turn over the Judiciary deck's top card: on SHOT he dies.",k:'assassin',z:{exile:1},x:'one'},
-{c:2,t:'Uncover the military-fascist plot.',d:'Arrest the men in the top four seats of the Red Army.',k:'arrest',z:{fixed:'headR'},x:'next',nx:3},
+{c:3,t:'Uncover the military-fascist plot.',d:'Arrest the men in the top four seats of the Red Army.',k:'arrest',z:{fixed:'headR'},x:'next',nx:3},
 {c:4,t:'Purge the military districts.',d:'Arrest a Red Army man and the man below him.',k:'arrest',z:{seat:'R'},x:'next',nx:1},
-{c:2,t:'Arrest the political commissars.',d:'Arrest a Red Army man and the two men below him.',k:'arrest',z:{seat:'R'},x:'next',nx:2},
+{c:3,t:'Arrest the political commissars.',d:'Arrest a Red Army man and the two men below him.',k:'arrest',z:{seat:'R'},x:'next',nx:2},
 {c:3,t:'Wreckers on the railways.',d:'Arrest an Industry man and the man below him.',k:'arrest',z:{seat:'I'},x:'next',nx:1},
-{c:2,t:'The parallel centre in Heavy Industry.',d:'Arrest an Industry man and the two men below him.',k:'arrest',z:{seat:'I'},x:'next',nx:2},
+{c:3,t:'The parallel centre in Heavy Industry.',d:'Arrest an Industry man and the two men below him.',k:'arrest',z:{seat:'I'},x:'next',nx:2},
 {c:3,t:'Hunt the double-dealers in the press.',d:'Arrest a Propaganda man and the man below him.',k:'arrest',z:{seat:'P'},x:'next',nx:1},
 {c:3,t:"Purge the Prosecutor's Office.",d:'Arrest a Judiciary man and the man below him.',k:'arrest',z:{seat:'J'},x:'next',nx:1},
 {c:4,t:"Send investigators to the Prosecutor's Office.",d:"A man from any other department moves to the Judiciary's bottom seat.",k:'transferTo',to:'J',z:{anyBut:'J'},x:'one'},
 {c:3,t:'Place informers in the editorial offices.',d:"A man from any other department moves to Propaganda's bottom seat.",k:'transferTo',to:'P',z:{anyBut:'P'},x:'one'},
 {c:3,t:'Plenipotentiaries for the Army.',d:"A man from any other department moves to the Red Army's bottom seat.",k:'transferTo',to:'R',z:{anyBut:'R'},x:'one'},
-{c:3,t:'Sentence by the Special Board.',d:'Arrest a man in the Party line’s department and the two men below him. They go straight to the Gulag, with no trial. If it names nobody, the chair picks the department.',k:'oso',z:{seat:'LINE'},x:'next',nx:2},
+{c:4,t:'Sentence by the Special Board.',d:'Arrest a man in the Party line’s department and the two men below him. They go straight to the Gulag, with no trial. If it names nobody, the chair picks the department.',k:'oso',z:{seat:'LINE'},x:'next',nx:2},
 {c:2,t:'Recall the residents from abroad.',d:'An NKVD man ordered home decides not to come: he defects into exile, if a place is free.',k:'exileOut',z:{seat:'N'},x:'one'},
 {c:6,t:'Troika: sentence by special procedure.',d:'Three NKVD officers, no court: everyone in the Lubyanka is sentenced to the Gulag.',k:'troika',z:{none:1},x:'none'},
 ],
@@ -288,7 +288,7 @@ R:[
 {c:2,t:'Promote the young commanders.',d:'A Red Army man moves up one seat.',k:'promote',n:1,z:{seat:'R'},x:'one'},
 {c:3,t:'Expose the conspiracy in the General Staff.',d:'Arrest a man in one of the top three seats of the Red Army and the man below him.',k:'arrest',z:{seat:'R',top:3},x:'next',nx:1},
 {c:1,t:'Arrest the corps commanders.',d:'Arrest a Red Army man and the two men below him.',k:'arrest',z:{seat:'R'},x:'next',nx:2},
-{c:1,t:'Purge the Far Eastern Army.',d:'Arrest a Red Army man and the three men below him.',k:'arrest',z:{seat:'R'},x:'next',nx:3},
+{c:2,t:'Purge the Far Eastern Army.',d:'Arrest a Red Army man and the three men below him.',k:'arrest',z:{seat:'R'},x:'next',nx:3},
 {c:4,t:'Political commissars for the Army.',d:"A man from any other department and the man below him move to the Red Army's bottom seats.",k:'transferTo',to:'R',z:{anyBut:'R'},x:'next',nx:1},
 {c:2,t:'Second officers to the defence industry.',d:"A Red Army man moves to Industry's bottom seat.",k:'transferTo',to:'I',z:{seat:'R'},x:'one'},
 {c:3,t:'Build the railway to the Far East.',d:'A prisoner in the Lubyanka and the next prisoner after him are sent to the Gulag to build the Baikal–Amur line.',k:'toGulag',z:{pris:['lub']},x:'next',nx:1},
@@ -298,7 +298,8 @@ R:[
 ],
 J:[
 {c:10,t:'Try the Trotskyite-Zinovievite centre.',d:'Try a prisoner in the Lubyanka and the next prisoner after him. Sentence: the Gulag.',k:'verdict',base:1,z:{pris:['lub']},x:'next',nx:1},
-{c:2,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to be shot.',k:'mass',base:3,z:{none:1},x:'harsh'},
+{c:3,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to be shot.',k:'mass',base:3,z:{none:1},x:'harsh'},
+{c:3,t:'Ten years without the right of correspondence.',d:'Try a prisoner in the Lubyanka. Sentence: shot. His family is told he got ten years.',k:'verdict',base:3,z:{pris:['lub']},x:'one'},
 {c:2,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka. Sentence: the Canal.',k:'verdict',base:2,z:{pris:['lub']},x:'one'},
 {c:2,t:'Review the case files.',d:'Turn over the top card of the black deck before the vote. The fate in its corner is the sentence for everyone in the Lubyanka.',k:'mass',fateBase:1,z:{none:1},x:'harsh'},
 {c:2,t:'Assign specialists to the sharashka.',d:'A prisoner in the Lubyanka goes to the sharashka, if a place is free.',k:'toShar',z:{pris:['lub']},x:'one'},
@@ -313,11 +314,11 @@ J:[
 // Approval scale. Target pass rates: NKVD ~85%, Red Army ~75%, Judiciary ~65%, Propaganda ~60%, Industry ~50%;
 // about one meeting in ten deferred. Halves are single cards in the twice-printed decks.
 const RESPMIX={
-P:{Amend:1,Support:13,Acclaim:1,Doubt:15,Defer:0.5,Abstain:5.5,Either:1},
-N:{Support:51,Acclaim:2,Doubt:18,Amend:2,Defer:1,Abstain:3,Either:3},
+P:{Amend:1,Support:14,Acclaim:1,Doubt:15,Defer:0.5,Abstain:5.5,Either:1},
+N:{Support:58,Acclaim:2,Doubt:20,Amend:2,Defer:1,Abstain:3,Either:3},
 I:{Abstain:6.5,Defer:0.5,Support:13,Acclaim:1,Doubt:15,Amend:1,Either:1},
-R:{Support:25,Acclaim:1,Doubt:10,Amend:1,Defer:0.5,Abstain:2.5,Either:1},
-J:{Defer:0.5,Support:13,Acclaim:1,Doubt:11,Abstain:3.5,Either:1},
+R:{Support:26,Acclaim:1,Doubt:10,Amend:1,Defer:0.5,Abstain:2.5,Either:1},
+J:{Defer:0.5,Support:15,Acclaim:1,Doubt:13,Abstain:3.5,Either:1},
 };
 const FLAV={
 P:{Support:'Pravda will print it on the front page.',Acclaim:'Thunderous applause, rising to an ovation.',Doubt:'The masses may not understand this.',Protest:'This is a slander against the Party!',Amend:'Let us correct the wording, comrades.',Defer:'Let the editors look at it again.',Abstain:'Pravda has no comment.',Either:'As the Party decides.'},
@@ -647,7 +648,7 @@ async function game(){
  while(!S.over){
   S.round++;S.nkvdMet=false;
   if(S.finalRound){cap('FINAL ROUND. The blue deck is empty: this is the last round of the Terror.');render();await wait(1800)}
-  await corridor();
+  if(S.round>1)await corridor();
   for(const d of D)await meeting(d);
   if(S.finalRound){cap('The final round is over. Yezhov falls, and the Terror is over.');render();await wait(2000);S.over=true;break}
   if(!S.nkvdMet&&S.decks.N.length){S.disc.N.push(S.decks.N.pop());S.stats.burn++;cap('The NKVD did not meet. Stalin grows impatient: a blue card is burned.');render();await wait(1300)}
@@ -1358,7 +1359,7 @@ function startScreen(){
 function rulesScreen(){
  $('#ovb').innerHTML=`<h1>HOW A ROUND WORKS</h1>
 <p>Everyone secretly owns six men. Who owns whom comes out slowly. Survival is the point.</p>
-<h2>1 · The corridor</h2><p>Everyone lays one card face down: one of his men, or the blank. They flip together, and anyone who came forward is revealed for good.</p>
+<h2>1 · The corridor</h2><p>Everyone lays one card face down: one of his men, or the blank. They flip together, and anyone who came forward is revealed for good. In the first round the opening reveal is the corridor.</p>
 <h2>2 · Five meetings</h2><p>Propaganda, NKVD, Industry, Red Army, Judiciary, in that order. A department meets only if someone has a revealed man in it. The owner of its highest revealed man chairs and goes first, then play goes clockwise. If you hold a card of that colour, you must play exactly one.</p>
 <p>The chair's card is read as an <b>agenda</b> (top left). Everyone else's card is read as a <b>response</b> (bottom right).</p>
 <h2>3 · The vote</h2><p>The vote only decides whether the agenda passes. Every response card shows its voice: <b>+1</b> Support, <b>+1</b> Acclaim, <b>−1</b> Doubt, <b>0</b> Abstain, and the rare <b>±1</b> Either Way, whose sign you choose when you play it. Stalin's card counts too. Add them up: zero or more and it passes, below zero it fails. What happens is printed on the agenda: how many men, which department, which sentence. A trial that fails leaves its prisoners waiting in the Lubyanka. <b>Acclaim</b> (rare) also overrules a Defer. <b>Amend</b> (rare) takes one man off the agenda and puts any other man it could name in his place. <b>Defer</b> postpones the agenda to the department's next meeting, unless someone plays an Acclaim. Abstain says nothing.</p>
