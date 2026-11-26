@@ -111,6 +111,16 @@ body.tall #app{flex-direction:column;height:auto}
 .card.ag .r{opacity:.3}.card.rs .a{opacity:.3}
 .card.mid{width:138px;height:196px}
 .card.tb{width:80px;height:116px}
+.card.scard{width:80px;height:116px}
+.card.scard .f{background:radial-gradient(ellipse at 50% 30%,#8e2420,#5a1311);border:2px solid #d4af37;color:#f3e9d2}
+.card.scard .b{border:2px solid #d4af37}
+.scard .sh{font-family:Oswald,sans-serif;font-size:10px;letter-spacing:.2em;text-align:center;padding-top:6px;color:#f1d98a}
+.scard .sbig{margin:8px auto 6px;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-size:20px;font-weight:600;color:#fff;box-shadow:0 0 0 2px #f1d98a}
+.scard .stx{font-size:9.5px;line-height:1.2;text-align:center;padding:0 5px;font-style:italic}
+.peek{font-size:10.5px;color:#ffd84a;max-width:120px;text-align:center;line-height:1.2}
+.trk{position:absolute;border-radius:6px;padding:3px 6px;font-size:10px;line-height:1.15;color:#fff;border:2px solid transparent;transition:box-shadow .3s,border-color .3s}
+.trk b{display:block;font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.05em}
+.trk.on{border-color:#ffd84a;box-shadow:0 0 10px 3px rgba(255,216,74,.85)}
 .card.tb .a b{font-size:8.5px}
 .card.tb .h{font-size:7.5px;height:13px}
 .card.tb .r b{font-size:11px}
@@ -315,6 +325,9 @@ const FATES={Shot:9,Gulag:9,Canal:5,Sharashka:2};
 const RUNG=['the sharashka','the Gulag','the Canal','the firing squad'];
 for(const d of D)for(const a of AG[d])if(a.k==='transferTo'||a.k==='transferI')a.d+=' If that department is full, he trades places with the man in its bottom seat.';
 for(const d of D)for(const a of AG[d])if(['draft','sharBack','amnesty'].includes(a.k))a.d+=' If that department is full, the chair seats him in any department with a free seat.';
+// Stalin's voice: his own small deck. Pure weight on the scales: it never names anyone.
+const SVOICE=[['Acclaim','+2','Stalin nods.',3],['Acclaim','+2','Comrade Stalin is pleased.',2],['Support','+1','Stalin puffs his pipe.',6],['Doubt','−1','Stalin frowns.',3],['Protest','−2','Stalin taps his pipe on the table.',1],['Abstain','0','Stalin says nothing.',3],['Defer','','“We will come back to this.” Cannot be overruled.',2]];
+function buildStalin(){const ids=[];let n=0;for(const[r,v,t,c]of SVOICE)for(let k=0;k<c;k++){const id='s'+(n++);CARDS[id]={id,d:'S',stalin:true,resp:r,sv:v,txt:t};ids.push(id)}return shuffle(ids)}
 const LINE0={id:'L0',d:'P',ag:{t:'Vigilance against the Trotskyite conspiracy.',d:'The Party line names nobody yet.',s:'',line:'-'},resp:'Abstain'};
 
 // ================= UTIL =================
@@ -352,6 +365,7 @@ function newState(np){
  S={np,round:0,players:[],men:{},seats:{P:[],N:[],I:[],R:[],J:[]},rh:null,kal:null,lub:[],shar:[],gulag:[],canal:Array(8).fill(null),exile:[],grave:[],
   decks:{},disc:{P:[],N:[],I:[],R:[],J:[]},line:LINE0,deferred:{},over:false,M:null,stats:{arrests:0,deaths:0,skipped:0,meetings:0,burn:0,verdicts:0,toGulag:0,toCanal:0,toShot:0,toShar:0},firstDraw:0,nkvdMet:false};
  for(const d of D)S.decks[d]=shuffle(decks[d].slice());
+ S.sdeck=buildStalin();S.sdisc=[];
  S.decks.N=S.decks.N.slice(0,10*np);
  MEN.forEach((m,i)=>{const id='m'+i;const pts=m[2].split(' ');S.men[id]={id,home:m[0],sn:m[1],name:m[2],title:m[3],ini:pts[0][0]+pts[pts.length-1][0],owner:null,rev:false,nobody:false,medal:false,from:null};
   if(D.includes(m[0]))S.seats[m[0]].push(id);else if(m[0]==='RH')S.rh=id;else if(m[0]==='K')S.kal=id;else S.exile.push(id)});
@@ -457,7 +471,7 @@ function nextOf(id,dir){const w=where(id);
  if(w.t==='canal'){for(let i=w.i+dir;i>=0&&i<8;i+=dir)if(S.canal[i])return S.canal[i];return null}
  return null}
 function neighbours(id){return[nextOf(id,-1),nextOf(id,1)].filter(Boolean)}
-function deferActive(M){return !!M.defer&&!M.plays.some(x=>x.resp==='Acclaim')}
+function deferActive(M){return !!M.sDefer||(!!M.defer&&!M.plays.some(x=>x.resp==='Acclaim'))}
 function samePlace(M){const z=M.ag.z;if(!M.subj||z.polit||z.heads||z.exile)return null;const w=where(M.subj);return w.t==='seat'?{t:'seat',d:w.d}:{t:w.t}}
 function placeName(pl){return pl.t==='seat'?DN[pl.d]:{lub:'the Lubyanka',gulag:'the Gulag',canal:'the Canal',shar:'the sharashka'}[pl.t]||''}
 function nameable(M){const ids=areaIds(M.ag)||[];const pl=samePlace(M);return ids.filter(i=>{if(M.named.includes(i)||i===M.subj)return false;if(!pl)return true;const w=where(i);return w.t===pl.t&&(pl.t!=='seat'||w.d===pl.d)})}
@@ -676,6 +690,7 @@ async function meeting(d){
   setNom(M);await proposeFate(M);
   cap(`${P(p).name} propose${p===HUMAN?'':'s'}: “${M.ag.t}”`+(M.subj?` Subject: ${man(M.subj).name} (${man(M.subj).ini}).`:M.fizzle?' There is no one it can apply to.':''));
  }
+ if(!M.fizzle)await stalinDeal(M);
  tug();
  render();await wait(1100);
  for(const p of resp){
@@ -703,8 +718,10 @@ async function meeting(d){
   }
   cap(note);tug();render();await wait(1100);
  }
+ await stalinSpeak(M);
  await resolve(M);
- for(const c of [M.card,...M.plays.map(x=>x.cid)]){if(!c)continue;if(c===M.card&&(M.keep))continue;S.disc[d].push(c)}
+ if(M.scard)S.sdisc.push(M.scard);
+ for(const c of [M.card,...M.plays.filter(x=>x.p!=='S').map(x=>x.cid)]){if(!c)continue;if(c===M.card&&(M.keep))continue;S.disc[d].push(c)}
  S.M=null;render();await wait(400);
 }
 function setNom(M){if(M.ag&&M.ag.z.seat==='LINE'&&!lineDept()&&M.subj){const w=where(M.subj);if(w.t==='seat')M.nom=w.d}}
@@ -727,6 +744,7 @@ const KV={arrest:'arrested',expose:'exposed',medal:'given the Order of Lenin',pr
 function forecast(M){
  const a=M.ag,T=tally(M);const lab=id=>`${man(id).ini} ${man(id).sn}`;
  if(!a)return'';
+ if(M.sDefer)return`Stalin has deferred it: it comes back at the next ${DN[M.d]} meeting, if the chair reopens it.`;
  if(deferActive(M))return`Deferred: it comes back at the next ${DN[M.d]} meeting, if the chair reopens it. Only an Acclaim can overrule the Defer.`;
  if(M.fizzle)return'There is no one it can apply to: nothing will happen.';
  let why='';
@@ -851,6 +869,7 @@ function buildBoard(){
  h+=B(36,106,'font-size:10px;color:#f1d98a;font-weight:700',"RIGHT HAND");
  h+=`<div class="ab" style="left:864px;top:136px;transform:translate(-50%,-50%) rotate(45deg);font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.2em;color:#9c7a0c;white-space:nowrap">POLITBURO</div>`;
  h+=A(902,79,'width:40px;height:26px;border-radius:5px;border:1.5px dashed #d4af37');
+ h+=A(866,64,'width:24px;height:32px;border-radius:4px;border:2px solid #d4af37;background:radial-gradient(circle at 50% 45%,#d4af37 0 5px,transparent 6px),repeating-linear-gradient(45deg,#7d1d1a,#7d1d1a 5px,#5a1311 5px,#5a1311 9px);box-shadow:0 2px 0 rgba(0,0,0,.35)','');
  for(const d of D)for(let r=0;r<7;r++){const[x,y]=seatXY(d,r);h+=A(1000-x-20,y-13,`width:40px;height:26px;border-radius:5px;border:1.5px ${r===0?'solid':'dashed'} ${r===0?'#b8901c':DK[d]};opacity:${r===0?.9:.45}`)}
  const nums={P:1,N:2,I:3,R:4,J:5};
  for(const d of D){const a=ANG[d]*Math.PI/180,R=T0+TS*6+42;h+=`<div class="lbl" style="right:${R*Math.cos(a)}px;top:${R*Math.sin(a)-9}px;transform:rotate(${-ANG[d]}deg);transform-origin:100% 50%;font-size:15px;color:${DL[d]}">${nums[d]} · ${DN[d].toUpperCase()}</div>`}
@@ -867,6 +886,8 @@ function buildBoard(){
  h+=A(446,552,'width:76px;height:116px;border-radius:0 8px 8px 0;background:#e3eedb;border:2px solid #2c6e43;border-left:none;padding:4px 6px 0 0;text-align:right;font-family:Oswald,sans-serif;font-size:10.5px;letter-spacing:.05em;color:#1e5632','SHARASHKA');
  for(let i=0;i<3;i++)h+=A(463,583+i*30,'width:40px;height:26px;border-radius:4px;background:#fff;border:1px solid #7fa58a');
  // grave
+ const TR=[['SHARASHKA','safe','#2c6e43'],['GULAG','may return','#6d6a63'],['THE CANAL','alive, for now','#2b5f7e'],['SHOT','gone','#151515']];
+ TR.forEach((t,i)=>{h+=`<div class="trk" data-rung="${i}" style="left:${238+i*98}px;top:671px;width:94px;height:31px;background:${t[2]}"><b>${t[0]}</b>${t[1]}</div>`});
  h+=A(284,704,'width:344px;height:182px;border-radius:8px;background:#2a2a2a;padding:8px 12px;color:#ddd',`<div class="bt">THE GRAVE</div>`);
  // canal (top-left, running up to the White Sea)
  h+=CANAL_SVG.replace('pointer-events:none">','pointer-events:none"><g transform="translate(1000 0) scale(-1 1)">').replace(/<\/svg>$/,'</g></svg>');
@@ -908,6 +929,7 @@ function render(){
  document.querySelectorAll('[data-pc]').forEach(el=>{el.textContent=S.decks[el.dataset.pc].length});
  $('#discInfo').textContent=`Blue cards left: ${S.decks.N.length}`;
  $('#lineSlot').innerHTML=lineCardHTML();
+ {const r=S.M?trialRung(S.M):null;document.querySelectorAll('.trk').forEach(el=>el.classList.toggle('on',r!=null&&+el.dataset.rung===r))}
  // players
  let ph='';
  for(const p of S.players){const cnt={};D.forEach(d=>cnt[d]=0);p.hand.forEach(c=>cnt[CARDS[c].d]++);
@@ -917,6 +939,8 @@ function render(){
  $('#pl').innerHTML=ph;
  renderMine();renderHand();
 }
+function trialRung(M){if(!M||!M.ag||M.fizzle)return null;const a=M.ag;if(a.k==='troika')return 1;if(a.k!=='verdict'&&a.k!=='mass')return null;
+ if(a.x==='harsh'){const T=tally(M);return Math.max(0,Math.min(3,baseOf(M)+T.extra-T.soft))}return a.base||1}
 function lineCardHTML(){const c=S.line;const ld=lineDept();
  return `<div style="background:#f8f1df;border:2px solid #9c7a0c;border-radius:6px;padding:6px 8px;color:#2a1d17;font-size:11.5px;line-height:1.25" class="linecard" data-cid="${c.id}"><b>${esc(c.ag.t)}</b><div style="margin-top:5px;font-weight:700;color:${ld?DL[ld]:'#555'}">Names: ${ld?DN[ld]:'nobody'}</div></div>`}
 function renderMine(){
@@ -970,11 +994,34 @@ function nomChip(M){if(!M.ag)return'';const a=M.ag;let h='';
  if(a.z.seat==='LINE'){const ld=lineDept();const d=ld||M.nom;if(d)h+=`<span class="nom" style="background:${DC[d]};color:${DT[d]}">Target department: ${DN[d]}</span> <span style="font-size:12px;color:#d8c9ad">${ld?'named by the Party line':'the line names nobody, so the chair chose it'}</span>`}
  else if(a.x==='name'){const pl=samePlace(M);if(pl)h+=pl.t==='seat'?`<span class="nom" style="background:${DC[pl.d]};color:${DT[pl.d]}">Extra names must come from ${DN[pl.d]}</span>`:`<span class="nom" style="background:#5d5d66;color:#fff">Extra names must come from ${placeName(pl)}</span>`}
  return h?`<div style="width:100%">${h}</div>`:''}
-function tug(){const M=S.M;if(!M)return;let f='',a='';
+async function stalinDeal(M){
+ if(!S.sdeck.length){S.sdeck=shuffle(S.sdisc);S.sdisc=[]}
+ const cid=S.sdeck.pop();if(!cid)return;M.scard=cid;
+ const slot=document.createElement('div');slot.className='tslot';slot.innerHTML=stalinHTML(CARDS[cid],'fd')+`<div class="who">Stalin</div>`;
+ $('#trow').appendChild(slot);M.sEl=slot;
+ if(S.rh&&man(S.rh).owner===HUMAN){const c=CARDS[cid];slot.insertAdjacentHTML('beforeend',`<div class="peek">Your right hand (${man(S.rh).ini}) peeks: ${c.sv?c.sv+' ':''}${esc(c.txt)}</div>`);
+  cap(`Stalin's card is dealt face down. Your right hand, ${man(S.rh).name}, has seen it.`);}
+ else cap(`Stalin's card is dealt face down. He will speak last.`);
+ render();await wait(800);
+}
+async function stalinSpeak(M){
+ if(!M.scard||!M.sEl)return;const c=CARDS[M.scard];
+ $('#trow').appendChild(M.sEl);await wait(250);M.sEl.querySelector('.card').classList.remove('fd');M.sRevealed=true;
+ const pk=M.sEl.querySelector('.peek');if(pk)pk.remove();
+ M.plays.push({p:'S',cid:M.scard,resp:c.resp});
+ if(c.resp==='Defer')M.sDefer=true;
+ cap(`Stalin: ${c.sv?c.sv+' · ':''}${c.txt}`+(c.resp==='Defer'?' Nobody can overrule him.':''));tug();render();await wait(1500);
+}
+function stalinHTML(c,cls){
+ const col=c.resp==='Defer'?'#3d6b8a':c.sv&&c.sv[0]==='+'?'#2e8b57':c.sv&&c.sv[0]==='−'?'#c0392b':'#7d7d7d';
+ const big=c.resp==='Defer'?IC_DEF.replace('width="10" height="12"','width="26" height="30"'):c.sv;
+ return `<div class="card scard ${cls||''}"><div class="f"><div class="sh">STALIN</div><div class="sbig" style="background:${col}">${big}</div><div class="stx">${esc(c.txt)}</div></div><div class="b" style="background:radial-gradient(circle at 50% 45%,#d4af37 0 9px,transparent 10px),repeating-linear-gradient(45deg,#7d1d1a,#7d1d1a 7px,#5a1311 7px,#5a1311 13px)"></div></div>`;
+}
+function tug(){const M=S.M;if(!M)return;let f='',a='';{const r=trialRung(M);document.querySelectorAll('.trk').forEach(el=>el.classList.toggle('on',r!=null&&+el.dataset.rung===r))}
  for(const x of M.plays){if(x.resp==='Support')f+=v(1);if(x.resp==='Acclaim')f+=v(2);if(x.resp==='Doubt')a+=v(1,1);if(x.resp==='Protest')a+=v(2,1)}
  function v(n,ag){return `<span class="v" style="background:${ag?'#c0392b':'#27ae60'};${n>1?'width:22px':''}"></span>`}
  const T=tally(M);
- $('#tug').innerHTML=`<span>For</span><span class="side">${f||'–'}</span><span style="margin:0 6px">vs</span><span class="side">${a||'–'}</span><span>Against</span>`+(deferActive(M)?'<span style="margin-left:10px;color:#ffd84a">DEFERRED</span>':M.defer?'<span style="margin-left:10px;color:#9fd88a">Defer overruled</span>':'')+(T.fail&&M.ag.x!=='harsh'?'<span style="margin-left:10px;color:#e74c3c">failing</span>':'')+nomChip(M)+`<div class="fc">${esc(forecast(M))}</div>`;
+ $('#tug').innerHTML=(M.scard&&!M.sRevealed?'<span style="color:#e8b4a8;margin-right:8px">Stalin has not spoken yet.</span>':'')+`<span>For</span><span class="side">${f||'–'}</span><span style="margin:0 6px">vs</span><span class="side">${a||'–'}</span><span>Against</span>`+(deferActive(M)?'<span style="margin-left:10px;color:#ffd84a">DEFERRED</span>':M.defer?'<span style="margin-left:10px;color:#9fd88a">Defer overruled</span>':'')+(T.fail&&M.ag.x!=='harsh'?'<span style="margin-left:10px;color:#e74c3c">failing</span>':'')+nomChip(M)+`<div class="fc">${esc(forecast(M))}</div>`;
 }
 async function placeCard(c,p,who,mode,facedown,isAg){
  const slot=document.createElement('div');slot.className='tslot';
@@ -1054,7 +1101,8 @@ function rulesScreen(){
 <h2>2 · Five meetings</h2><p>Propaganda, NKVD, Industry, Red Army, Judiciary, in that order. A department meets only if someone has a revealed man in it. The owner of its highest revealed man chairs and goes first, then play goes clockwise. If you hold a card of that colour, you must play exactly one.</p>
 <p>The chair's card is read as an <b>agenda</b> (top left). Everyone else's card is read as a <b>response</b> (bottom right).</p>
 <h2>3 · The loudest voice</h2><p>Every response card shows its voice: <b>+1</b> Support, <b>+2</b> Acclaim, <b>−1</b> Doubt, <b>−2</b> Protest, <b>0</b> Abstain. Amend (the up-and-down arrows) and Defer (the hourglass) are not votes. Add the voices up: If the room is against, the agenda fails. If it is for, the agenda grows by the margin, but never beyond its loudest supporter (Support one step, Acclaim two). Amend moves the agenda one seat up or down. Defer postpones it to the department's next meeting, unless someone in the room plays an Acclaim, which overrules it. When the chair picks the department or the camp by choosing the subject, every supporter's extra name must come from the same place. Abstain says nothing. In trials, the voices make the sentence harsher or milder instead.</p>
-<h2>4 · Prisons</h2><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first: the sharashka, the Gulag, the White Sea Canal, the firing squad. The Canal moves along whenever an agenda pushes the work, and the end kills.</p>
+<h2>Stalin's chair</h2><p>At every meeting a card from Stalin's own small deck is dealt face down to his chair, and turned over after everyone else has spoken. It is pure weight: +2, +1, 0, −1 or −2 on the scales, and it never names anyone. His Defer cannot be overruled, not even by an Acclaim. Whoever owns the man in Stalin's right-hand seat may secretly look at Stalin's card before the meeting.</p>
+<h2>4 · Prisons</h2><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first, as shown on the track under the Lubyanka: the sharashka (safe, and the way back into Industry), the Gulag (alive, and may come back), the White Sea Canal (alive for now, but every department can push it along) and the firing squad. During a trial the current sentence glows on the track. The Canal moves along whenever an agenda pushes the work, and the end kills.</p>
 <h2>5 · Drawing</h2><p>At the end of the round everyone draws back up to fifteen, one card at a time, choosing the deck in the open. Whoever chaired the Judiciary decides who draws first.</p>
 <h2>The end</h2><p>The blue NKVD deck is the clock and is never reshuffled: it holds ten cards per player. When its last card is drawn, the Terror ends. For this playtest there is no declared winner: see how it feels.</p>
 <p style="color:#d8c9ad;font-size:13px">Playtest safeguard: if the NKVD does not meet in a round, one blue card is burned, so the game cannot stall forever.</p>
