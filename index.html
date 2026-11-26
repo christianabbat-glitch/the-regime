@@ -78,7 +78,7 @@ body.tall #app{flex-direction:column;height:auto}
 #res{margin-top:4px;font-size:14px;font-weight:700;color:#ffd84a;min-height:18px}
 #mine{display:flex;gap:6px;flex-wrap:wrap}
 .mc{width:82px;min-height:46px;background:#f3e9d2;color:#2a1d17;border-radius:6px;padding:3px 6px;font-size:10px;border-left:6px solid #999;position:relative;line-height:1.2}
-.mc b{font-size:12px;display:block}
+.mc b{font-size:11px;display:block;overflow-wrap:anywhere}
 .mc .rb{display:block;font-size:9px;font-weight:700;color:#7d1d1a;margin-top:1px}
 .mc.pick{outline:3px solid #ff2fd0;cursor:pointer}
 .mc.dead{opacity:.45}
@@ -98,8 +98,15 @@ body.tall #app{flex-direction:column;height:auto}
 .card .a b{font-size:9.5px;line-height:1.15;display:block}
 .card .a .ad,.card .a .as,.card .r .rf{display:none}
 .card .r{position:absolute;right:6px;bottom:6px;left:6px;text-align:right}
-.card .r b{font-family:Oswald,sans-serif;font-size:13px;letter-spacing:.05em}
-.card .fate{position:absolute;left:5px;bottom:5px;font-size:7.5px;font-weight:700;color:#7d1d1a;text-transform:uppercase}
+.card .r b{font-family:Oswald,sans-serif;font-size:12px;letter-spacing:.04em;vertical-align:middle}
+.rv{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;border-radius:10px;font-family:Oswald,sans-serif;font-size:11.5px;font-weight:600;color:#fff;padding:0 4px;vertical-align:middle;margin-right:3px;letter-spacing:0}
+.hi{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:12px;border-radius:6px;font-family:Oswald,sans-serif;font-size:9.5px;font-weight:600;color:#fff;padding:0 3px;margin-right:5px;letter-spacing:0;box-shadow:0 0 0 1px rgba(255,255,255,.85)}
+.rv.pos,.hi.pos{background:#2e8b57}.rv.neg,.hi.neg{background:#c0392b}.rv.zero,.hi.zero{background:#7d7d7d}.rv.def,.hi.def{background:#3d6b8a}.rv.amd,.hi.amd{background:#7b4fa0}
+.hi svg{width:8px;height:10px}
+.card.mid .rv{min-width:24px;height:24px;font-size:14px;border-radius:12px}
+.card.big .rv{min-width:28px;height:28px;font-size:16px;border-radius:14px}
+.card.big .hi{height:16px;min-width:22px;font-size:12px;border-radius:8px}
+.card .fate{position:absolute;left:5px;bottom:27px;font-size:7.5px;font-weight:700;color:#7d1d1a;text-transform:uppercase}
 .card.ag .r{opacity:.3}.card.rs .a{opacity:.3}
 .card.mid{width:150px;height:212px}
 .card.mid .h{height:20px;font-size:11px}
@@ -108,7 +115,7 @@ body.tall #app{flex-direction:column;height:auto}
 .card.mid .a .ad{display:block;font-size:10.5px;margin-top:4px;line-height:1.25}
 .card.mid .a .as{display:block;font-size:10px;margin-top:3px;font-style:italic;color:#5a4a30}
 .card.mid .r b{font-size:16px}
-.card.mid .fate{font-size:9px}
+.card.mid .fate{font-size:9px;bottom:34px}
 .card.big{width:220px;height:312px}
 .card.big .h{height:24px;font-size:13px}
 .card.big .a{top:30px;left:10px;right:22px}
@@ -118,7 +125,7 @@ body.tall #app{flex-direction:column;height:auto}
 .card.big .r{right:10px;bottom:10px}
 .card.big .r b{font-size:20px}
 .card.big .r .rf{display:block;font-size:11.5px;font-style:italic;line-height:1.25}
-.card.big .fate{font-size:10px;bottom:10px;left:10px}
+.card.big .fate{font-size:10px;bottom:44px;left:10px}
 .card.chr .f{background:#f3e9d2}
 .card.chr .cn{position:absolute;top:22px;left:7px;right:7px;font-weight:700;font-size:11px;line-height:1.15}
 .card.chr .ct{position:absolute;top:56px;left:7px;right:7px;font-size:9px;line-height:1.2;color:#5a4a30}
@@ -859,11 +866,14 @@ function renderMine(){
  if(PEND&&PEND.kind==='corridor')h+=`<div class="mc blank pick" data-m="blank">The blank: stay silent</div>`;
  $('#mine').innerHTML=`<div style="font-size:11px;color:#d8c9ad;width:100%">Your men (only you can see this):</div>`+h;
 }
+const IC_DEF='<svg viewBox="0 0 12 14" width="10" height="12" aria-label="Defer"><path d="M2 1h8M2 13h8M3 1c0 4 6 4 6 6s-6 2-6 6M9 1c0 4-6 4-6 6s6 2 6 6" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+const IC_AMD='<svg viewBox="0 0 12 14" width="10" height="12" aria-label="Amend"><path d="M6 1v12M2.5 4.5L6 1l3.5 3.5M2.5 9.5L6 13l3.5-3.5" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>';
+const RV={Support:['+1','pos'],Acclaim:['+2','pos'],Doubt:['−1','neg'],Protest:['−2','neg'],Abstain:['0','zero'],Defer:[IC_DEF,'def'],Amend:[IC_AMD,'amd']};
 function cardHTML(c,cls){
  if(!c)return'';
- const a=c.ag;const hd=`<div class="h" style="background:${DC[c.d]};color:${DT[c.d]}">${DN[c.d].toUpperCase()}</div>`;
+ const a=c.ag;const rv=RV[c.resp]||['','zero'];const hd=`<div class="h" style="background:${DC[c.d]};color:${DT[c.d]}"><span class="hi ${rv[1]}">${rv[0]}</span>${DN[c.d].toUpperCase()}</div>`;
  const fate=c.fate?`<div class="fate">Fate: ${c.fate}</div>`:'';
- return `<div class="card ${cls||''}" data-cid="${c.id}"><div class="f">${hd}<div class="a"><b>${esc(a.t)}</b><span class="ad">${esc(a.d)}</span><span class="as">${esc(a.s)}</span></div><div class="r"><b>${c.resp.toUpperCase()}</b><span class="rf">${esc(FLAV[c.d][c.resp]||'')}</span></div>${fate}</div><div class="b" style="background:repeating-linear-gradient(45deg,${DC[c.d]},${DC[c.d]} 7px,${DK[c.d]} 7px,${DK[c.d]} 13px)"></div></div>`;
+ return `<div class="card ${cls||''}" data-cid="${c.id}"><div class="f">${hd}<div class="a"><b>${esc(a.t)}</b><span class="ad">${esc(a.d)}</span><span class="as">${esc(a.s)}</span></div><div class="r"><span class="rv ${rv[1]}">${rv[0]}</span><b>${c.resp.toUpperCase()}</b><span class="rf">${esc(FLAV[c.d][c.resp]||'')}</span></div>${fate}</div><div class="b" style="background:repeating-linear-gradient(45deg,${DC[c.d]},${DC[c.d]} 7px,${DK[c.d]} 7px,${DK[c.d]} 13px)"></div></div>`;
 }
 function charCard(id){return{chr:true,id}}
 function charHTML(o,cls){
@@ -970,7 +980,7 @@ function rulesScreen(){
 <h2>1 · The corridor</h2><p>Everyone lays one card face down: one of his men, or the blank. They flip together, and anyone who came forward is revealed for good.</p>
 <h2>2 · Five meetings</h2><p>Propaganda, NKVD, Industry, Red Army, Judiciary, in that order. A department meets only if someone has a revealed man in it. The owner of its highest revealed man chairs and goes first, then play goes clockwise. If you hold a card of that colour, you must play exactly one.</p>
 <p>The chair's card is read as an <b>agenda</b> (top left). Everyone else's card is read as a <b>response</b> (bottom right).</p>
-<h2>3 · The loudest voice</h2><p>Support (1) and Acclaim (2) are for; Doubt (1) and Protest (2) are against. If the room is against, the agenda fails. If it is for, the agenda grows by the margin, but never beyond its loudest supporter (Support one step, Acclaim two). Amend moves the agenda one seat up or down. Defer postpones it to the department's next meeting. Abstain says nothing. In trials, the voices make the sentence harsher or milder instead.</p>
+<h2>3 · The loudest voice</h2><p>Every response card shows its voice: <b>+1</b> Support, <b>+2</b> Acclaim, <b>−1</b> Doubt, <b>−2</b> Protest, <b>0</b> Abstain. Amend (the up-and-down arrows) and Defer (the hourglass) are not votes. Add the voices up: If the room is against, the agenda fails. If it is for, the agenda grows by the margin, but never beyond its loudest supporter (Support one step, Acclaim two). Amend moves the agenda one seat up or down. Defer postpones it to the department's next meeting. Abstain says nothing. In trials, the voices make the sentence harsher or milder instead.</p>
 <h2>4 · Prisons</h2><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first: the sharashka, the Gulag, the White Sea Canal, the firing squad. The Canal moves along whenever an agenda pushes the work, and the end kills.</p>
 <h2>5 · Drawing</h2><p>At the end of the round everyone draws back up to ten, one card at a time, choosing the deck in the open. Whoever chaired the Judiciary decides who draws first.</p>
 <h2>The end</h2><p>The blue NKVD deck is the clock and is never reshuffled: it holds eight cards per player. When its last card is drawn, the Terror ends. For this playtest there is no declared winner: see how it feels.</p>
