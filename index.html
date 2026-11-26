@@ -162,6 +162,10 @@ body.tall #app{flex-direction:column;height:auto}
 .np button.on{border-color:#ffd84a}
 .go{background:#ffd84a!important;color:#2a1d17!important;border:none!important;font-weight:700;font-size:16px!important;padding:10px 20px!important;border-radius:8px}
 table.fin{border-collapse:collapse;width:100%;font-size:13px}
+.ovb input{font:inherit;padding:7px 9px;border-radius:6px;border:1px solid #7a5a45;background:#f8f1df;color:#2a1d17}
+.lf{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}.lerr{color:#ff9a8a;min-height:1em}
+#netbar{position:fixed;left:8px;bottom:6px;z-index:40;font-size:12px;background:rgba(26,18,13,.88);color:#e8dcc0;padding:4px 9px;border-radius:6px;border:1px solid #5a4030;pointer-events:none}
+#netbar.bad{background:#7d1d1a;color:#fff;border-color:#ff8a7a}
 table.fin td,table.fin th{border-bottom:1px solid #5a4030;padding:5px 6px;text-align:left;vertical-align:top}
 .fly{position:fixed;z-index:30;pointer-events:none;transition:left .55s ease,top .55s ease,transform .55s ease}
 </style>
@@ -334,19 +338,20 @@ const LINE0={id:'L0',d:'P',ag:{t:'Vigilance against the Trotskyite conspiracy.',
 // ================= UTIL =================
 const $=s=>document.querySelector(s);
 let RNG=Math.random;
-function rnd(n){return Math.floor(RNG()*n)}
+let GRNG=Math.random; // the game's dice: seeded, so every browser in an online game rolls the same
+function rnd(n){return Math.floor(GRNG()*n)}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
 function seeded(seed){let s=seed>>>0;return()=>{s=(s+0x6D2B79F5)|0;let t=Math.imul(s^(s>>>15),1|s);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}}
 let SPEED=1,PAUSED=false,GEN=0;
 const CANCEL={};
-async function wait(ms){const g=GEN;if(window.__fast){await new Promise(r=>setTimeout(r,0));if(g!==GEN)throw CANCEL;return}
+async function wait(ms){const g=GEN;if(catchingUp()){await null;if(g!==GEN)throw CANCEL;return}if(window.__fast){await new Promise(r=>setTimeout(r,0));if(g!==GEN)throw CANCEL;return}
  let t=0;const step=50;while(t<ms*SPEED||PAUSED){await new Promise(r=>setTimeout(r,step));if(g!==GEN)throw CANCEL;if(!PAUSED)t+=step}}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 
 // ================= DECKS =================
 let CARDS={};
 function buildDecks(){
- const r=seeded(1937);const keep=RNG;RNG=r;
+ const r=seeded(1937);const keep=GRNG;GRNG=r;
  const decks={};CARDS={};let n=0;
  for(const d of D){
   const mult=d==='N'?1:2; // the four everyday decks are printed twice over, so they never run dry
@@ -357,12 +362,13 @@ function buildDecks(){
   const fates=[];for(const k in FATES)for(let c=0;c<FATES[k]*mult;c++)fates.push(k);shuffle(fates);
   decks[d]=ags.map((ai,j)=>{const id='c'+(n++);const c={id,d,ag:AG[d][ai],resp:rs[j]};if(d==='J')c.fate=fates[j%fates.length];CARDS[id]=c;return id});
  }
- RNG=keep;return decks;
+ GRNG=keep;return decks;
 }
 
 // ================= STATE =================
-let S=null;const HUMAN=0;
-function newState(np){
+let S=null;let HUMAN=0; // the seat this browser plays
+function newState(np,seed,names,humans){
+ GRNG=seeded(seed==null?Math.floor(Math.random()*2147483647):seed);
  const decks=buildDecks();
  S={np,round:0,players:[],men:{},seats:{P:[],N:[],I:[],R:[],J:[]},rh:null,kal:null,lub:[],shar:[],gulag:[],canal:Array(8).fill(null),exile:[],grave:[],
   decks:{},disc:{P:[],N:[],I:[],R:[],J:[]},line:LINE0,deferred:{},over:false,M:null,stats:{arrests:0,deaths:0,skipped:0,meetings:0,burn:0,verdicts:0,toGulag:0,toCanal:0,toShot:0,toShar:0,moves:0,resh:0},firstDraw:0,nkvdMet:false};
@@ -372,7 +378,7 @@ function newState(np){
  castMen().forEach((m,i)=>{const id='m'+i;const pts=m[2].split(' ');S.men[id]={id,home:m[0],sn:m[1],name:m[2],title:m[3],ini:m[4]||pts[0][0]+pts[pts.length-1][0],owner:null,rev:false,nobody:false,medal:0,from:null};
   if(D.includes(m[0]))S.seats[m[0]].push(id);else if(m[0]==='RH')S.rh=id;else if(m[0]==='K')S.kal=id;else S.exile.push(id)});
  {const seen={};for(const k in S.men){const i=S.men[k].ini;if(seen[i])console.warn('duplicate initials',i);seen[i]=1}}
- for(let p=0;p<np;p++)S.players.push({i:p,name:PNAMES[p],ai:p!==HUMAN,hand:[]});
+ for(let p=0;p<np;p++)S.players.push({i:p,name:names?names[p]:PNAMES[p],ai:humans?!humans.includes(p):p!==HUMAN,hand:[]});
  const ids=shuffle(Object.keys(S.men));
  for(let p=0;p<np;p++)for(let k=0;k<6;k++){S.men[ids[p*6+k]].owner=p}
  for(const p of S.players)for(const d of D)for(let k=0;k<3;k++)p.hand.push(S.decks[d].pop());
@@ -438,13 +444,11 @@ function transferMsg(id,to,r){const nm=x=>`${man(x).sn} (${man(x).ini})`;
 // A freed prisoner goes to his card's department; if it is full, the chair seats him wherever there is room.
 async function freeInto(M,id,pref,verb){const nm=x=>`${man(x).sn} (${man(x).ini})`;
  if(enter(pref,id))return`${nm(id)} ${verb} ${DN[pref]}`;
- const opts=D.filter(d=>S.seats[d].length<7);
- if(!opts.length)return`no department has a free seat, so ${nm(id)} stays where he is`;
- const ch=M.lead;let d;
- if(ch===HUMAN){cap(`${DN[pref]} is full.`,`You chair: choose a department with a free seat for ${man(id).name} (${man(id).ini}).`);d=await ask('dept',{opts,id})}
- else d=aiFreeDept(ch,id,opts);
- enter(d,id);render();
- return`${DN[pref]} is full, so ${ch===HUMAN?'you seat':P(ch).name+' seats'} ${nm(id)} in ${DN[d]}`}
+ const a=S.seats[pref];const bm=a[a.length-1];const w=where(id);
+ if(!bm||!['gulag','shar','lub','canal'].includes(w.t))return`${DN[pref]} is full, so ${nm(id)} stays where he is`;
+ if(w.t==='canal')S.canal[w.i]=bm;else S[w.t][w.i]=bm;a[a.length-1]=id;man(bm).from=pref;
+ const place={gulag:'the Gulag',shar:'the sharashka',lub:'the Lubyanka',canal:'the Canal'}[w.t];
+ return`${DN[pref]} is full, so ${nm(id)} takes its bottom seat and ${nm(bm)} goes to ${place} in his place`}
 function aiFreeDept(p,id,opts){const mine=man(id).owner===p;let best=opts[0],bv=-1e9;
  for(const d of opts){const tc=topClaim(d);let v=RNG()*0.1+(7-S.seats[d].length)*0.02;if(mine&&tc&&tc.p===p)v+=0.3;if(mine&&!tc)v+=0.2;if(!mine&&tc&&tc.p===p)v-=0.1;if(v>bv){bv=v;best=d}}return best}
 function sentence(id,r){S.stats.verdicts++;if(r<=0){if(toShar(id))S.stats.toShar++;else{toGulag(id);S.stats.toGulag++}}else if(r===1){toGulag(id);S.stats.toGulag++}else if(r===2){toCanal(id);S.stats.toCanal++}else{kill(id);S.stats.toShot++}}
@@ -545,8 +549,7 @@ async function pickDest(p,M){
  if(!M.ag||!['vacancy','cadres'].includes(M.ag.k)||!M.subj||M.fizzle)return;
  const opts=destOpts(M.ag,M.subj);if(M.to&&opts.includes(M.to))return;if(!opts.length){M.fizzle=true;return}
  if(opts.length===1){M.to=opts[0];return}
- if(p===HUMAN){cap(`Agenda: “${M.ag.t}”`,`Choose where ${man(M.subj).name} (${man(M.subj).ini}) goes.`);M.to=await ask('dept',{opts,id:M.subj,ai:()=>bestDest(HUMAN,M,M.subj)})}
- else M.to=bestDest(p,M,M.subj)}
+ M.to=await decide(p,()=>{cap(`Agenda: “${M.ag.t}”`,`Choose where ${man(M.subj).name} (${man(M.subj).ini}) goes.`);return ask('dept',{opts,id:M.subj,ai:()=>bestDest(HUMAN,M,M.subj)})},()=>bestDest(p,M,M.subj),`Waiting for ${P(p).name}…`)}
 function agVal(p,M,subj){
  const a=M.ag;
  if(a.k==='swap'){const b=swapPartner(a,subj);return b?reshVal(p,subj,b):0}
@@ -602,13 +605,13 @@ function aiCorridor(p){
 function aiReopen(p,d,dfr){const dc=CARDS[dfr.cid];const tmp={ag:dc.ag,named:[],subj:null,d};const ids=dc.ag.z.none?null:areaIds(dc.ag);
  let vOld;if(ids&&!ids.length)vOld=-0.05;else{const s0=ids?(ids.includes(dfr.subj)?dfr.subj:bestSubj(p,tmp,ids)):null;vOld=agVal(p,tmp,s0,0)}
  const b=aiLead(p,d);if(!b||vOld>=b.v)return{reopen:true};return{reopen:false,cid:b.cid,subj:b.subj}}
-function aiReveal(p,opts){return opts[rnd(opts.length)]}
+function aiReveal(p,opts){return opts[Math.floor(RNG()*opts.length)]}
 function aiDeck(p){
  const cnt={};D.forEach(d=>cnt[d]=0);P(p).hand.forEach(c=>cnt[CARDS[c].d]++);
  const ok=D.filter(d=>canDraw(d));if(!ok.length)return null;
  ok.sort((a,b)=>cnt[a]-cnt[b]+(RNG()-0.5)*0.9);return ok[0];
 }
-function aiFirst(p){const o=S.players.filter(q=>q.i!==p);return o[rnd(o.length)].i}
+function aiFirst(p){const o=S.players.filter(q=>q.i!==p);return o[Math.floor(RNG()*o.length)].i}
 
 // ================= HUMAN INPUT =================
 let PEND=null,SEL=null;
@@ -661,20 +664,15 @@ async function setupReveal(){
   let opts=mine.filter(id=>{const w=where(id);return w.t==='seat'&&!opened.has(w.d)});
   if(!opts.length)opts=mine;
   if(!opts.length)continue;
-  let id;
-  if(p===HUMAN){cap('Setup: reveal one of your men.','Click one of your men below. He must sit in a department nobody has revealed in yet, if you can.');id=await ask('reveal',{ids:opts})}
-  else{cap(`${P(p).name} is choosing a man to reveal…`);await wait(500);id=aiReveal(p,opts)}
+  if(p!==HUMAN){cap(`${P(p).name} is choosing a man to reveal…`);await wait(500)}
+  const id=await decide(p,()=>{cap('Setup: reveal one of your men.','Click one of your men below. He must sit in a department nobody has revealed in yet, if you can.');return ask('reveal',{ids:opts})},()=>aiReveal(p,opts),`Waiting for ${P(p).name} to reveal a man…`);
   man(id).rev=true;cap(`${P(p).name} reveal${p===HUMAN?'':'s'} ${man(id).name} (${man(id).ini}, ${locName(id)}).`);render();flashTok([id]);await wait(1100);
  }
 }
 async function corridor(){
  clearTable(`${S.finalRound?'Final round':'Round '+S.round} · The corridor`,'Everyone lays one card face down: one of his men, or the blank.');
  cap(`Round ${S.round}. The corridor: does anyone wish to come forward?`);render();
- const picks=[];
- for(let p=0;p<S.np;p++){
-  if(p===HUMAN){picks[p]=await ask('corridor',{})}
-  else picks[p]=aiCorridor(p);
- }
+ const picks=await decideAll(S.players.map(q=>q.i),p=>[async()=>{const v=await ask('corridor',{});cap('Waiting for the others to choose…');render();return v},()=>aiCorridor(p)]);
  const els=[];
  for(let p=0;p<S.np;p++){els.push(await placeCard(charCard(picks[p]),p,P(p).name,'chr',true));await wait(180)}
  await wait(500);
@@ -702,11 +700,10 @@ async function meeting(d){
  if(dfr){
   const dc=CARDS[dfr.cid],ch=order[0];
   M.agEl=await placeCard(dc,null,'deferred agenda','ag',false,true);
-  if(ch===HUMAN){
-   cap(`A deferred agenda is waiting: “${dc.ag.t}”`,'You chair: reopen it with the button, or choose a new agenda from your hand (the deferred one is then dropped).');
-   const r=await ask('lead',{d,cids:P(ch).hand.filter(c=>CARDS[c].d===d),reopen:true});
-   if(r==='REOPEN')reopen=true;else preCid=r;
-  }else{cap(`A deferred agenda is waiting: “${dc.ag.t}”. ${P(ch).name} chairs and decides…`);render();await wait(900);const o=aiReopen(ch,d,dfr);reopen=o.reopen;preCid=o.cid;preSubj=o.subj}
+  if(ch!==HUMAN){cap(`A deferred agenda is waiting: “${dc.ag.t}”. ${P(ch).name} chairs and decides…`);render();await wait(900)}
+  const r=await decide(ch,()=>{cap(`A deferred agenda is waiting: “${dc.ag.t}”`,'You chair: reopen it with the button, or choose a new agenda from your hand (the deferred one is then dropped).');return ask('lead',{d,cids:P(ch).hand.filter(c=>CARDS[c].d===d),reopen:true})},
+   ()=>{const o=aiReopen(ch,d,dfr);return o.reopen?'REOPEN':{cid:o.cid,subj:o.subj}},`A deferred agenda is waiting: “${dc.ag.t}”. Waiting for ${P(ch).name} to decide…`);
+  if(r==='REOPEN')reopen=true;else if(typeof r==='string')preCid=r;else{preCid=r.cid;preSubj=r.subj}
   delete S.deferred[d];
   if(reopen){
    M.card=dfr.cid;M.ag=dc.ag;M.resumed=true;resp=order;if(dfr.base!=null)M.base=dfr.base;
@@ -719,15 +716,15 @@ async function meeting(d){
  if(!reopen){
   const p=order[0];let cid=preCid,subj=preSubj;
   if(!cid){
-   if(p===HUMAN){
-    cap(`You chair the ${DN[d]} meeting.`,'Choose an agenda: click a card in your hand, then click it again to propose it.');
-    cid=await ask('lead',{d,cids:P(p).hand.filter(c=>CARDS[c].d===d)});
-   }else{cap(`${P(p).name} chairs the ${DN[d]} meeting and proposes an agenda…`);render();await wait(700);const b=aiLead(p,d);cid=b.cid;subj=b.subj}
+   if(p!==HUMAN){cap(`${P(p).name} chairs the ${DN[d]} meeting and proposes an agenda…`);render();await wait(700)}
+   const r=await decide(p,()=>{cap(`You chair the ${DN[d]} meeting.`,'Choose an agenda: click a card in your hand, then click it again to propose it.');return ask('lead',{d,cids:P(p).hand.filter(c=>CARDS[c].d===d)})},
+    ()=>{const b=aiLead(p,d);return{cid:b.cid,subj:b.subj}},`${P(p).name} chairs the ${DN[d]} meeting. Waiting for an agenda…`);
+   if(typeof r==='string')cid=r;else{cid=r.cid;subj=r.subj}
   }
   takeCard(p,cid);M.card=cid;M.ag=CARDS[cid].ag;
   M.agEl=await placeCard(CARDS[cid],p,P(p).name,'ag',true,true);await wait(350);M.agEl.querySelector('.card').classList.remove('fd');await wait(600);
   const ids=M.ag.z.none?null:areaIds(M.ag);
-  if(ids){if(!ids.length){M.fizzle=true}else if(M.ag.z.fixed)M.subj=ids[0];else if(p===HUMAN)M.subj=await chooseSubject(p,M,ids);else M.subj=subj&&ids.includes(subj)?subj:bestSubj(p,M,ids)}
+  if(ids){if(!ids.length){M.fizzle=true}else if(M.ag.z.fixed)M.subj=ids[0];else M.subj=await chooseSubject(p,M,ids,subj)}
   setNom(M);await pickMore(p,M);await pickPartner(p,M);await pickDest(p,M);await proposeFate(M);
   cap(`${P(p).name} propose${p===HUMAN?'':'s'}: “${M.ag.t}”`+(M.subj?` Subject: ${man(M.subj).name} (${man(M.subj).ini})`+(M.named.length?`, with ${M.named.map(x=>man(x).name+' ('+man(x).ini+')').join(', ')}`:'')+'.'+(M.to?` He would move to ${DN[M.to]}.`:'')+(partnerOf(M)?` He would trade places with ${man(partnerOf(M)).name} (${man(partnerOf(M)).ini}) of ${DN[M.pd]}.`:''):M.fizzle?' There is no one it can apply to.':''));
  }
@@ -737,14 +734,15 @@ async function meeting(d){
  for(const p of resp){
   if(!hand(p).some(c=>c.d===d))continue;
   let cid;
-  if(p===HUMAN){cap(`Your turn to speak in the ${DN[d]} meeting.`,'You must play one of your '+DN[d]+' cards. Its response (bottom right) counts. Click a card, then click it again to play it.');cid=await ask('resp',{d,cids:P(p).hand.filter(c=>CARDS[c].d===d)})}
-  else{cap(`${P(p).name} speaks…`);render();await wait(500);cid=aiRespond(p,M)}
+  if(p!==HUMAN){cap(`${P(p).name} speaks…`);render();await wait(500)}
+  cid=await decide(p,()=>{cap(`Your turn to speak in the ${DN[d]} meeting.`,'You must play one of your '+DN[d]+' cards. Its response (bottom right) counts. Click a card, then click it again to play it.');return ask('resp',{d,cids:P(p).hand.filter(c=>CARDS[c].d===d)})},
+   ()=>aiRespond(p,M),`Waiting for ${P(p).name} to speak…`);
   takeCard(p,cid);const c=CARDS[cid];
   const el=await placeCard(c,p,P(p).name,'rs',true);await wait(300);el.querySelector('.card').classList.remove('fd');
   let resp=c.resp,pmNote='';
   if(resp==='Either'){let sg;
-   if(p===HUMAN){cap(`Your ±1: “${FLAV[d].Either}”`,'Choose which way it counts.');sg=await ask('dir',{labels:['−1 (against)','+1 (for)']})}
-   else sg=respUtil(p,M,'Support')>=respUtil(p,M,'Doubt')?1:-1;
+   sg=await decide(p,()=>{cap(`Your ±1: “${FLAV[d].Either}”`,'Choose which way it counts.');return ask('dir',{labels:['−1 (against)','+1 (for)']})},
+    ()=>respUtil(p,M,'Support')>=respUtil(p,M,'Doubt')?1:-1,`Waiting for ${P(p).name} to choose which way the ±1 counts…`);
    resp=sg>0?'Support':'Doubt';pmNote=` (±1 played as ${sg>0?'+1':'−1'})`}
   M.plays.push({p,cid,resp,pm:c.resp==='Either'});
   await wait(500);
@@ -752,10 +750,12 @@ async function meeting(d){
   if(c.resp==='Amend'){const slots=amendSlots(M);
    if(!slots.length)note+=' There is no name on the agenda to change.';
    else{let o=null,n=null;
-    if(p===HUMAN){const pk=aiAmendPick(HUMAN,M);
-     if(slots.length>1){cap(note,'Amend: click the man you want taken off the agenda.');o=await ask('man',{ids:slots,ai:()=>pk?pk.o:slots[0]})}else o=slots[0];
-     const opts=amendOpts(M,o);if(opts.length){cap(note,`Amend: click any man to put on the agenda in place of ${man(o).sn}.`);n=await ask('man',{ids:opts,ai:()=>pk&&pk.o===o?pk.n:opts[0]})}}
-    else{const pk=aiAmendPick(p,M);if(pk){o=pk.o;n=pk.n}}
+    const am=await decide(p,async()=>{const pk=window.__auto?aiAmendPick(HUMAN,M):null;let o=null,n=null;
+      if(slots.length>1){cap(note,'Amend: click the man you want taken off the agenda.');o=await ask('man',{ids:slots,ai:()=>pk?pk.o:slots[0]})}else o=slots[0];
+      const opts=amendOpts(M,o);if(opts.length){cap(note,`Amend: click any man to put on the agenda in place of ${man(o).sn}.`);n=await ask('man',{ids:opts,ai:()=>pk&&pk.o===o?pk.n:opts[0]})}
+      return o&&n?{o,n}:null},
+     ()=>{const pk=aiAmendPick(p,M);return pk?{o:pk.o,n:pk.n}:null},`Waiting for ${P(p).name} to amend the agenda…`);
+    if(am){o=am.o;n=am.n}
     if(o&&n){if(M.subj===o)M.subj=n;else M.named=M.named.map(x=>x===o?n:x);note+=` The agenda now names ${man(n).sn} (${man(n).ini}) instead of ${man(o).sn}.`}
     else note+=' The agenda is left as it is.'}
   }
@@ -774,18 +774,18 @@ async function pickMore(p,M){
  if(!M.ag||M.ag.x!=='pick'||!M.subj||M.fizzle)return;
  while(1+M.named.length<(M.ag.pk||1)){const opts=nameable(M);if(!opts.length)break;
   const best=q=>{let b=opts[0],bv=-1e9;for(const id of opts){const v=agVal(q,{ag:M.ag,named:M.named.concat([id]),subj:M.subj,d:M.d},M.subj)+RNG()*0.02;if(v>bv){bv=v;b=id}}return b};
-  let n;if(p===HUMAN){cap(`Agenda: “${M.ag.t}”`,`The card names ${M.ag.pk}: click the next man.`);n=await ask('man',{ids:opts,ai:()=>best(HUMAN)})}else n=best(p);
+  const n=await decide(p,()=>{cap(`Agenda: “${M.ag.t}”`,`The card names ${M.ag.pk}: click the next man.`);return ask('man',{ids:opts,ai:()=>best(HUMAN)})},()=>best(p),`Waiting for ${P(p).name} to name the next man…`);
   M.named.push(n)}}
 async function pickPartner(p,M){
  if(!M.ag||M.ag.k!=='reshuffle'||!M.subj||M.fizzle)return;if(partnerOf(M))return;
  const ids=partnerCands(M.subj);if(!ids.length){M.fizzle=true;return}
  const aiP=q=>{let b=ids[0],bv=-1e9;for(const x of ids){const v=reshVal(q,M.subj,x)+RNG()*0.03;if(v>bv){bv=v;b=x}}return b};
- let b;if(p===HUMAN){cap(`Agenda: “${M.ag.t}”`,`Now choose the man ${man(M.subj).sn} trades places with: the same rank, in another department.`);b=await ask('man',{ids,ai:()=>aiP(HUMAN)})}else b=aiP(p);
+ const b=await decide(p,()=>{cap(`Agenda: “${M.ag.t}”`,`Now choose the man ${man(M.subj).sn} trades places with: the same rank, in another department.`);return ask('man',{ids,ai:()=>aiP(HUMAN)})},()=>aiP(p),`Waiting for ${P(p).name}…`);
  M.pd=where(b).d}
 function bestSubj(p,M,ids){let best=ids[0],bv=-1e9;for(const id of ids){const v=agVal(p,M,id,0)+RNG()*0.03;if(v>bv){bv=v;best=id}}return best}
-async function chooseSubject(p,M,ids){
- if(p===HUMAN){cap(`Agenda: “${M.ag.t}”`,'Choose the subject: click one of the highlighted men.');return await ask('man',{ids,ai:()=>bestSubj(HUMAN,M,ids)})}
- return bestSubj(p,M,ids);
+async function chooseSubject(p,M,ids,hint){
+ return await decide(p,()=>{cap(`Agenda: “${M.ag.t}”`,'Choose the subject: click one of the highlighted men.');return ask('man',{ids,ai:()=>bestSubj(HUMAN,M,ids)})},
+  ()=>hint&&ids.includes(hint)?hint:bestSubj(p,M,ids),`Waiting for ${P(p).name} to choose whom the agenda names…`);
 }
 const VOICE={Support:1,Acclaim:1,Doubt:-1};
 function tally(M){let f=0,a=0;for(const x of M.plays){const v=VOICE[x.resp]||0;if(v>0)f+=v;else a-=v}
@@ -881,8 +881,8 @@ async function drawPhase(){
  clearTable(`End of round ${S.round}`,`Everyone draws back up to ${HAND} cards, one at a time, in the open.`);
  let first;
  if(S.lastJ!=null){const j=S.lastJ;
-  if(j===HUMAN){cap('You chaired the Judiciary, so you decide who draws first.','Click the player who should draw first.');first=await ask('player',{})}
-  else{first=aiFirst(j);cap(`${P(j).name} chaired the Judiciary and has ${first===HUMAN?'you':P(first).name} draw first.`);render();await wait(1100)}
+  first=await decide(j,()=>{cap('You chaired the Judiciary, so you decide who draws first.','Click the player who should draw first.');return ask('player',{})},()=>aiFirst(j),`${P(j).name} chaired the Judiciary. Waiting for him to choose who draws first…`);
+  if(j!==HUMAN){cap(`${P(j).name} chaired the Judiciary and has ${first===HUMAN?'you':P(first).name} draw first.`);render();await wait(1100)}
  }else first=S.firstDraw;
  S.lastJ=null;S.firstDraw=(first+1)%S.np;
  const order=cw(first);
@@ -890,8 +890,8 @@ async function drawPhase(){
  while(order.some(p=>P(p).hand.length<HAND)&&D.some(canDraw)&&guard++<120){
   for(const p of order){if(P(p).hand.length>=HAND)continue;if(!D.some(canDraw))break;
    let d;
-   if(p===HUMAN){cap(`Draw: you have ${P(p).hand.length} cards.`,'Click one of Stalin’s decks on the board to draw from it.');d=await ask('deck',{})}
-   else{d=aiDeck(p);await wait(260)}
+   d=await decide(p,()=>{cap(`Draw: you have ${P(p).hand.length} cards.`,'Click one of Stalin’s decks on the board to draw from it.');return ask('deck',{})},()=>aiDeck(p),`Waiting for ${P(p).name} to draw…`);
+   if(p!==HUMAN)await wait(260);
    if(!d)continue;drawCard(p,d);cap(`${P(p).name} draw${p===HUMAN?'':'s'} a${'NI'.includes(d)?'n':''} ${DN[d]} card.`);render();
   }
  }
@@ -911,12 +911,12 @@ function posRaw(id){const w=where(id);
  switch(w.t){
  case'seat':return seatXY(w.d,w.r);
  case'rh':return[78,92];case'kal':return[590,940];
- case'lub':{const i=Math.min(w.i,19);return[590+(i%4)*48,516+Math.floor(i/4)*32+(w.i>19?(w.i-19)*3:0)]}
+ case'lub':{const i=Math.min(w.i,19);return[590+(3-i%4)*48,516+Math.floor(i/4)*32+(w.i>19?(w.i-19)*3:0)]}
  case'shar':return[517,596+w.i*30];
- case'gulag':{const i=Math.min(w.i,27);return[48+(i%4)*50,786+Math.floor(i/4)*30+(w.i>27?(w.i-27)*3:0)]}
+ case'gulag':{const i=Math.min(w.i,27);return[48+(3-i%4)*50,786+Math.floor(i/4)*30+(w.i>27?(w.i-27)*3:0)]}
  case'canal':return canalXY(w.i);
  case'exile':return[810+w.i*50,920];
- case'grave':{const i=Math.min(w.i,34);return[404+(i%7)*46,746+Math.floor(i/7)*30+(w.i>34?(w.i-34)*2:0)]}
+ case'grave':{const i=Math.min(w.i,34);return[404+(6-i%7)*46,846+Math.floor(i/7)*30+(w.i>34?(w.i-34)*2:0)]}
  }return[-100,-100]}
 const GULAG_SVG='<svg class="art" width="290" height="252" viewBox="0 0 290 252" aria-hidden="true" style="position:absolute;left:0;top:0;border-radius:8px"><defs><linearGradient id="gsk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#93a6b4"/><stop offset=".5" stop-color="#d3dbe0"/><stop offset="1" stop-color="#eef2f4"/></linearGradient></defs><rect width="290" height="252" rx="8" fill="url(#gsk)"/><path d="M252 82 L150 22 L146 44 Z" fill="#fffbe0" opacity=".45"/><path d="M0 118 C40 100 80 104 120 114 C160 124 200 98 240 102 C262 104 278 110 290 108 V252 H0Z" fill="#c4ced5"/><path d="M0 160 C50 138 100 150 150 158 C200 166 240 140 290 146 V252 H0Z" fill="#e2e8eb"/><path d="M0 206 C60 188 120 204 180 200 C230 196 260 186 290 192 V252 H0Z" fill="#f5f8f9"/><g stroke="#5f564c" stroke-width="2"><line x1="6" y1="150" x2="6" y2="170"/><line x1="32" y1="149" x2="32" y2="169"/><line x1="58" y1="148" x2="58" y2="168"/><line x1="84" y1="147" x2="84" y2="167"/><line x1="110" y1="147" x2="110" y2="167"/><line x1="136" y1="146" x2="136" y2="166"/><line x1="162" y1="145" x2="162" y2="165"/><line x1="188" y1="144" x2="188" y2="164"/><line x1="214" y1="144" x2="214" y2="164"/></g><path d="M0 154 L226 147 M0 162 L226 155" stroke="#5f564c" stroke-width="1" stroke-dasharray="3 2" fill="none"/><g stroke="#4a3b2c" stroke-width="3" fill="none" stroke-linecap="round"><path d="M236 198 L250 104 M284 198 L270 104 M241 170 L279 140 M279 170 L241 140 M245 140 L275 140 M240 170 L280 170"/></g><rect x="242" y="96" width="36" height="9" fill="#5a4632"/><rect x="247" y="74" width="26" height="22" fill="#6b5640"/><rect x="254" y="80" width="12" height="8" fill="#ffe9a0"/><path d="M240 76 L260 60 L280 76 Z" fill="#3d3024"/><path d="M240 76 L260 60 L280 76" fill="none" stroke="#fff" stroke-width="2" opacity=".8"/><circle cx="2" cy="6" r="1.0" fill="#fff" opacity=".85"/><circle cx="55" cy="43" r="1.5" fill="#fff" opacity=".85"/><circle cx="108" cy="80" r="2.0" fill="#fff" opacity=".85"/><circle cx="161" cy="117" r="1.0" fill="#fff" opacity=".85"/><circle cx="214" cy="154" r="1.5" fill="#fff" opacity=".85"/><circle cx="267" cy="191" r="2.0" fill="#fff" opacity=".85"/><circle cx="33" cy="228" r="1.0" fill="#fff" opacity=".85"/><circle cx="86" cy="25" r="1.5" fill="#fff" opacity=".85"/><circle cx="139" cy="62" r="2.0" fill="#fff" opacity=".85"/><circle cx="192" cy="99" r="1.0" fill="#fff" opacity=".85"/><circle cx="245" cy="136" r="1.5" fill="#fff" opacity=".85"/><circle cx="11" cy="173" r="2.0" fill="#fff" opacity=".85"/><circle cx="64" cy="210" r="1.0" fill="#fff" opacity=".85"/><circle cx="117" cy="7" r="1.5" fill="#fff" opacity=".85"/><circle cx="170" cy="44" r="2.0" fill="#fff" opacity=".85"/><circle cx="223" cy="81" r="1.0" fill="#fff" opacity=".85"/><circle cx="276" cy="118" r="1.5" fill="#fff" opacity=".85"/><circle cx="42" cy="155" r="2.0" fill="#fff" opacity=".85"/><circle cx="95" cy="192" r="1.0" fill="#fff" opacity=".85"/><circle cx="148" cy="229" r="1.5" fill="#fff" opacity=".85"/><circle cx="201" cy="26" r="2.0" fill="#fff" opacity=".85"/><circle cx="254" cy="63" r="1.0" fill="#fff" opacity=".85"/><circle cx="20" cy="100" r="1.5" fill="#fff" opacity=".85"/><circle cx="73" cy="137" r="2.0" fill="#fff" opacity=".85"/><circle cx="126" cy="174" r="1.0" fill="#fff" opacity=".85"/><circle cx="179" cy="211" r="1.5" fill="#fff" opacity=".85"/><circle cx="232" cy="8" r="2.0" fill="#fff" opacity=".85"/><circle cx="285" cy="45" r="1.0" fill="#fff" opacity=".85"/><circle cx="51" cy="82" r="1.5" fill="#fff" opacity=".85"/><circle cx="104" cy="119" r="2.0" fill="#fff" opacity=".85"/><circle cx="157" cy="156" r="1.0" fill="#fff" opacity=".85"/><circle cx="210" cy="193" r="1.5" fill="#fff" opacity=".85"/><circle cx="263" cy="230" r="2.0" fill="#fff" opacity=".85"/><circle cx="29" cy="27" r="1.0" fill="#fff" opacity=".85"/></svg>';
 const EXILE_SVG='<svg class="art" width="218" height="122" viewBox="0 0 218 122" aria-hidden="true" style="position:absolute;left:0;top:0;border-radius:8px"><defs><linearGradient id="esk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd07a"/><stop offset="1" stop-color="#fff2d2"/></linearGradient><radialGradient id="esun"><stop offset="0" stop-color="#fff6c0"/><stop offset=".55" stop-color="#ffc233" stop-opacity=".9"/><stop offset="1" stop-color="#ffc233" stop-opacity="0"/></radialGradient></defs><rect width="218" height="122" rx="8" fill="url(#esk)"/><circle cx="150" cy="26" r="24" fill="url(#esun)"/><circle cx="150" cy="26" r="10" fill="#ffad0a"/><path d="M0 92 C30 88 60 95 100 91 C140 87 180 93 218 89 V122 H0Z" fill="#2f9cc4"/><path d="M8 100 q6 -3 12 0 M52 106 q6 -3 12 0 M104 99 q6 -3 12 0 M150 104 q6 -3 12 0" stroke="#c9eef8" stroke-width="1.5" fill="none"/><path d="M120 116 C150 104 190 104 218 108 V122 H112Z" fill="#f0d29a"/><path d="M204 116 C202 96 198 80 192 60" stroke="#7a5230" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M204 116 C202 96 198 80 192 60" stroke="#a37446" stroke-width="5" fill="none" stroke-dasharray="2 5"/><g fill="#2e8b57"><path d="M192 60 C180 48 168 50 160 58 C172 54 182 56 192 62Z"/><path d="M192 60 C186 44 174 38 166 40 C178 44 186 50 192 61Z"/><path d="M192 60 C198 44 208 40 217 44 C206 46 199 52 193 61Z"/><path d="M192 60 C204 54 213 58 218 68 C208 62 200 60 193 62Z"/><path d="M192 60 C192 46 197 36 204 32 C199 40 195 50 193 61Z"/></g><path d="M178 116 C177 104 175 96 172 88" stroke="#7a5230" stroke-width="3.5" fill="none" stroke-linecap="round"/><g fill="#3a9d63"><path d="M172 88 C164 80 156 82 152 88 C160 85 166 86 172 90Z"/><path d="M172 88 C180 80 188 80 192 86 C184 84 178 86 173 90Z"/><path d="M172 88 C170 78 174 70 180 68 C176 74 174 80 173 89Z"/></g></svg>';
@@ -930,7 +930,7 @@ function buildBoard(){
  const X=(x,w)=>1000-x-w;
  for(let r=0;r<7;r++){const R=T0+TS*r;h+=A(1000-R,-R,`width:${2*R}px;height:${2*R}px;border-radius:50%;border:1px dashed rgba(60,40,20,.22)`)}
  for(const d of D){const th=180-ANG[d],st=T0-32,L=TS*6+64;
-  h+=`<div class="ab" style="left:1000px;top:-27px;width:${L}px;height:54px;border-radius:27px;background:${DC[d]};box-shadow:0 0 0 2px ${DK[d]},0 2px 4px rgba(0,0,0,.35);transform-origin:0 27px;transform:rotate(${th}deg) translateX(${st}px)"></div>`}
+  h+=`<div class="ab" style="left:1000px;top:-27px;width:${L}px;height:54px;box-sizing:border-box;border-radius:27px;background:#f7f1e1;border:5px solid ${d==='P'?'#c99a10':DC[d]};box-shadow:0 1px 3px rgba(0,0,0,.25);transform-origin:0 27px;transform:rotate(${th}deg) translateX(${st}px)"></div>`}
  h+=A(755,-245,'width:490px;height:490px;border-radius:50%;border:40px solid rgba(212,175,55,.45)');
  h+=A(830,-170,'width:340px;height:340px;border-radius:50%;background:#7d1d1a;box-shadow:0 0 0 3px #5a1311');
  h+=B(14,10,'font-family:Oswald,sans-serif;font-size:26px;letter-spacing:.1em;color:#f3e9d2','STALIN');
@@ -939,7 +939,7 @@ function buildBoard(){
  h+=`<div class="ab" style="left:864px;top:136px;transform:translate(-50%,-50%) rotate(45deg);font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.2em;color:#9c7a0c;white-space:nowrap">POLITBURO</div>`;
  h+=A(902,79,'width:40px;height:26px;border-radius:5px;border:1.5px dashed #d4af37');
  h+=A(866,64,'width:24px;height:32px;border-radius:4px;border:2px solid #d4af37;background:radial-gradient(circle at 50% 45%,#d4af37 0 5px,transparent 6px),repeating-linear-gradient(45deg,#7d1d1a,#7d1d1a 5px,#5a1311 5px,#5a1311 9px);box-shadow:0 2px 0 rgba(0,0,0,.35)','');
- for(const d of D)for(let r=0;r<7;r++){const[x,y]=seatXY(d,r);h+=A(1000-x-20,y-13,`box-sizing:border-box;width:40px;height:26px;border-radius:5px;${r===0?'border:2.5px solid #f1d98a;background:rgba(255,255,255,.28)':'border:1.5px dashed rgba(255,255,255,.6);background:rgba(255,255,255,.16)'}`)}
+ for(const d of D)for(let r=0;r<7;r++){const[x,y]=seatXY(d,r);h+=A(1000-x-20,y-13,`box-sizing:border-box;width:40px;height:26px;border-radius:5px;${r===0?'border:2.5px solid #c9a227;background:rgba(212,175,55,.18)':`border:1.5px dashed ${DK[d]};opacity:.55`}`)}
  const nums={P:1,N:2,I:3,R:4,J:5};
  for(const d of D){const a=ANG[d]*Math.PI/180,R=T0+TS*6+42;h+=`<div class="lbl" style="right:${R*Math.cos(a)}px;top:${R*Math.sin(a)-9}px;transform:rotate(${-ANG[d]}deg);transform-origin:100% 50%;font-size:15px;color:${DL[d]}">${nums[d]} · ${DN[d].toUpperCase()}</div>`}
  const arrow=(x,y,len,deg,col,dash)=>`<div class="ab" style="left:${x}px;top:${y}px;width:${len}px;${dash?`height:0;border-top:3px dashed ${col}`:`height:3px;background:${col}`};transform:rotate(${deg}deg);transform-origin:0 ${dash?'0':'50%'}"><div class="ab" style="right:-10px;top:${dash?-8.5:-5.5}px;width:0;height:0;border-left:11px solid ${col};border-top:7px solid transparent;border-bottom:7px solid transparent"></div></div>`;
@@ -949,15 +949,32 @@ function buildBoard(){
  h+=arrow(800,730,194,-110.9,'#a3221b');
  h+=B(232,642,'font-size:11px;font-style:italic;color:#a3221b','drafted back');
  // Lubyanka
- h+=A(238,470,'width:210px;height:198px;border-radius:8px;background:#3a3a40;padding:8px 12px;color:#f0ece4',`<div class="bt">LUBYANKA</div>`);
- for(let i=0;i<20;i++)h+=A(X(570+(i%4)*48,40),503+Math.floor(i/4)*32,'width:40px;height:26px;border-radius:4px;background:#4a4a52;border:1px solid #5f5f68');
+ {const W=210,pil=[0,48,96,144,192].map(x=>`<rect x="${x}" y="58" width="${x===192?18:8}" height="162" fill="#7d6b58"/><rect x="${x+1}" y="58" width="${x===192?16:6}" height="4" fill="#9a8672"/>`).join('');
+  const courses=[0,1,2,3,4,5].map(r=>`<rect x="0" y="${58+r*32-3}" width="${W}" height="3" fill="#8c7a66"/>`).join('');
+  const plinth=Array.from({length:7},(_,k)=>`<rect x="${k*30+1}" y="221" width="28" height="6" fill="#4b4037"/>`).join('');
+  const dent=Array.from({length:26},(_,k)=>`<rect x="${4+k*8}" y="29" width="4" height="3" fill="#5f5246"/>`).join('');
+  h+=A(238,436,'width:210px;height:232px;pointer-events:none',`<svg width="210" height="232" viewBox="0 0 210 232" aria-hidden="true" style="position:absolute;left:0;top:0">
+<path d="M8 22 L8 14 L70 14 L80 6 L130 6 L140 14 L202 14 L202 22 Z" fill="#5f5246"/><rect x="0" y="20" width="210" height="9" fill="#9a8672"/>${dent}
+<circle cx="105" cy="13" r="8" fill="#e9dfc6" stroke="#3b3129" stroke-width="2"/><path d="M105 8 V13 L109 15" stroke="#3b3129" stroke-width="1.6" fill="none"/>
+<rect x="0" y="32" width="210" height="26" fill="#6b5a4a"/><text x="105" y="50" text-anchor="middle" font-family="Oswald,sans-serif" font-size="15" letter-spacing="4" fill="#efe4cc">LUBYANKA</text>
+<rect x="0" y="58" width="210" height="163" fill="#5b4c3f"/>${courses}${pil}<rect x="0" y="219" width="210" height="13" fill="#3b3129"/>${plinth}</svg>`);}
+ for(let i=0;i<20;i++)h+=A(X(570+(3-i%4)*48,40),503+Math.floor(i/4)*32,'width:40px;height:26px;box-sizing:border-box;border-radius:3px 3px 0 0;background:repeating-linear-gradient(90deg,#1d1814 0 8px,#3a332d 8px 10px);border:1.5px solid #9a8672;color:#8c7a66;font-size:8.5px;line-height:9px;padding:1px 0 0 3px;pointer-events:none',String(i+1));
  // sharashka, an annex on the Lubyanka's Industry side
  h+=A(446,552,'width:76px;height:116px;border-radius:0 8px 8px 0;background:#e3eedb;border:2px solid #2c6e43;border-left:none;padding:4px 6px 0 0;text-align:right;font-family:Oswald,sans-serif;font-size:10.5px;letter-spacing:.05em;color:#1e5632','SHARASHKA');
  for(let i=0;i<3;i++)h+=A(463,583+i*30,'width:40px;height:26px;border-radius:4px;background:#fff;border:1px solid #7fa58a');
  // grave
  const TR=[['SHARASHKA','safe','#2c6e43'],['GULAG','may return','#6d6a63'],['THE CANAL','alive, for now','#2b5f7e'],['SHOT','gone','#151515']];
  TR.forEach((t,i)=>{h+=`<div class="trk" data-rung="${i}" style="left:${238+i*98}px;top:671px;width:94px;height:31px;background:${t[2]}"><b>${t[0]}</b>${t[1]}</div>`});
- h+=A(284,704,'width:344px;height:182px;border-radius:8px;background:#2a2a2a;padding:8px 12px;color:#ddd',`<div class="bt">THE GRAVE</div>`);
+ h+=A(284,800,'width:344px;height:200px;border-radius:8px 8px 0 0;overflow:hidden;color:#cdbfae',`<svg width="344" height="200" viewBox="0 0 344 200" aria-hidden="true" style="position:absolute;left:0;top:0">
+<defs><linearGradient id="soil" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2e231b"/><stop offset="1" stop-color="#17100b"/></linearGradient></defs>
+<rect width="344" height="200" fill="url(#soil)"/>
+${Array.from({length:60},(_,k)=>`<circle cx="${(k*53)%344}" cy="${40+((k*37)%160)}" r="${1+(k%3)*.6}" fill="#3d2e22"/>`).join('')}
+<path d="M226 200 Q250 150 296 146 Q330 144 344 156 L344 200 Z" fill="#3d2c1f"/><path d="M240 200 Q262 166 300 162 Q326 160 344 170 L344 200 Z" fill="#4a3727"/>
+<circle cx="268" cy="168" r="5" fill="#523d2b"/><circle cx="312" cy="156" r="6" fill="#523d2b"/><circle cx="290" cy="180" r="4" fill="#5a4330"/><circle cx="330" cy="176" r="5" fill="#46331f"/>
+<g transform="rotate(-24 300 120)"><rect x="296" y="40" width="7" height="92" rx="3" fill="#7a5a36"/><path d="M290 36 h19 v8 h-19 z" fill="#6a4c2c"/><rect x="295" y="24" width="9" height="14" rx="4" fill="none" stroke="#6a4c2c" stroke-width="3"/>
+<path d="M290 130 h19 l-2 24 q-7 8 -15 0 z" fill="#7d8286" stroke="#4a4e52" stroke-width="1.5"/></g>
+<path d="M196 182 q6 -6 12 -1 q5 4 -1 8 q-6 3 -11 -1 q-3 -3 0 -6 z" fill="#6e0b0b"/><circle cx="214" cy="176" r="2" fill="#7d0f0f"/><circle cx="190" cy="190" r="1.6" fill="#7d0f0f"/><circle cx="220" cy="186" r="1.3" fill="#6e0b0b"/><circle cx="203" cy="172" r="1" fill="#7d0f0f"/><path d="M208 189 l9 4" stroke="#6e0b0b" stroke-width="1.6" stroke-linecap="round"/>
+</svg><div class="bt" style="position:relative;padding:8px 12px 0;color:#d8c9b4">THE GRAVE</div>`);
  // canal (top-left, running up to the White Sea)
  h+=CANAL_SVG.replace('pointer-events:none">','pointer-events:none"><g transform="translate(1000 0) scale(-1 1)">').replace(/<\/svg>$/,'</g></svg>');
  for(let i=0;i<8;i++){const[x,y]=canalXY(i);h+=A(1000-x-20,y-13,'width:40px;height:26px;border-radius:4px;background:#a9c9dc;border:1.5px solid #e8f3f9')}
@@ -965,7 +982,8 @@ function buildBoard(){
  h+=B(620,404,'font-family:Oswald,sans-serif;font-size:14px;letter-spacing:.06em;color:#2b4a5e','WHITE SEA CANAL');
  h+=B(620,422,'font-size:10.5px;color:#2b4a5e','prisoners enter here');
  // gulag (bottom-right)
- h+=A(694,736,'width:290px;height:252px;border-radius:8px;border:1px solid #6d7880;color:#1f2a33;overflow:hidden',GULAG_SVG.replace('border-radius:8px"','border-radius:8px;transform:scaleX(-1)"')+`<div class="bt" style="position:relative;padding:8px 12px 0;text-align:right">GULAG <span class="bs" style="font-family:'PT Sans';letter-spacing:0">a queue: front at top right</span></div>`);
+ h+=A(694,736,'width:290px;height:252px;border-radius:8px;border:1px solid #6d7880;color:#1f2a33;overflow:hidden',GULAG_SVG.replace('border-radius:8px"','border-radius:8px;transform:scaleX(-1)"')+`<div class="bt" style="position:relative;padding:8px 12px 0;text-align:right">GULAG <span class="bs" style="font-family:'PT Sans';letter-spacing:0">a queue, front first: 1 is top left</span></div>`);
+ for(let i=0;i<28;i++)h+=A(X(28+(3-i%4)*50,40),773+Math.floor(i/4)*30,'width:40px;height:26px;box-sizing:border-box;border:1px dashed rgba(31,42,51,.28);border-radius:4px;color:rgba(31,42,51,.5);font-size:8.5px;line-height:9px;padding:1px 0 0 3px;pointer-events:none',String(i+1));
  // exile (bottom-left, farthest from Stalin)
  h+=A(12,866,'width:218px;height:122px;border-radius:8px;border:1px solid #c89b45;color:#5a3a10;overflow:hidden',EXILE_SVG.replace('border-radius:8px"','border-radius:8px;transform:scaleX(-1)"')+`<div style="position:relative;padding:6px 12px 0;text-align:right"><div class="bt">EXILE</div><div class="bs">Abroad, farthest from Stalin</div></div>`);
  for(let i=0;i<3;i++)h+=A(X(790+i*50,40),907,'width:40px;height:26px;border-radius:5px;border:1.5px dashed #a0763a;background:rgba(255,255,255,.35)');
@@ -1005,7 +1023,7 @@ function render(){
  for(const p of S.players){const cnt={};D.forEach(d=>cnt[d]=0);p.hand.forEach(c=>cnt[CARDS[c].d]++);
   const rv=owned(p.i).filter(id=>man(id).rev).map(id=>man(id).ini+(alive(id)?'':' †'));
   const lead=S.M&&S.M.lead===p.i;
-  ph+=`<div class="pchip${lead?' lead':''}${PEND&&PEND.kind==='player'?' pick':''}" data-p="${p.i}"><div class="nm"><span class="dot" style="background:${PCOL[p.i]}"></span>${esc(p.name)}${lead?' · chair':''}</div><div class="backs">${D.map(d=>`<div class="bg">${Array.from({length:cnt[d]},()=>`<div class="bk" style="background:${DC[d]}"></div>`).join('')}</div>`).join('')}</div><div class="rvl">${rv.length?'Revealed: '+rv.join(', '):'No one revealed'}</div></div>`}
+  ph+=`<div class="pchip${lead?' lead':''}${PEND&&PEND.kind==='player'?' pick':''}" data-p="${p.i}"><div class="nm"><span class="dot" style="background:${PCOL[p.i]}"></span>${esc(p.name)}${NET&&!NET.humans.includes(p.i)?' · computer':''}${lead?' · chair':''}</div><div class="backs">${D.map(d=>`<div class="bg">${Array.from({length:cnt[d]},()=>`<div class="bk" style="background:${DC[d]}"></div>`).join('')}</div>`).join('')}</div><div class="rvl">${rv.length?'Revealed: '+rv.join(', '):'No one revealed'}</div></div>`}
  $('#pl').innerHTML=ph;
  renderMine();renderHand();
 }
@@ -1133,13 +1151,14 @@ document.addEventListener('click',e=>{
   if(k==='pause'){PAUSED=!PAUSED;x.textContent=PAUSED?'Resume':'Pause'}
   if(k==='speed'){SPEED=SPEED===1?0.45:SPEED===0.45?1.8:1;x.textContent='Speed: '+(SPEED===1?'normal':SPEED<1?'fast':'slow')}
   if(k==='rules')rulesScreen();
-  if(k==='new')startScreen();
+  if(k==='new'){if(NET&&!confirm('Leave this online game?'))return;if(NET)ONL.leave();startScreen()}
   if(k==='playsel'&&SEL&&PEND)PEND.res(SEL);
   if(k==='skip'&&PEND)PEND.res(null);
   if(k==='dir'&&PEND&&PEND.kind==='dir')PEND.res(+x.dataset.v);
   if(k==='dept'&&PEND&&PEND.kind==='dept'&&PEND.opts.includes(x.dataset.d))PEND.res(x.dataset.d);
   if(k==='reopen'&&PEND&&PEND.kind==='lead'&&PEND.reopen)PEND.res('REOPEN');
-  if(k==='start')startGame();
+  if(k==='start'){if(NET)ONL.leave();startGame()}
+  if(['online','solo','hostroom','joinroom','copylink','startroom','leaveroom'].includes(k))onlineClick(k,x);
   if(k==='close'){$('#ov').classList.remove('on')}
   if(k==='np'){CHOSEN=+x.dataset.n;document.querySelectorAll('.np button').forEach(b=>b.classList.toggle('on',b===x))}
   return}
@@ -1165,10 +1184,166 @@ const _render=render;
 render=function(){_render();if(PEND&&PEND.kind==='man'&&PEND.allowNone&&!$('#cap [data-x=skip]')){$('#cap').insertAdjacentHTML('beforeend',' <button class="btn" data-x="skip">Skip</button>')}};
 const _render2=render;render=function(){_render2();if(PEND&&PEND.kind==='dir'&&!$('#cap [data-x=dir]')){$('#cap').insertAdjacentHTML('beforeend',' '+[-1,1].map((v,i)=>`<button class="btn" data-x="dir" data-v="${v}" style="background:#7b4fa0;border:none;font-weight:700;margin:3px 3px 0 0">${PEND.labels[i]}</button>`).join(''))}if(PEND&&PEND.kind==='dept'&&!$('#cap [data-x=dept]')){$('#cap').insertAdjacentHTML('beforeend',' '+PEND.opts.map(d=>`<button class="btn" data-x="dept" data-d="${d}" style="background:${DC[d]};color:${DT[d]};border:none;font-weight:700;margin:3px 3px 0 0">${DN[d]}</button>`).join(''))}if(PEND&&PEND.kind==='lead'&&PEND.reopen&&!$('#cap [data-x=reopen]')){$('#cap').insertAdjacentHTML('beforeend',' <button class="btn" data-x="reopen" style="background:#ffd84a;color:#2a1d17;border:none;font-weight:700">Reopen the deferred agenda</button>')}};
 
+// ================= ONLINE PLAY =================
+// Every player's browser runs this same game from the same seed. Only decisions travel: each decision gets a number,
+// in the order the game asks for it, and whoever makes it writes it to the room. The host's browser decides for the
+// computer seats. Because the rules run in every browser, any tweak to the rules or cards applies online automatically.
+// Someone who reloads replays the room's list of decisions and catches up.
+const FB_CONFIG={apiKey:"AIzaSyCw7Fz1zSK0lujBfkv6clY3kwBdwIKryuA",authDomain:"the-regime-26978.firebaseapp.com",databaseURL:"https://the-regime-26978-default-rtdb.firebaseio.com",projectId:"the-regime-26978",storageBucket:"the-regime-26978.firebasestorage.app",messagingSenderId:"814859846908",appId:"1:814859846908:web:1467c7a47566f9c69bc379"};
+const FB_SDK="https://www.gstatic.com/firebasejs/10.12.2/";
+const COMPNAMES=['Masha','Pyotr','Sasha','Olga','Ivan','Anya'];
+let NET=null,DECN=0;
+function stateHash(){if(!S)return'';const t=S.round+'|'+D.map(d=>S.seats[d].join(',')).join(';')+'|'+S.lub.join(',')+'|'+S.gulag.join(',')+'|'+S.players.map(p=>p.hand.length).join(',')+'|'+D.map(d=>S.decks[d].length).join(',');
+ let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return(h>>>0).toString(36)}
+async function oneDecision(k,p,ui,ai,waitMsg){
+ if(!NET)return p===HUMAN?await ui():ai();
+ const h=stateHash();
+ if(NET.moves.has(k))return NET.take(k,h);
+ if(p===HUMAN){const v=await ui();if(NET.moves.has(k))return NET.take(k,h);NET.put(k,p,v,h);return v}
+ if(NET.host&&!NET.humans.includes(p)){const v=ai();NET.put(k,p,v,h);return v}
+ if(waitMsg){cap(waitMsg);render()}
+ NET.waitingFor=p;onlineBar();const v=await NET.wait(k);NET.waitingFor=null;onlineBar();return NET.take(k,h,v)}
+// one decision, made by seat p: ui() asks this browser's player, ai() decides for a computer seat
+function decide(p,ui,ai,waitMsg){return oneDecision(DECN++,p,ui,ai,waitMsg)}
+// several decisions made at the same time (the corridor): everyone chooses at once
+function decideAll(ps,mk){const k0=DECN;DECN+=ps.length;return Promise.all(ps.map((p,i)=>{const[ui,ai,w]=mk(p);return oneDecision(k0+i,p,ui,ai,w)}))}
+function catchingUp(){return !!NET&&DECN<NET.known}
+
+// --- the Firebase transport (anonymous sign-in, like the classic version) ---
+const FireB={
+ async init(){const load=f=>new Promise((res,rej)=>{const s=document.createElement('script');s.src=FB_SDK+f;s.onload=res;s.onerror=()=>rej(new Error("couldn't load "+f));document.head.appendChild(s)});
+  if(!window.firebase){await load('firebase-app-compat.js');await Promise.all([load('firebase-auth-compat.js'),load('firebase-database-compat.js')])}
+  if(!firebase.apps.length)firebase.initializeApp(FB_CONFIG);await firebase.auth().signInAnonymously();this.db=firebase.database()},
+ get(p){return this.db.ref(p).get().then(s=>s.val())},
+ set(p,v){return this.db.ref(p).set(v)},
+ update(p,o){return this.db.ref(p).update(o)},
+ listen(p,cb){const r=this.db.ref(p),f=s=>cb(s.val());r.on('value',f);return()=>r.off('value',f)},
+ added(p,cb){const r=this.db.ref(p),f=s=>cb(s.key,s.val());r.on('child_added',f);return()=>r.off('child_added',f)},
+ claim(p,fn){return this.db.ref(p).transaction(fn).then(r=>({ok:r.committed,v:r.snapshot.val()}))}};
+// --- a stand-in for Firebase when testing in several tabs on one machine (?fake=1): tabs share one tree ---
+const FakeB={tree:{},ls:[],als:[],
+ init(){this.ch=new BroadcastChannel('regime2-fake');this.ch.onmessage=e=>this.recv(e.data);this.ch.postMessage({op:'hello'});return new Promise(r=>setTimeout(r,250))},
+ recv(m){if(m.op==='hello'){this.ch.postMessage({op:'full',tree:this.tree});return}
+  if(m.op==='full'){if(!Object.keys(this.tree).length&&m.tree&&Object.keys(m.tree).length){this.tree=m.tree;this.fire('')}return}
+  this.put(m.p,m.v);this.fire(m.p,m.v)},
+ parts:p=>p.split('/').filter(Boolean),
+ at(p){let n=this.tree;for(const k of this.parts(p)){if(n==null||typeof n!=='object')return null;n=n[k]}return n===undefined?null:n},
+ put(p,v){const ks=this.parts(p);let n=this.tree;for(const k of ks.slice(0,-1)){if(n[k]==null||typeof n[k]!=='object')n[k]={};n=n[k]}
+  const l=ks[ks.length-1];if(v==null)delete n[l];else n[l]=JSON.parse(JSON.stringify(v))},
+ fire(p){for(const l of this.ls.slice())if(p===''||l.p===p||l.p.startsWith(p+'/')||p.startsWith(l.p+'/')){const j=JSON.stringify(this.at(l.p));if(j!==l.j){l.j=j;l.cb(JSON.parse(j))}}
+  for(const l of this.als)if(p===''||p===l.p||p.startsWith(l.p+'/')||l.p.startsWith(p+'/')){const o=this.at(l.p)||{};for(const k of Object.keys(o))if(!l.seen.has(k)){l.seen.add(k);l.cb(k,o[k])}}},
+ w(p,v){this.put(p,v);this.ch.postMessage({p,v});this.fire(p)},
+ get(p){return Promise.resolve(JSON.parse(JSON.stringify(this.at(p))))},
+ set(p,v){this.w(p,v);return Promise.resolve()},
+ update(p,o){for(const k in o)this.w(p+'/'+k,o[k]);return Promise.resolve()},
+ listen(p,cb){const l={p,cb};this.ls.push(l);setTimeout(()=>{if(l.j===undefined){l.j=JSON.stringify(this.at(p));cb(JSON.parse(l.j))}},0);return()=>{this.ls=this.ls.filter(x=>x!==l)}},
+ added(p,cb){const l={p,cb,seen:new Set()};this.als.push(l);setTimeout(()=>this.fire(p),0);return()=>{this.als=this.als.filter(x=>x!==l)}},
+ claim(p,fn){const v=fn(JSON.parse(JSON.stringify(this.at(p))));if(v===undefined)return Promise.resolve({ok:false,v:this.at(p)});this.w(p,v);return Promise.resolve({ok:true,v})}};
+
+// --- rooms ---
+const ONL={B:null,code:null,meta:null,seats:{},offs:[],fake:false,started:false,
+ q:new URLSearchParams(location.search),
+ cid:(()=>{const q=new URLSearchParams(location.search);if(q.get('cid'))return q.get('cid');const r=()=>Math.random().toString(36).slice(2,10);try{let c=sessionStorage.getItem('regime2-cid');if(!c){c=r();sessionStorage.setItem('regime2-cid',c)}return c}catch(e){return r()}})(),
+ R(p){return'rooms/'+this.code+(p?'/'+p:'')},
+ link(){return location.origin+location.pathname+'?room='+this.code+(this.fake?'&fake=1':'')},
+ setURL(code){try{const q=new URLSearchParams(location.search);['host','code','startwhen'].forEach(k=>q.delete(k));if(code)q.set('room',code);else q.delete('room');const t=q.toString();history.replaceState(null,'',location.pathname+(t?'?'+t:''))}catch(e){}},
+ name(){try{return this.q.get('name')||localStorage.getItem('regime2-name')||''}catch(e){return''}},
+ saveName(n){try{localStorage.setItem('regime2-name',n)}catch(e){}},
+ mySeat(){const src=this.meta&&this.meta.lineup||this.seats;for(const i in src)if(src[i]&&src[i].cid===this.cid)return +i;return null},
+ adopt(code){if(this.q.get('cid')||this.q.has('fake'))return;try{const c=localStorage.getItem('regime2-room-'+code);if(c){this.cid=c;sessionStorage.setItem('regime2-cid',c)}}catch(e){}},
+ remember(){try{localStorage.setItem('regime2-room-'+this.code,this.cid)}catch(e){}},
+ async connect(){if(this.B)return;this.fake=this.q.has('fake');const B=this.fake?FakeB:FireB;await B.init();this.B=B},
+ newCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ';let c='';for(let i=0;i<5;i++)c+=L[Math.floor(Math.random()*L.length)];return c},
+ async host(name,np){await this.connect();this.code=this.q.get('code')||this.newCode();
+  await this.B.set(this.R(),{meta:{ver:GAME_VER,np,status:'lobby',host:this.cid,created:Date.now()},seats:{0:{cid:this.cid,name}}});
+  this.setURL(this.code);this.remember();this.watch()},
+ async join(code,name){await this.connect();this.code=code;let meta=null;for(let t=0;t<6&&!meta;t++){meta=await this.B.get(this.R('meta'));if(!meta)await new Promise(r=>setTimeout(r,500))}
+  if(!meta)return lobbyMsg(`There is no room called ${code}. Check the code.`);
+  if(meta.ver!==GAME_VER)return lobbyMsg('This room was made with a different version of the game. Refresh this page; if that does not help, ask the host to refresh and make a new room.');
+  this.setURL(code);
+  const seats=(await this.B.get(this.R('seats')))||{};for(const i in seats)if(seats[i]&&seats[i].cid===this.cid){this.watch();return}
+  if(meta.status!=='lobby')return lobbyMsg('That game has already started.');
+  for(let i=1;i<meta.np;i++){const r=await this.B.claim(this.R('seats/'+i),cur=>cur?undefined:{cid:this.cid,name});if(r.ok){this.remember();this.watch();return}}
+  lobbyMsg('That room is full.')},
+ watch(){this.offs.forEach(f=>f());this.offs=[
+  this.B.listen(this.R('meta'),m=>{this.meta=m;this.update()}),
+  this.B.listen(this.R('seats'),s=>{this.seats=s||{};this.update()})]},
+ update(){const m=this.meta;if(!m)return;
+  if(m.status==='playing'){if(!this.started&&m.lineup&&this.mySeat()!=null)this.begin();else if(!this.started&&m.lineup&&this.mySeat()==null)lobbyMsg('That game has already started without you.');return}
+  if(!this.started)roomScreen()},
+ async start(){if(!this.meta||this.meta.host!==this.cid)return;const seats=(await this.B.get(this.R('seats')))||{};
+  const lineup={};for(let i=0;i<this.meta.np;i++){const s=seats[i];if(s)lineup[i]={cid:s.cid,name:s.name}}
+  await this.B.update(this.R('meta'),{lineup,seed:Math.floor(Math.random()*2147483647),status:'playing'})},
+ async begin(){this.started=true;const m=this.meta,np=m.np,me=this.mySeat();
+  const L=m.lineup||{};const humans=[],names=[];for(let i=0;i<np;i++){const s=L[i];if(s){humans.push(i);names.push(i===me?'You':s.name)}else names.push(COMPNAMES[i])}
+  const known=(await this.B.get(this.R('moves')))||{};
+  NET={code:this.code,me,host:m.host===this.cid,humans,moves:new Map(),hashes:new Map(),waiters:{},known:0,desync:null,
+   put(k,p,v,h){this.moves.set(k,v);this.known=Math.max(this.known,k+1);ONL.B.set(ONL.R('moves/'+k),{p,h,v:JSON.stringify(v===undefined?null:v)})},
+   got(k,o){if(this.moves.has(k))return;const v=JSON.parse(o.v);this.moves.set(k,v);this.hashes.set(k,o.h);this.known=Math.max(this.known,k+1);const w=this.waiters[k];if(w){delete this.waiters[k];w(v)}},
+   wait(k){return this.moves.has(k)?Promise.resolve(this.moves.get(k)):new Promise(r=>{this.waiters[k]=r})},
+   take(k,h,v){const theirs=this.hashes.get(k);if(theirs&&h&&theirs!==h&&!this.desync){this.desync=k;document.body.dataset.desync=k;onlineBar()}return v!==undefined?v:this.moves.get(k)}};
+  for(const k in known)NET.got(+k,known[k]);
+  this.offs.push(this.B.added(this.R('moves'),(k,o)=>NET&&NET.got(+k,o)));
+  HUMAN=me;CHOSEN=np;
+  startGame({seed:m.seed,names,humans});
+ },
+ leave(){this.offs.forEach(f=>f());this.offs=[];this.code=null;this.meta=null;this.seats={};this.started=false;NET=null;HUMAN=0;this.setURL(null);onlineBar()}};
+const GAME_VER=(()=>{const t=(document.currentScript&&document.currentScript.textContent)||'';let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return(h>>>0).toString(36)})();
+
+function lobbyMsg(t){const e=$('#lerr');if(e)e.textContent=t;else{$('#ovb').innerHTML=`<h1>PLAY ONLINE</h1><p class="lerr">${esc(t)}</p><p><button class="go" data-x="online">Back</button> <button class="btn" data-x="solo">Play the computer instead</button></p>`;$('#ov').classList.add('on')}}
+function onlineScreen(){
+ $('#ovb').innerHTML=`<h1>PLAY ONLINE</h1><p>Play with friends on their own phones or computers. One person hosts and sends the link; the computer plays any empty seat.</p>
+<p><label class="lf">Your name <input id="lname" maxlength="16" value="${esc(ONL.name())}" autocomplete="nickname"></label></p>
+<h2>Host a game</h2><p>How many seats at the table?</p><div class="np">${[3,4,5,6].map(n=>`<button data-x="np" data-n="${n}" class="${n===CHOSEN?'on':''}">${n}</button>`).join('')}</div>
+<p><button class="go" data-x="hostroom">Host a room</button></p>
+<h2>Or join one</h2><p><label class="lf">Room code <input id="lcode" maxlength="5" autocapitalize="characters" autocomplete="off" placeholder="ABCDE"></label> <button class="btn" data-x="joinroom">Join</button></p>
+<p class="lerr" id="lerr"></p><p><button class="btn" data-x="solo">Back</button></p>`;
+ $('#ov').classList.add('on')}
+function readName(){const n=(($('#lname')||{}).value||'').replace(/\s+/g,' ').trim().slice(0,16);if(!n){lobbyMsg('Type your name first.');return null}ONL.saveName(n);return n}
+function roomScreen(){const m=ONL.meta;if(!m)return;const me=ONL.mySeat(),host=m.host===ONL.cid;
+ let rows='';for(let i=0;i<m.np;i++){const s=ONL.seats[i];rows+=`<tr><td><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${PCOL[i]}"></span> Seat ${i+1}</td><td>${s?esc(s.name)+(i===me?' (you)':'')+(s.cid===m.host?' · host':''):'<i>computer, unless someone joins</i>'}</td></tr>`}
+ $('#ovb').innerHTML=`<h1>ROOM ${esc(ONL.code)}</h1><p>Send this link to the people you want to play with:</p>
+<p><input id="llink" readonly value="${esc(ONL.link())}" style="width:100%"></p><p><button class="btn" data-x="copylink">Copy link</button></p>
+<table class="fin">${rows}</table>
+<p>${host?'Start when everyone is in. Empty seats are played by the computer.':'Waiting for the host to start the game…'}</p>
+<p>${host?'<button class="go" data-x="startroom">Start the game</button> ':''}<button class="btn" data-x="leaveroom">Leave the room</button></p><p class="lerr" id="lerr"></p>`;
+ $('#ov').classList.add('on')}
+function joinScreen(code){
+ $('#ovb').innerHTML=`<h1>JOIN ROOM ${esc(code)}</h1><p><label class="lf">Your name <input id="lname" maxlength="16" value="${esc(ONL.name())}" autocomplete="nickname"></label></p>
+<p><button class="go" data-x="joinroom" data-code="${esc(code)}">Join</button> <button class="btn" data-x="solo">Play the computer instead</button></p><p class="lerr" id="lerr"></p>`;
+ $('#ov').classList.add('on')}
+// a thin line under the caption in online games: the room, who we are waiting for, and a warning if browsers disagree
+function onlineBar(){let b=$('#netbar');if(!NET){if(b)b.remove();return}
+ document.body.dataset.net=DECN+'/'+NET.known+'/'+NET.waitingFor;
+ if(!b){b=document.createElement('div');b.id='netbar';document.body.appendChild(b)}
+ const w=NET.waitingFor!=null&&S?` · waiting for ${esc(P(NET.waitingFor).name)}`:'';
+ b.innerHTML=NET.desync!=null?`Room ${esc(NET.code)} · <b>out of step with the other players</b>: refresh the page to catch up.`:`Room ${esc(NET.code)} · online${w}`;
+ b.classList.toggle('bad',NET.desync!=null)}
+async function onlineClick(k,x){try{
+ if(k==='online'){onlineScreen();return}
+ if(k==='solo'){ONL.leave();startScreen();return}
+ if(k==='hostroom'){const n=readName();if(!n)return;$('#ovb').innerHTML='<h1>PLAY ONLINE</h1><p>Setting up a room…</p>';await ONL.host(n,CHOSEN);return}
+ if(k==='joinroom'){const n=readName();if(!n)return;const code=(x.dataset.code||($('#lcode')||{}).value||'').toUpperCase().replace(/[^A-Z]/g,'');if(code.length!==5)return lobbyMsg('Room codes are five letters.');$('#ovb').innerHTML='<h1>PLAY ONLINE</h1><p>Joining…</p>';await ONL.join(code,n);return}
+ if(k==='copylink'){const t=ONL.link();try{await navigator.clipboard.writeText(t);x.textContent='Copied'}catch(e){const i=$('#llink');if(i){i.select();document.execCommand&&document.execCommand('copy')}x.textContent='Copied'}return}
+ if(k==='startroom'){await ONL.start();return}
+ if(k==='leaveroom'){ONL.leave();startScreen();return}
+}catch(e){console.error(e);lobbyMsg('Could not reach the online service: '+(e&&e.message||e))}}
+async function onlineBoot(){const code=(ONL.q.get('room')||'').toUpperCase().replace(/[^A-Z]/g,'');
+ if(ONL.q.has('host')){CHOSEN=+ONL.q.get('host')||4;await ONL.host(ONL.name()||'Host',CHOSEN);
+  const need=+(ONL.q.get('startwhen')||1);const t0=Date.now();const iv=setInterval(()=>{const n=Object.values(ONL.seats||{}).filter(Boolean).length;if(n>=need||Date.now()-t0>20000){clearInterval(iv);ONL.start()}},200);return true}
+ if(!code)return false;
+ try{await ONL.connect();ONL.code=code;ONL.adopt(code);let meta=null;for(let t=0;t<6&&!meta;t++){meta=await ONL.B.get(ONL.R('meta'));if(!meta)await new Promise(r=>setTimeout(r,500))}const seats=(await ONL.B.get(ONL.R('seats')))||{};
+  const mine=Object.values(seats).some(s=>s&&s.cid===ONL.cid);
+  if(mine){ONL.watch();return true}
+  if(ONL.q.get('name')){await ONL.join(code,ONL.q.get('name'));return true}
+  if(!meta){lobbyMsg(`There is no room called ${code}.`);return true}
+  joinScreen(code)}catch(e){console.error(e);lobbyMsg('Could not reach the online service: '+(e&&e.message||e))}
+ return true}
+
 // ================= SCREENS =================
 let CHOSEN=4;
 function startScreen(){
- $('#ovb').innerHTML=`<h1>THE REGIME</h1><p>Moscow, 1936. Survive the Terror.</p><p>How many players at the table? You play against the computer.</p><div class="np">${[3,4,5,6].map(n=>`<button data-x="np" data-n="${n}" class="${n===CHOSEN?'on':''}">${n}</button>`).join('')}</div><p><button class="go" data-x="start">Start the game</button> &nbsp; <button class="btn" data-x="rules">Rules</button></p>`;
+ $('#ovb').innerHTML=`<h1>THE REGIME</h1><p>Moscow, 1936. Survive the Terror.</p><p>How many players at the table? You play against the computer.</p><div class="np">${[3,4,5,6].map(n=>`<button data-x="np" data-n="${n}" class="${n===CHOSEN?'on':''}">${n}</button>`).join('')}</div><p><button class="go" data-x="start">Start the game</button> &nbsp; <button class="btn" data-x="rules">Rules</button></p><h2>Play with friends</h2><p>Each person plays on their own phone or computer; the computer fills any empty seat.</p><p><button class="go" data-x="online">Play online</button></p>`;
  $('#ov').classList.add('on');
 }
 function rulesScreen(){
@@ -1194,11 +1369,12 @@ function endScreen(){
  $('#ovb').innerHTML=`<h1>THE TERROR IS OVER</h1><p>${S.round} rounds. ${free} of ${Object.keys(S.men).length} men are still free. ${S.stats.arrests} arrests, ${S.stats.deaths} deaths.</p><p>No winner is declared in this playtest. Who feels like they won?</p><table class="fin"><tr><th>Player</th><th>Free</th><th>In prison</th><th>Dead</th></tr>${rows}</table><p style="margin-top:14px"><button class="go" data-x="new">New game</button> <button class="btn" data-x="close">Look at the board</button></p>`;
  $('#ov').classList.add('on');
  window.__done=true;
+ {const t=JSON.stringify([S.round,S.stats,Object.keys(S.men).map(id=>{const m=S.men[id];return[id,JSON.stringify(where(id)),m.owner,m.rev,m.medal]})]);let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;document.body.dataset.final=(h>>>0).toString(36)}
 }
-async function startGame(){
- $('#ov').classList.remove('on');GEN++;PEND=null;SEL=null;hidePv();
+async function startGame(o){
+ $('#ov').classList.remove('on');GEN++;PEND=null;SEL=null;hidePv();DECN=0;
  for(const k in TOK){TOK[k].remove();delete TOK[k]}
- newState(CHOSEN);buildBoard();layout();render();
+ newState(CHOSEN,o&&o.seed,o&&o.names,o&&o.humans);buildBoard();layout();render();onlineBar();
  try{await game()}catch(e){if(e!==CANCEL){console.error(e);document.body.dataset.err=String(e&&e.stack||e)}}
 }
 function layout(){
@@ -1209,7 +1385,9 @@ function layout(){
 }
 addEventListener('resize',layout);
 layout();
-if(window.__autostart){CHOSEN=window.__autostart;startGame()}else startScreen();
+(async()=>{if(ONL.q.has('auto')){window.__auto=1;window.__fast=1}
+ if(await onlineBoot())return;
+ if(window.__autostart){CHOSEN=window.__autostart;startGame()}else startScreen()})();
 </script>
 </body>
 </html>
