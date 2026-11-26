@@ -116,6 +116,10 @@ body.tall #app{flex-direction:column;height:auto}
 .card.tb .r b{font-size:11px}
 .card.tb .rv{min-width:17px;height:17px;font-size:10.5px}
 .card.tb .fate{display:none}
+.card.fatec{width:80px;height:116px}
+.card.fatec .a,.card.fatec .r{opacity:.18}
+.card.fatec .h{font-size:7.5px;height:13px}
+.card.fatec .fate{display:block;left:5px;right:5px;bottom:auto;top:46px;text-align:center;font-size:12px;background:#7d1d1a;color:#fff;padding:4px 2px;border-radius:4px;letter-spacing:.04em}
 .nom{display:inline-block;margin:6px 0 0;padding:3px 8px;border-radius:5px;font-size:12.5px;font-weight:700}
 .card.mid .h{height:20px;font-size:11px}
 .card.mid .a{top:24px;left:8px;right:16px}
@@ -281,7 +285,7 @@ J:[
 {c:5,t:'Try the Trotskyite-Zinovievite centre.',d:'Try a prisoner in the Lubyanka. Sentence: the Gulag.',s:'Support: a harsher sentence. Objections: a milder one.',k:'verdict',base:1,z:{pris:['lub']},x:'harsh'},
 {c:5,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to the Gulag.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',base:1,z:{none:1},x:'harsh'},
 {c:2,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka who was taken from the department named by the Party line. Sentence: the Canal.',s:'Support: a harsher sentence. Objections: a milder one.',k:'verdict',base:2,z:{lubLine:1},x:'harsh'},
-{c:3,t:'Review the case files.',d:"Each prisoner in the Lubyanka gets the fate on the Judiciary deck's top card.",s:'Support changes nothing.',k:'review',z:{none:1},x:'none'},
+{c:3,t:'Review the case files.',d:'Turn over the top card of the black deck. The fate in its corner becomes the proposed sentence for everyone in the Lubyanka.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',fateBase:1,z:{none:1},x:'harsh'},
 {c:3,t:'Assign specialists to the sharashka.',d:'A prisoner in the Lubyanka or the Gulag goes to the sharashka, if a place is free.',s:'Support: each supporter names another prisoner.',k:'toShar',z:{pris:['lub','gulag']},x:'name'},
 {c:2,t:'The wrong file was sent.',d:'A prisoner on the Canal is sent back to the end of the Gulag queue.',s:'Support: each supporter names another.',k:'canalBack',z:{pris:['canal']},x:'name'},
 {c:2,t:'Amnesty for the repentant.',d:'The prisoner at the front of the Gulag queue goes back to the bottom seat of his old department.',s:'Support: the next prisoner in line too.',k:'amnesty',z:{fixed:'frontGulag'},x:'next'},
@@ -391,11 +395,16 @@ function moveSeat(id,delta){const w=where(id);if(w.t!=='seat')return;const a=S.s
 function swapIR(id){const w=where(id);if(w.t!=='seat'||w.d!=='R')return false;const o=S.seats.I[w.r];if(!o)return false;S.seats.R[w.r]=o;S.seats.I[w.r]=id;return true}
 function favourite(id){const w=where(id);if(w.t!=='seat'||w.r!==0)return false;const old=S.rh;if(old){S.seats[w.d][0]=old}else S.seats[w.d].splice(0,1);S.rh=id;return true}
 function sentence(id,r){if(r<=0){if(!toShar(id))toGulag(id)}else if(r===1)toGulag(id);else if(r===2)toCanal(id);else kill(id)}
-function fateFlip(){
+function fateDraw(){
  if(!S.decks.J.length&&S.disc.J.length){S.decks.J=shuffle(S.disc.J);S.disc.J=[]}
- if(!S.decks.J.length)return['Shot','Gulag','Gulag','Canal','Shot','Sharashka'][rnd(6)];
- const c=S.decks.J.pop();S.disc.J.push(c);return CARDS[c].fate;
+ if(!S.decks.J.length)return{f:['Shot','Gulag','Gulag','Canal','Shot','Sharashka'][rnd(6)],cid:null};
+ const c=S.decks.J.pop();S.disc.J.push(c);return{f:CARDS[c].fate,cid:c};
 }
+function fateFlip(){return fateDraw().f}
+const FRUNG={Sharashka:0,Gulag:1,Canal:2,Shot:3};
+function baseOf(M,a){a=a||M.ag;return a.fateBase?(M.base!=null?M.base:1):(a.base||0)}
+async function showFate(fl,label){if(!fl.cid)return;const el=await placeCard(CARDS[fl.cid],null,label,'fatec',true);await wait(300);el.querySelector('.card').classList.remove('fd');await wait(900)}
+async function proposeFate(M){if(!M.ag||!M.ag.fateBase||M.base!=null)return;const fl=fateDraw();M.base=FRUNG[fl.f];await showFate(fl,'Proposed fate');cap(`The top black card proposes: ${RUNG[M.base]} for everyone in the Lubyanka.`);await wait(700)}
 
 // ================= TARGETS =================
 function areaIds(a){
@@ -464,7 +473,7 @@ function plusList(M,subj){ // what one more supporting voice would add
 }
 function agVal(p,M,subj,extra){
  const a=M.ag;extra=extra||0;
- if(a.x==='harsh')return val(p,a.k,agList(M,subj),0,(a.base||0)+extra);
+ if(a.x==='harsh')return val(p,a.k,agList(M,subj),0,baseOf(M,a)+extra);
  if(a.k==='transferTo')return val(p,a.k,agList(M,subj),a.to==='LINE'?lineDept():a.to,0);
  if(a.x==='more')return val(p,a.k,agList(M,subj),(a.n||0)+extra,0);
  let l=agList(M,subj);
@@ -613,11 +622,11 @@ async function meeting(d){
   }else{cap(`A deferred agenda is waiting: “${dc.ag.t}”. ${P(ch).name} chairs and decides…`);render();await wait(900);const o=aiReopen(ch,d,dfr);reopen=o.reopen;preCid=o.cid;preSubj=o.subj}
   delete S.deferred[d];
   if(reopen){
-   M.card=dfr.cid;M.ag=dc.ag;M.resumed=true;resp=order;
+   M.card=dfr.cid;M.ag=dc.ag;M.resumed=true;resp=order;if(dfr.base!=null)M.base=dfr.base;
    cap(`${ch===HUMAN?'You reopen':P(ch).name+' reopens'} the deferred agenda: “${M.ag.t}”`);render();await wait(700);
    const ids=M.ag.z.none?null:areaIds(M.ag);
    if(ids&&ids.includes(dfr.subj))M.subj=dfr.subj;else if(ids&&ids.length)M.subj=await chooseSubject(ch,M,ids);else if(ids)M.fizzle=true;
-   setNom(M);
+   setNom(M);await proposeFate(M);
   }else{S.disc[d].push(dfr.cid);M.agEl.remove();M.agEl=null;cap(`${ch===HUMAN?'You drop':P(ch).name+' drops'} the deferred agenda and proposes a new one.`);render();await wait(800)}
  }
  if(!reopen){
@@ -632,7 +641,7 @@ async function meeting(d){
   M.agEl=await placeCard(CARDS[cid],p,P(p).name,'ag',true,true);await wait(350);M.agEl.querySelector('.card').classList.remove('fd');await wait(600);
   const ids=M.ag.z.none?null:areaIds(M.ag);
   if(ids){if(!ids.length){M.fizzle=true}else if(M.ag.z.fixed)M.subj=ids[0];else if(p===HUMAN)M.subj=await chooseSubject(p,M,ids);else M.subj=subj&&ids.includes(subj)?subj:bestSubj(p,M,ids)}
-  setNom(M);
+  setNom(M);await proposeFate(M);
   cap(`${P(p).name} propose${p===HUMAN?'':'s'}: “${M.ag.t}”`+(M.subj?` Subject: ${man(M.subj).name} (${man(M.subj).ini}).`:M.fizzle?' There is no one it can apply to.':''));
  }
  tug();
@@ -690,7 +699,7 @@ function forecast(M){
  if(M.fizzle)return'There is no one it can apply to: nothing will happen.';
  let why='';
  if(T.f||T.a)why=` (For ${T.f}, Against ${T.a}${T.net>0&&T.net>T.extra&&a.x!=='harsh'?`; the loudest supporter is ${T.mf===2?'an Acclaim, so at most two more':'a Support, so at most one more'}`:''})`;
- if(a.x==='harsh'){const rung=Math.max(0,Math.min(3,(a.base||0)+T.extra-T.soft));const who=a.k==='mass'?(S.lub.length?'everyone in the Lubyanka':'nobody (the Lubyanka is empty)'):(M.subj?lab(M.subj):'nobody');return`If the meeting ended now: ${who} → ${RUNG[rung]}${why}.`}
+ if(a.x==='harsh'){const rung=Math.max(0,Math.min(3,baseOf(M)+T.extra-T.soft));const who=a.k==='mass'?(S.lub.length?'everyone in the Lubyanka':'nobody (the Lubyanka is empty)'):(M.subj?lab(M.subj):'nobody');return`If the meeting ended now: ${who} → ${RUNG[rung]}${why}.`}
  if(T.fail)return`If the meeting ended now: the agenda fails${why}.`;
  if(a.k==='push')return`If the meeting ended now: the Canal moves ${(a.n||0)+T.extra} place${(a.n||0)+T.extra>1?'s':''}${why}.`;
  if(a.k==='none')return'If the meeting ended now: '+(a.line==='-'?'the Party line is withdrawn.':'nothing happens.');
@@ -701,10 +710,10 @@ function forecast(M){
 }
 async function resolve(M){
  const a=M.ag,d=M.d,T=tally(M);
- if(deferActive(M)){S.deferred[d]={cid:M.card,subj:M.subj};M.keep=true;res(`Deferred. “${a.t}” comes back at the next ${DN[d]} meeting.`);await wait(1500);return}
+ if(deferActive(M)){S.deferred[d]={cid:M.card,subj:M.subj,base:M.base};M.keep=true;res(`Deferred. “${a.t}” comes back at the next ${DN[d]} meeting.`);await wait(1500);return}
  if(M.fizzle){res('The agenda has no one to act on. Nothing happens.');await wait(1300);return}
  if(a.x==='harsh'){
-  const rung=Math.max(0,Math.min(3,(a.base||0)+T.extra-T.soft));
+  const rung=Math.max(0,Math.min(3,baseOf(M)+T.extra-T.soft));
   const list=a.k==='mass'?S.lub.slice():[M.subj];
   if(!list.length||!list[0]){res('There is nobody in the Lubyanka to try.');await wait(1300);return}
   flashTok(list);await wait(500);
@@ -732,7 +741,7 @@ async function resolve(M){
  case'exileOut':for(const id of list){out.push(toExile(id)?`${nm(id)} goes abroad into exile`:`no exile place is free for ${nm(id)}`)}break;
  case'arrest':for(const id of list){const r=arrest(id);out.push(r==='medal'?`${nm(id)}'s Order of Lenin saves him this time (the medal is lost)`:`${nm(id)} is arrested`)}break;
  case'shoot':case'accident':for(const id of list){kill(id);out.push(`${nm(id)} is dead`)}break;
- case'assassin':for(const id of list){const f=fateFlip();if(f==='Shot'){kill(id);out.push(`the assassin finds ${nm(id)} (fate: SHOT)`)}else out.push(`${nm(id)} escapes the assassin (fate: ${f.toUpperCase()})`)}break;
+ case'assassin':for(const id of list){const fl=fateDraw();const f=fl.f;await showFate(fl,'Fate for '+man(id).ini);if(f==='Shot'){kill(id);out.push(`the assassin finds ${nm(id)} (fate: SHOT)`)}else out.push(`${nm(id)} escapes the assassin (fate: ${f.toUpperCase()})`)}break;
  case'draft':for(const id of list){out.push(enter('R',id)?`${nm(id)} is recalled into the Red Army`:`the Red Army has no seat free for ${nm(id)}`)}break;
  case'sharBack':for(const id of list){out.push(enter('I',id)?`${nm(id)} returns to Industry`:`Industry has no seat free for ${nm(id)}`)}break;
  case'amnesty':for(const id of list){const fd=D.includes(man(id).from)?man(id).from:'I';out.push(enter(fd,id)?`${nm(id)} returns to ${DN[fd]}`:`${DN[fd]} has no seat free for ${nm(id)}`)}break;
