@@ -286,9 +286,9 @@ R:[
 {c:2,t:'Manoeuvres in the Kiev district.',d:'Nothing happens.',s:'Support changes nothing.',k:'none',z:{none:1},x:'none'},
 ],
 J:[
-{c:6,t:'Try the Trotskyite-Zinovievite centre.',d:'Try a prisoner in the Lubyanka. Sentence: the Gulag.',s:'Support: a harsher sentence. Objections: a milder one.',k:'verdict',base:1,z:{pris:['lub']},x:'harsh'},
+{c:6,t:'Try the Trotskyite-Zinovievite centre.',d:'Try a prisoner in the Lubyanka. Sentence: the Gulag.',s:'Support: each supporter names another prisoner in the Lubyanka to stand trial with him. Objections can stop the trial.',k:'verdict',base:1,z:{pris:['lub']},x:'name'},
 {c:6,t:'Try the anti-Soviet bloc of Rights and Trotskyites.',d:'A mass trial: every prisoner in the Lubyanka is sentenced to the Gulag.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',base:1,z:{none:1},x:'harsh'},
-{c:2,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka. Sentence: the Canal.',s:'Support: a harsher sentence. Objections: a milder one.',k:'verdict',base:2,z:{pris:['lub']},x:'harsh'},
+{c:2,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka. Sentence: the Canal.',s:'Support: each supporter names an accomplice from the Lubyanka to share his sentence. Objections can stop the trial.',k:'verdict',base:2,z:{pris:['lub']},x:'name'},
 {c:3,t:'Review the case files.',d:'Turn over the top card of the black deck. The fate in its corner becomes the proposed sentence for everyone in the Lubyanka.',s:'Support: a harsher sentence for all. Objections: a milder one.',k:'mass',fateBase:1,z:{none:1},x:'harsh'},
 {c:2,t:'Assign specialists to the sharashka.',d:'A prisoner in the Lubyanka goes to the sharashka, if a place is free.',s:'Support: each supporter names another prisoner.',k:'toShar',z:{pris:['lub']},x:'name'},
 {c:2,t:'The wrong file was sent.',d:'A prisoner on the Canal is sent back to the end of the Gulag queue.',s:'Support: each supporter names another.',k:'canalBack',z:{pris:['canal']},x:'name'},
@@ -509,8 +509,8 @@ function agVal(p,M,subj,extra){
  if(a.x==='more')return val(p,a.k,agList(M,subj),(a.n||0)+extra,0);
  let l=agList(M,subj);
  if(extra>0&&(a.x==='next'||a.x==='up')){for(let i=0;i<extra;i++){const n=nextOf(l[l.length-1],a.x==='up'?-1:1);if(n)l=l.concat([n])}}
- if(extra>0&&a.x==='name'){const c=nameable(M).map(id=>[id,val(p,a.k,[id],a.n||0,0)]).sort((x,y)=>y[1]-x[1]);if(c.length&&c[0][1]>0)return val(p,a.k,l,a.n||0,0)+c[0][1]}
- return val(p,a.k,l,a.n||0,0);
+ if(extra>0&&a.x==='name'){const c=nameable(M).map(id=>[id,val(p,a.k,[id],a.n||0,a.base||0)]).sort((x,y)=>y[1]-x[1]);if(c.length&&c[0][1]>0)return val(p,a.k,l,a.n||0,a.base||0)+c[0][1]}
+ return val(p,a.k,l,a.n||0,a.base||0);
 }
 function lineVal(p,ld){if(!ld||ld==='-')return 0;let v=0;for(const id of S.seats[ld])v-=wt(p,id)*0.12;return v}
 function aiLead(p,d){
@@ -537,7 +537,7 @@ function aiRespond(p,M){
  return best&&best.cid;
 }
 function aiAmend(p,M){let b=null,bv=-1e9;for(const n of neighbours(M.subj)){if(M.named.includes(n))continue;const v=agVal(p,M,n,0);if(v>bv){bv=v;b=n}}return b}
-function aiName(p,M,opts){let b=null,bv=-1e9;for(const id of opts){const v=val(p,M.ag.k,[id],M.ag.n||0,0)+RNG()*0.02;if(v>bv){bv=v;b=id}}return bv>-0.05?b:null}
+function aiName(p,M,opts){let b=null,bv=-1e9;for(const id of opts){const v=val(p,M.ag.k,[id],M.ag.n||0,M.ag.base||0)+RNG()*0.02;if(v>bv){bv=v;b=id}}return bv>-0.05?b:null}
 function aiCorridor(p){
  const cand=[];
  for(const d of D){const top=topClaim(d);const lim=top?top.r:99;
@@ -738,7 +738,7 @@ function forecast(M){
  if(a.k==='troika')return`If the meeting ended now: ${S.lub.length?'everyone in the Lubyanka goes to the Gulag':'nothing (the Lubyanka is empty)'}${why}.`;
  const list=finalList(M,T);if(!list.length)return'';
  const amt=a.x==='more'?` ${(a.n||0)+T.extra} seat${(a.n||0)+T.extra>1?'s':''}`:'';
- return`If the meeting ended now: ${list.map(lab).join(', ')} ${list.length>1?'are':'is'} ${KV[a.k]||'affected'}${amt}${why}.`;
+ return`If the meeting ended now: ${list.map(lab).join(', ')} ${list.length>1?'are':'is'} ${a.k==='verdict'?'sentenced to '+RUNG[a.base||1]:(KV[a.k]||'affected')}${amt}${why}.`;
 }
 async function resolve(M){
  const a=M.ag,d=M.d,T=tally(M);
@@ -786,6 +786,7 @@ async function resolve(M){
  case'transferTo':{const to=a.to==='LINE'?lineDept():a.to;for(const id of list){if(!to){out.push('the line names nobody');break}out.push(transferMsg(id,to,tradeInto(to,id)))}break}
  case'favourite':for(const id of list){out.push(favourite(id)?`${nm(id)} becomes Stalin's right hand`:`nothing changes`)}break;
  case'troika':{const l=S.lub.slice();if(!l.length)out.push('the Lubyanka is empty');else{for(const id of l)sentence(id,1);out.push(`${l.map(nm).join(', ')} ${l.length>1?'are':'is'} sent to the Gulag`)}break}
+ case'verdict':for(const id of list){sentence(id,a.base||1);out.push(`${nm(id)} is sentenced to ${RUNG[a.base||1]}`)}break;
  case'none':out.push(a.line==='-'?'the Party line is withdrawn':'nothing happens');break;
  }
  if(a.line){const old=S.line;S.line=CARDS[M.card];M.keep=true;if(old.id!=='L0')S.disc.P.push(old.id);out.push(a.line==='-'?'the line names nobody':`the Party line now points at ${DN[a.line]}`)}
