@@ -192,46 +192,24 @@ const PCOL=['#8e44ad','#e67e22','#16a085','#d6336c','#8a5a2b','#5b6b7a'];
 const PNAMES=['You','Masha','Pyotr','Sasha','Olga','Ivan'];
 const HAND=15;
 const RANKN=['head','second','third','fourth','fifth','sixth','seventh'];
-const MEN=[
-['P','Zhdanov','Andrei Zhdanov','Secretary for Ideology'],
-['P','Mekhlis','Lev Mekhlis','Editor-in-Chief of Pravda'],
-['P','Yaroslavsky','Yemelyan Yaroslavsky','Chairman of the League of the Militant Godless'],
-['P','Bukharin','Nikolai Bukharin','Editor of Izvestia'],
-['P','Ehrenburg','Ilya Ehrenburg','Izvestia Correspondent in Paris'],
-['P','Kerzhentsev','Platon Kerzhentsev','Chairman of the Committee for the Arts'],
-['P','Shumyatsky','Boris Shumyatsky','Head of the Cinema Administration'],
-['N','Yagoda','Genrikh Yagoda',"People's Commissar of Internal Affairs"],
-['N','Yezhov','Nikolai Yezhov','Central Committee Secretary for the Organs'],
-['N','Agranov','Yakov Agranov','First Deputy Commissar'],
-['N','Frinovsky','Mikhail Frinovsky','Head of the Border Guards'],
-['N','Pauker','Karl Pauker',"Head of Stalin's Bodyguard"],
-['N','Artuzov','Artur Artuzov','Head of Counter-Intelligence'],
-['N','Berman','Matvei Berman','Head of the Gulag Administration'],
-['I','Sergo','Sergo Ordzhonikidze',"People's Commissar of Heavy Industry"],
-['I','Kaganovich','Lazar Kaganovich',"People's Commissar of Railways"],
-['I','Pyatakov','Georgy Pyatakov','Deputy Commissar of Heavy Industry'],
-['I','Mikoyan','Anastas Mikoyan',"People's Commissar of the Food Industry"],
-['I','Rukhimovich','Moisei Rukhimovich',"People's Commissar of the Defence Industry"],
-['I','Likhachov','Ivan Likhachov','Director of the Stalin Auto Works'],
-['I','Stakhanov','Aleksei Stakhanov','Miner at the Central-Irmino Pit'],
-['R','Voroshilov','Kliment Voroshilov',"People's Commissar of Defence"],
-['R','Tukhachevsky','Mikhail Tukhachevsky','Deputy Commissar of Defence'],
-['R','Gamarnik','Yan Gamarnik','Head of the Political Directorate'],
-['R','Blyukher','Vasily Blyukher','Commander of the Far Eastern Army'],
-['R','Yakir','Iona Yakir','Commander of the Kiev Military District'],
-['R','Uborevich','Ieronim Uborevich','Commander of the Belorussian Military District'],
-['R','Rokossovsky','Konstantin Rokossovsky','Commander of the 5th Cavalry Corps'],
-['J','Ulrikh','Vasily Ulrikh','Chairman of the Military Collegium'],
-['J','Vyshinsky','Andrei Vyshinsky','Prosecutor General'],
-['J','Krylenko','Nikolai Krylenko',"People's Commissar of Justice"],
-['J','Roginsky','Grigory Roginsky','Deputy Prosecutor General'],
-['J','Nikitchenko','Iona Nikitchenko','Member of the Military Collegium'],
-['J','Matulevich','Ivan Matulevich','Deputy Chairman of the Military Collegium'],
-['J','Sheinin','Lev Sheinin',"Investigator at the Prosecutor's Office"],
-['RH','Molotov','Vyacheslav Molotov',"Stalin's Right Hand"],
-['K','Kalinin','Mikhail Kalinin','Head of State'],
-['X','Trotsky','Leon Trotsky','In exile in Mexico'],
-];
+// Harry's list of names (Kalinin removed). The old guard always start at the head of their departments and Molotov at
+// Stalin's right hand; everyone else is dealt into the remaining seats at random, so the cast changes from game to game.
+const NAMELIST=[["Andrei","Bubnov","AB"],["Sergo","Ordzhonikidze","SO"],["Karl","Radek","KR"],["Alexei","Rykov","AR"],["Grigory","Zinoviev","GZ"],["Nikolai","Bukharin","NB"],["Ivan","Smirnov","IS"],["Jekabs","Peterss","JP"],["Gaya","Gai","GG"],["Valentin","Trifonov","VT"],
+["Lazar","Kaganovich","LK"],["Nikita","Khrushchev","NK"],["Vyacheslav","Molotov","VM"],["Kliment","Voroshilov","KV"],["Anastas","Mikoyan","AM"],["Andrey","Vyshinsky","AV"],["Lavrenti","Beria","LB"],["Lev","Mekhlis","LM"],["Andrei","Zhdanov","AZ"],
+["Mikhail","Tukhachevsky","MT"],["Vasily","Bluykher","VB"],["Semyon","Budyonny","SB"],["Alexander","Yegorov","AY"],["Genrikh","Yagoda","GY"],["Nikolai","Yezhov","NY"],["Ivan","Akulov","IA"],["Mikhail","Frinovsky","MF"],["Nestor","Lakoba","NL"],["Robert","Eikhe","RE"],["Ivan","Golyakov","IG"],["Vasiliy","Ulrikh","VU"],["Evgeny","Pashukanis","EP"],["Ivan","Bakayev","IB"],["Pavel","Postyshev","PP"],["Pyotr","Zalutsky","PZ"],["Nikolai","Uglanov","NU"],["Artur","Artuzov","AA"],["Isaak","Zelensky","IZ"],["Akmal","Ikramov","AI"],["Sultan","Afandiyev","SA"],["Trofim","Lysenko","TL"],["Grigory","Petrovsky","GP"],["Boris","Shaposhnikov","BS"],["Georgy","Malenkov","GM"],["Semyon","Timoshenko","ST"],["Stanislaw","Kosior","SK"],["Yakov","Sheko","YS"],["Yan","Berzin","YB"],["Yefim","Yevdokimov","YY"]];
+const FIXED={LM:['P',0],GY:['N',0],NY:['N',1],SO:['I',0],KV:['R',0]};
+function castMen(){
+ const byIni={};NAMELIST.forEach(n=>byIni[n[2]]=n);
+ const row=(home,n)=>[home,n[1],n[0]+' '+n[1],'',n[2]];
+ const seat={P:[],N:[],I:[],R:[],J:[]};
+ for(const ini in FIXED){const[d,r]=FIXED[ini];seat[d][r]=byIni[ini]}
+ const pool=shuffle(NAMELIST.filter(n=>!FIXED[n[2]]&&n[2]!=='VM'));
+ for(const d of D)for(let r=0;r<7;r++)if(!seat[d][r])seat[d][r]=pool.shift();
+ const out=[];for(const d of D)for(const n of seat[d])out.push(row(d,n));
+ out.push(row('RH',byIni.VM));
+ out.push(['X','Trotsky','Leon Trotsky','In exile in Mexico','LT']);
+ return out}
+
 // Agendas. k = effect, z = who it can be aimed at, x = what Support adds, c = copies in the deck.
 const AG={
 P:[
@@ -328,12 +306,14 @@ J:[
 {c:1,t:'Approve the new procedural code.',d:'Nothing happens.',k:'none',z:{none:1},x:'none'},
 ],
 };
+// Approval scale. Target pass rates: NKVD ~85%, Red Army ~75%, Judiciary ~65%, Propaganda ~60%, Industry ~50%;
+// about one meeting in ten deferred. Halves are single cards in the twice-printed decks.
 const RESPMIX={
-P:{Amend:1,Support:18,Acclaim:1,Doubt:10,Defer:1,Abstain:5,Either:1},
-N:{Support:65,Acclaim:2,Doubt:4,Amend:2,Defer:1,Abstain:3,Either:3},
-I:{Abstain:6,Defer:2,Support:18,Acclaim:1,Doubt:9,Amend:1,Either:1},
-R:{Support:31,Acclaim:1,Doubt:4,Amend:1,Defer:1,Abstain:2,Either:1},
-J:{Defer:2,Support:15,Acclaim:1,Doubt:8,Abstain:3,Either:1},
+P:{Amend:1,Support:13,Acclaim:1,Doubt:15,Defer:0.5,Abstain:5.5,Either:1},
+N:{Support:51,Acclaim:2,Doubt:18,Amend:2,Defer:1,Abstain:3,Either:3},
+I:{Abstain:6.5,Defer:0.5,Support:13,Acclaim:1,Doubt:15,Amend:1,Either:1},
+R:{Support:25,Acclaim:1,Doubt:10,Amend:1,Defer:0.5,Abstain:2.5,Either:1},
+J:{Defer:0.5,Support:13,Acclaim:1,Doubt:11,Abstain:3.5,Either:1},
 };
 const FLAV={
 P:{Support:'Pravda will print it on the front page.',Acclaim:'Thunderous applause, rising to an ovation.',Doubt:'The masses may not understand this.',Protest:'This is a slander against the Party!',Amend:'Let us correct the wording, comrades.',Defer:'Let the editors look at it again.',Abstain:'Pravda has no comment.',Either:'As the Party decides.'},
@@ -347,7 +327,7 @@ const RUNG=['the sharashka','the Gulag','the Canal','the firing squad'];
 for(const d of D)for(const a of AG[d])if(['transferTo','transferI'].includes(a.k))a.d+=(a.nx||0)>0?' If it is full, they swap places with its bottom men.':' If it is full, he swaps places with its bottom man.';
 for(const d of D)for(const a of AG[d])if(['draft','sharBack','amnesty'].includes(a.k))a.d+=` If it is full, he swaps places with its bottom man, who goes to ${a.k==='sharBack'?'the sharashka':'the Gulag'} in his place.`;
 // Stalin's voice: his own small deck. Pure weight on the scales: it never names anyone.
-const SVOICE=[['Support','+1','Stalin nods.',3],['Acclaim','+1','Comrade Stalin is pleased.',2],['Support','+1','Stalin puffs his pipe.',6],['Doubt','−1','Stalin frowns.',3],['Doubt','−1','Stalin taps his pipe on the table.',1],['Abstain','0','Stalin says nothing.',3],['Defer','','“We will come back to this.” Cannot be overruled.',2]];
+const SVOICE=[['Support','+1','Stalin nods.',3],['Acclaim','+1','Comrade Stalin is pleased.',2],['Support','+1','Stalin puffs his pipe.',6],['Doubt','−1','Stalin frowns.',3],['Doubt','−1','Stalin taps his pipe on the table.',1],['Abstain','0','Stalin says nothing.',3],['Defer','','“We will come back to this.” Cannot be overruled.',1]];
 function buildStalin(){const ids=[];let n=0;for(const[r,v,t,c]of SVOICE)for(let k=0;k<c;k++){const id='s'+(n++);CARDS[id]={id,d:'S',stalin:true,resp:r,sv:v,txt:t};ids.push(id)}return shuffle(ids)}
 const LINE0={id:'L0',d:'P',ag:{t:'Vigilance against the Trotskyite conspiracy.',d:'The Party line names nobody yet.',s:'',line:'-'},resp:'Abstain'};
 
@@ -389,7 +369,7 @@ function newState(np){
  for(const d of D)S.decks[d]=shuffle(decks[d].slice());
  S.sdeck=buildStalin();S.sdisc=[];
  S.decks.N=S.decks.N.slice(0,10*np);
- MEN.forEach((m,i)=>{const id='m'+i;const pts=m[2].split(' ');S.men[id]={id,home:m[0],sn:m[1],name:m[2],title:m[3],ini:pts[0][0]+pts[pts.length-1][0],owner:null,rev:false,nobody:false,medal:0,from:null};
+ castMen().forEach((m,i)=>{const id='m'+i;const pts=m[2].split(' ');S.men[id]={id,home:m[0],sn:m[1],name:m[2],title:m[3],ini:m[4]||pts[0][0]+pts[pts.length-1][0],owner:null,rev:false,nobody:false,medal:0,from:null};
   if(D.includes(m[0]))S.seats[m[0]].push(id);else if(m[0]==='RH')S.rh=id;else if(m[0]==='K')S.kal=id;else S.exile.push(id)});
  {const seen={};for(const k in S.men){const i=S.men[k].ini;if(seen[i])console.warn('duplicate initials',i);seen[i]=1}}
  for(let p=0;p<np;p++)S.players.push({i:p,name:PNAMES[p],ai:p!==HUMAN,hand:[]});
@@ -941,7 +921,7 @@ function posRaw(id){const w=where(id);
 const GULAG_SVG='<svg class="art" width="290" height="252" viewBox="0 0 290 252" aria-hidden="true" style="position:absolute;left:0;top:0;border-radius:8px"><defs><linearGradient id="gsk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#93a6b4"/><stop offset=".5" stop-color="#d3dbe0"/><stop offset="1" stop-color="#eef2f4"/></linearGradient></defs><rect width="290" height="252" rx="8" fill="url(#gsk)"/><path d="M252 82 L150 22 L146 44 Z" fill="#fffbe0" opacity=".45"/><path d="M0 118 C40 100 80 104 120 114 C160 124 200 98 240 102 C262 104 278 110 290 108 V252 H0Z" fill="#c4ced5"/><path d="M0 160 C50 138 100 150 150 158 C200 166 240 140 290 146 V252 H0Z" fill="#e2e8eb"/><path d="M0 206 C60 188 120 204 180 200 C230 196 260 186 290 192 V252 H0Z" fill="#f5f8f9"/><g stroke="#5f564c" stroke-width="2"><line x1="6" y1="150" x2="6" y2="170"/><line x1="32" y1="149" x2="32" y2="169"/><line x1="58" y1="148" x2="58" y2="168"/><line x1="84" y1="147" x2="84" y2="167"/><line x1="110" y1="147" x2="110" y2="167"/><line x1="136" y1="146" x2="136" y2="166"/><line x1="162" y1="145" x2="162" y2="165"/><line x1="188" y1="144" x2="188" y2="164"/><line x1="214" y1="144" x2="214" y2="164"/></g><path d="M0 154 L226 147 M0 162 L226 155" stroke="#5f564c" stroke-width="1" stroke-dasharray="3 2" fill="none"/><g stroke="#4a3b2c" stroke-width="3" fill="none" stroke-linecap="round"><path d="M236 198 L250 104 M284 198 L270 104 M241 170 L279 140 M279 170 L241 140 M245 140 L275 140 M240 170 L280 170"/></g><rect x="242" y="96" width="36" height="9" fill="#5a4632"/><rect x="247" y="74" width="26" height="22" fill="#6b5640"/><rect x="254" y="80" width="12" height="8" fill="#ffe9a0"/><path d="M240 76 L260 60 L280 76 Z" fill="#3d3024"/><path d="M240 76 L260 60 L280 76" fill="none" stroke="#fff" stroke-width="2" opacity=".8"/><circle cx="2" cy="6" r="1.0" fill="#fff" opacity=".85"/><circle cx="55" cy="43" r="1.5" fill="#fff" opacity=".85"/><circle cx="108" cy="80" r="2.0" fill="#fff" opacity=".85"/><circle cx="161" cy="117" r="1.0" fill="#fff" opacity=".85"/><circle cx="214" cy="154" r="1.5" fill="#fff" opacity=".85"/><circle cx="267" cy="191" r="2.0" fill="#fff" opacity=".85"/><circle cx="33" cy="228" r="1.0" fill="#fff" opacity=".85"/><circle cx="86" cy="25" r="1.5" fill="#fff" opacity=".85"/><circle cx="139" cy="62" r="2.0" fill="#fff" opacity=".85"/><circle cx="192" cy="99" r="1.0" fill="#fff" opacity=".85"/><circle cx="245" cy="136" r="1.5" fill="#fff" opacity=".85"/><circle cx="11" cy="173" r="2.0" fill="#fff" opacity=".85"/><circle cx="64" cy="210" r="1.0" fill="#fff" opacity=".85"/><circle cx="117" cy="7" r="1.5" fill="#fff" opacity=".85"/><circle cx="170" cy="44" r="2.0" fill="#fff" opacity=".85"/><circle cx="223" cy="81" r="1.0" fill="#fff" opacity=".85"/><circle cx="276" cy="118" r="1.5" fill="#fff" opacity=".85"/><circle cx="42" cy="155" r="2.0" fill="#fff" opacity=".85"/><circle cx="95" cy="192" r="1.0" fill="#fff" opacity=".85"/><circle cx="148" cy="229" r="1.5" fill="#fff" opacity=".85"/><circle cx="201" cy="26" r="2.0" fill="#fff" opacity=".85"/><circle cx="254" cy="63" r="1.0" fill="#fff" opacity=".85"/><circle cx="20" cy="100" r="1.5" fill="#fff" opacity=".85"/><circle cx="73" cy="137" r="2.0" fill="#fff" opacity=".85"/><circle cx="126" cy="174" r="1.0" fill="#fff" opacity=".85"/><circle cx="179" cy="211" r="1.5" fill="#fff" opacity=".85"/><circle cx="232" cy="8" r="2.0" fill="#fff" opacity=".85"/><circle cx="285" cy="45" r="1.0" fill="#fff" opacity=".85"/><circle cx="51" cy="82" r="1.5" fill="#fff" opacity=".85"/><circle cx="104" cy="119" r="2.0" fill="#fff" opacity=".85"/><circle cx="157" cy="156" r="1.0" fill="#fff" opacity=".85"/><circle cx="210" cy="193" r="1.5" fill="#fff" opacity=".85"/><circle cx="263" cy="230" r="2.0" fill="#fff" opacity=".85"/><circle cx="29" cy="27" r="1.0" fill="#fff" opacity=".85"/></svg>';
 const EXILE_SVG='<svg class="art" width="218" height="122" viewBox="0 0 218 122" aria-hidden="true" style="position:absolute;left:0;top:0;border-radius:8px"><defs><linearGradient id="esk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd07a"/><stop offset="1" stop-color="#fff2d2"/></linearGradient><radialGradient id="esun"><stop offset="0" stop-color="#fff6c0"/><stop offset=".55" stop-color="#ffc233" stop-opacity=".9"/><stop offset="1" stop-color="#ffc233" stop-opacity="0"/></radialGradient></defs><rect width="218" height="122" rx="8" fill="url(#esk)"/><circle cx="150" cy="26" r="24" fill="url(#esun)"/><circle cx="150" cy="26" r="10" fill="#ffad0a"/><path d="M0 92 C30 88 60 95 100 91 C140 87 180 93 218 89 V122 H0Z" fill="#2f9cc4"/><path d="M8 100 q6 -3 12 0 M52 106 q6 -3 12 0 M104 99 q6 -3 12 0 M150 104 q6 -3 12 0" stroke="#c9eef8" stroke-width="1.5" fill="none"/><path d="M120 116 C150 104 190 104 218 108 V122 H112Z" fill="#f0d29a"/><path d="M204 116 C202 96 198 80 192 60" stroke="#7a5230" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M204 116 C202 96 198 80 192 60" stroke="#a37446" stroke-width="5" fill="none" stroke-dasharray="2 5"/><g fill="#2e8b57"><path d="M192 60 C180 48 168 50 160 58 C172 54 182 56 192 62Z"/><path d="M192 60 C186 44 174 38 166 40 C178 44 186 50 192 61Z"/><path d="M192 60 C198 44 208 40 217 44 C206 46 199 52 193 61Z"/><path d="M192 60 C204 54 213 58 218 68 C208 62 200 60 193 62Z"/><path d="M192 60 C192 46 197 36 204 32 C199 40 195 50 193 61Z"/></g><path d="M178 116 C177 104 175 96 172 88" stroke="#7a5230" stroke-width="3.5" fill="none" stroke-linecap="round"/><g fill="#3a9d63"><path d="M172 88 C164 80 156 82 152 88 C160 85 166 86 172 90Z"/><path d="M172 88 C180 80 188 80 192 86 C184 84 178 86 173 90Z"/><path d="M172 88 C170 78 174 70 180 68 C176 74 174 80 173 89Z"/></g></svg>';
 const CANAL_SVG='<svg width="1000" height="1000" aria-hidden="true" style="position:absolute;left:0;top:0;pointer-events:none"><path d="M846 0 H1000 V128 C986 120 976 104 962 98 C944 90 934 76 916 66 C898 56 884 40 872 26 C862 16 852 8 846 0Z" fill="#557f9c"/><path d="M900 18 q6 -3 12 0 M940 30 q6 -3 12 0 M964 60 q6 -3 12 0 M918 48 q6 -3 12 0 M972 12 q6 -3 12 0 M984 92 q6 -3 12 0" stroke="#cfe6f2" stroke-width="1.5" fill="none"/><g transform="translate(800 440) rotate(-69.35)"><rect x="-40" y="-29" width="459" height="58" rx="8" fill="#9a8f7c"/><rect x="-40" y="-29" width="459" height="58" rx="8" fill="none" stroke="#6e6556" stroke-width="2" stroke-dasharray="7 4"/><rect x="-36" y="-22" width="455" height="44" rx="4" fill="#6c98b3"/><path d="M-20 -8 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M10 9 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M48 -10 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M80 6 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M120 -6 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M150 10 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M196 -9 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M230 7 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M268 -7 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M300 9 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M338 -5 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M372 6 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><rect x="23.8" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="26.3" cy="-28" r="3" fill="#3d2f22"/><circle cx="26.3" cy="28" r="3" fill="#3d2f22"/><rect x="76.5" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="79.0" cy="-28" r="3" fill="#3d2f22"/><circle cx="79.0" cy="28" r="3" fill="#3d2f22"/><rect x="129.2" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="131.7" cy="-28" r="3" fill="#3d2f22"/><circle cx="131.7" cy="28" r="3" fill="#3d2f22"/><rect x="181.8" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="184.3" cy="-28" r="3" fill="#3d2f22"/><circle cx="184.3" cy="28" r="3" fill="#3d2f22"/><rect x="234.5" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="237.0" cy="-28" r="3" fill="#3d2f22"/><circle cx="237.0" cy="28" r="3" fill="#3d2f22"/><rect x="287.2" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="289.7" cy="-28" r="3" fill="#3d2f22"/><circle cx="289.7" cy="28" r="3" fill="#3d2f22"/><rect x="339.8" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="342.3" cy="-28" r="3" fill="#3d2f22"/><circle cx="342.3" cy="28" r="3" fill="#3d2f22"/></g><ellipse cx="790" cy="462" rx="34" ry="16" fill="#6c98b3" stroke="#9a8f7c" stroke-width="3"/></svg>';
-function showTip(id,el){const m=man(id);const t=$('#tip');t.innerHTML=`<b>${m.ini} · ${esc(m.name)}</b><br>${esc(m.title)}<br><i>${esc(locName(id))}</i>`+(m.owner===HUMAN?'<br>Yours'+(m.rev?' (revealed)':' (secret)'):m.rev&&m.owner!=null?`<br>Belongs to ${esc(P(m.owner).name)}`:m.nobody?'<br>Belongs to nobody':'')+(m.medal?`<br>Order of Lenin${m.medal>1?' ×'+m.medal:''}`:'');const r=el.getBoundingClientRect();t.classList.add('on');t.style.left=Math.min(innerWidth-250,Math.max(6,r.left))+'px';t.style.top=(r.bottom+6+120>innerHeight?r.top-6-t.offsetHeight:r.bottom+6)+'px';clearTimeout(showTip.h);showTip.h=setTimeout(hideTip,4000)}
+function showTip(id,el){const m=man(id);const t=$('#tip');t.innerHTML=`<b>${m.ini} · ${esc(m.name)}</b><br>${m.title?esc(m.title)+'<br>':''}<i>${esc(locName(id))}</i>`+(m.owner===HUMAN?'<br>Yours'+(m.rev?' (revealed)':' (secret)'):m.rev&&m.owner!=null?`<br>Belongs to ${esc(P(m.owner).name)}`:m.nobody?'<br>Belongs to nobody':'')+(m.medal?`<br>Order of Lenin${m.medal>1?' ×'+m.medal:''}`:'');const r=el.getBoundingClientRect();t.classList.add('on');t.style.left=Math.min(innerWidth-250,Math.max(6,r.left))+'px';t.style.top=(r.bottom+6+120>innerHeight?r.top-6-t.offsetHeight:r.bottom+6)+'px';clearTimeout(showTip.h);showTip.h=setTimeout(hideTip,4000)}
 function hideTip(){const t=$('#tip');if(t)t.classList.remove('on')}
 function buildBoard(){
  // The board is drawn mirrored: Stalin's office in the top-right corner, Propaganda leftmost.
@@ -990,7 +970,7 @@ function buildBoard(){
  h+=A(12,866,'width:218px;height:122px;border-radius:8px;border:1px solid #c89b45;color:#5a3a10;overflow:hidden',EXILE_SVG.replace('border-radius:8px"','border-radius:8px;transform:scaleX(-1)"')+`<div style="position:relative;padding:6px 12px 0;text-align:right"><div class="bt">EXILE</div><div class="bs">Abroad, farthest from Stalin</div></div>`);
  for(let i=0;i<3;i++)h+=A(X(790+i*50,40),907,'width:40px;height:26px;border-radius:5px;border:1.5px dashed #a0763a;background:rgba(255,255,255,.35)');
  // kalinin
- h+=A(360,902,'width:200px;height:86px;border-radius:8px;border:1px dashed #b9a77f;padding:6px 10px;color:#6b5a3a;text-align:right',`<div class="bt" style="font-size:12px">HEAD OF STATE</div><div class="bs">a figurehead</div>`);
+
  // party line + decks (left side)
  h+=A(10,486,'width:204px;height:170px;border-radius:8px;background:#e4d8bd;border:1px solid #b9a77f;padding:8px 10px;color:#5a1311',`<div class="bt" style="font-size:13px">THE PARTY LINE</div><div id="lineSlot" style="margin-top:6px"></div>`);
  h+=A(10,668,'width:204px;height:186px;border-radius:8px;background:#e4d8bd;border:1px solid #b9a77f;padding:8px 10px;color:#5a1311',`<div class="bt" style="font-size:13px">STALIN'S DECKS</div><div class="bs" style="color:#4a3d27">Blue is the clock: it is never reshuffled.</div>`);
@@ -1011,7 +991,7 @@ function render(){
   el.className='tok '+(w.t==='seat'?'s'+w.d:'t'+w.t)+(m.owner===HUMAN?' mine':'')+(pick.has(id)?' pick':'')+(HL.has(id)?' hl':S.M&&(S.M.subj===id||S.M.named.includes(id)||partnerOf(S.M)===id)?' subj':'');
   el.style.zIndex=w.t==='grave'?3:5;
   el.innerHTML=(m.rev&&m.owner!=null?`<i class="ob" style="background:${PCOL[m.owner]}"></i>`:m.nobody?'<i class="ob nob"></i>':'')+`<span>${m.ini}</span>`+(m.medal?`<i class="md">${m.medal>1?m.medal:''}</i>`:'');
-  el.title=`${m.name}\n${m.title}\n${locName(id)}`+(m.owner===HUMAN?'\nYours'+(m.rev?' (revealed)':' (secret)'):m.rev&&m.owner!=null?`\nBelongs to ${P(m.owner).name}`:m.nobody?'\nBelongs to nobody':'')+(m.medal?`\nOrder of Lenin${m.medal>1?' ×'+m.medal:''}`:'');
+  el.title=`${m.name}\n${m.title?m.title+'\n':''}${locName(id)}`+(m.owner===HUMAN?'\nYours'+(m.rev?' (revealed)':' (secret)'):m.rev&&m.owner!=null?`\nBelongs to ${P(m.owner).name}`:m.nobody?'\nBelongs to nobody':'')+(m.medal?`\nOrder of Lenin${m.medal>1?' ×'+m.medal:''}`:'');
  }
  // piles
  document.querySelectorAll('.pile').forEach(el=>{const d=el.dataset.d;const n=S.decks[d].length;el.classList.toggle('empty',!n&&!(d!=='N'&&S.disc[d].length));el.classList.toggle('pick',!!(PEND&&PEND.kind==='deck'&&canDraw(d)))});
@@ -1053,7 +1033,7 @@ function charHTML(o,cls){
  const back=`<div class="b" style="background:repeating-linear-gradient(-45deg,#7d1d1a,#7d1d1a 7px,#5a1311 7px,#5a1311 13px)"></div>`;
  if(!o.id)return `<div class="card chr ${cls||''}"><div class="f" style="display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#555">BLANK<br>(silent)</div>${back}</div>`;
  const m=man(o.id),w=where(o.id);
- return `<div class="card chr ${cls||''}"><div class="f"><div class="h" style="background:${w.t==='seat'?DC[w.d]:'#777'};color:${w.t==='seat'?DT[w.d]:'#fff'}">COMES FORWARD</div><div class="cn">${esc(m.name)}</div><div class="ct">${esc(m.title)}<br><br>${esc(locName(o.id))}</div></div>${back}</div>`;
+ return `<div class="card chr ${cls||''}"><div class="f"><div class="h" style="background:${w.t==='seat'?DC[w.d]:'#777'};color:${w.t==='seat'?DT[w.d]:'#fff'}">COMES FORWARD</div><div class="cn">${esc(m.name)}</div><div class="ct">${m.title?esc(m.title)+'<br><br>':''}${esc(locName(o.id))}</div></div>${back}</div>`;
 }
 function renderHand(){
  const hEl=$('#hand');const me=P(HUMAN);const cs=me.hand.slice().sort((a,b)=>D.indexOf(CARDS[a].d)-D.indexOf(CARDS[b].d));
@@ -1210,7 +1190,7 @@ function endScreen(){
  for(const p of S.players){const ids=owned(p.i);const f=ids.filter(isFree),pr=ids.filter(id=>alive(id)&&!isFree(id)),dd=ids.filter(id=>!alive(id));
   rows+=`<tr><td><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${PCOL[p.i]}"></span> <b>${esc(p.name)}</b></td><td>${f.map(id=>esc(man(id).sn)).join(', ')||'–'}</td><td>${pr.map(id=>esc(man(id).sn)+' ('+locName(id).replace('the ','')+')').join(', ')||'–'}</td><td>${dd.map(id=>esc(man(id).sn)).join(', ')||'–'}</td></tr>`}
  const free=Object.keys(S.men).filter(isFree).length;
- $('#ovb').innerHTML=`<h1>THE TERROR IS OVER</h1><p>${S.round} rounds. ${free} of ${MEN.length} men are still free. ${S.stats.arrests} arrests, ${S.stats.deaths} deaths.</p><p>No winner is declared in this playtest. Who feels like they won?</p><table class="fin"><tr><th>Player</th><th>Free</th><th>In prison</th><th>Dead</th></tr>${rows}</table><p style="margin-top:14px"><button class="go" data-x="new">New game</button> <button class="btn" data-x="close">Look at the board</button></p>`;
+ $('#ovb').innerHTML=`<h1>THE TERROR IS OVER</h1><p>${S.round} rounds. ${free} of ${Object.keys(S.men).length} men are still free. ${S.stats.arrests} arrests, ${S.stats.deaths} deaths.</p><p>No winner is declared in this playtest. Who feels like they won?</p><table class="fin"><tr><th>Player</th><th>Free</th><th>In prison</th><th>Dead</th></tr>${rows}</table><p style="margin-top:14px"><button class="go" data-x="new">New game</button> <button class="btn" data-x="close">Look at the board</button></p>`;
  $('#ov').classList.add('on');
  window.__done=true;
 }
