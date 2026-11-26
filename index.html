@@ -251,6 +251,8 @@ P:[
 {c:3,t:'Cadres decide everything.',d:"A man from any other department moves to Industry's bottom seat.",k:'transferTo',to:'I',z:{anyBut:'I'},x:'one'},
 {c:2,t:'Party organisers for the Army.',d:"A man from any other department moves to the Red Army's bottom seat.",k:'transferTo',to:'R',z:{anyBut:'R'},x:'one'},
 {c:2,t:'Exchange cadres with the organs.',d:'A Propaganda man trades places with the NKVD man in the same rank.',k:'swap',with:'N',z:{seat:'P'},x:'one'},
+{c:1,t:'A denunciation in Pravda.',d:'Arrest a man in the Party line’s department. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'one'},
+{c:1,t:'The workers demand the supreme penalty.',d:'Factory rallies demand blood: a prisoner in the Lubyanka is shot.',k:'shoot',z:{pris:['lub']},x:'one'},
 {c:1,t:'Lies of the Trotskyite press.',d:'Reveal who owns a man in exile.',k:'expose',z:{exile:1},x:'one'},
 ],
 N:[
@@ -309,6 +311,7 @@ R:[
 {c:2,t:'Second officers to the defence industry.',d:"A Red Army man moves to Industry's bottom seat.",k:'transferTo',to:'I',z:{seat:'R'},x:'one'},
 {c:3,t:'Build the railway to the Far East.',d:'A prisoner in the Lubyanka and the next prisoner after him are sent to the Gulag to build the Baikal–Amur line.',k:'toGulag',z:{pris:['lub']},x:'next',nx:1},
 {c:2,t:'Officers for the NKVD border troops.',d:"A Red Army man moves to the NKVD's bottom seat.",k:'transferTo',to:'N',z:{seat:'R'},x:'one'},
+{c:1,t:'Court-martial for defeatism.',d:'Arrest a Red Army man.',k:'arrest',z:{seat:'R'},x:'one'},
 {c:2,t:'Manoeuvres in the Kiev district.',d:'Nothing happens.',k:'none',z:{none:1},x:'none'},
 ],
 J:[
@@ -321,15 +324,16 @@ J:[
 {c:2,t:'Amnesty for the repentant.',d:"The first prisoner in the Gulag queue takes Propaganda's bottom seat.",k:'amnesty',z:{fixed:'frontGulag'},x:'one'},
 {c:4,t:'Recall a cadre to Moscow.',d:"A man from any other department moves to the NKVD's bottom seat.",k:'transferTo',to:'N',z:{anyBut:'N'},x:'one'},
 {c:2,t:'Appoint a new editor of Izvestia.',d:"A man from any other department moves to Propaganda's bottom seat.",k:'transferTo',to:'P',z:{anyBut:'P'},x:'one'},
+{c:1,t:'The Prosecutor sanctions the arrest.',d:'Arrest a man in the Party line’s department. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'one'},
 {c:1,t:'Approve the new procedural code.',d:'Nothing happens.',k:'none',z:{none:1},x:'none'},
 ],
 };
 const RESPMIX={
-P:{Amend:1,Support:16,Acclaim:1,Doubt:10,Defer:1,Abstain:5,Either:1},
-N:{Support:57,Acclaim:2,Doubt:9,Amend:2,Defer:1,Abstain:6,Either:3},
+P:{Amend:1,Support:18,Acclaim:1,Doubt:10,Defer:1,Abstain:5,Either:1},
+N:{Support:65,Acclaim:2,Doubt:4,Amend:2,Defer:1,Abstain:3,Either:3},
 I:{Abstain:6,Defer:2,Support:18,Acclaim:1,Doubt:9,Amend:1,Either:1},
-R:{Support:21,Acclaim:1,Doubt:11,Amend:1,Defer:1,Abstain:4,Either:1},
-J:{Defer:2,Support:14,Acclaim:1,Doubt:8,Abstain:3,Either:1},
+R:{Support:31,Acclaim:1,Doubt:4,Amend:1,Defer:1,Abstain:2,Either:1},
+J:{Defer:2,Support:15,Acclaim:1,Doubt:8,Abstain:3,Either:1},
 };
 const FLAV={
 P:{Support:'Pravda will print it on the front page.',Acclaim:'Thunderous applause, rising to an ovation.',Doubt:'The masses may not understand this.',Protest:'This is a slander against the Party!',Amend:'Let us correct the wording, comrades.',Defer:'Let the editors look at it again.',Abstain:'Pravda has no comment.',Either:'As the Party decides.'},
