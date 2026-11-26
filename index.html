@@ -25,9 +25,11 @@ body.tall #app{flex-direction:column;height:auto}
 .bt{font-family:Oswald,sans-serif;letter-spacing:.07em;font-size:15px}
 .bs{font-size:11px;opacity:.85}
 .slotb{position:absolute;width:58px;height:24px;border-radius:5px;border:1.5px dashed}
-.tok{position:absolute;width:62px;height:24px;border-radius:5px;font-family:'PT Sans Narrow','PT Sans',sans-serif;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;transition:left .8s ease,top .8s ease,background .4s,opacity .4s;box-shadow:0 1px 2px rgba(0,0,0,.4);white-space:nowrap;z-index:5}
-.tok span{max-width:60px;overflow:hidden;text-overflow:clip}
-.tok.l1{font-size:11px}.tok.l2{font-size:10px;letter-spacing:-.2px}
+.tok{position:absolute;width:40px;height:26px;border-radius:5px;font-family:Oswald,sans-serif;font-weight:600;font-size:14px;letter-spacing:.04em;cursor:default;display:flex;align-items:center;justify-content:center;transition:left .8s ease,top .8s ease,background .4s,opacity .4s;box-shadow:0 1px 2px rgba(0,0,0,.4);white-space:nowrap;z-index:5}
+.tok span{pointer-events:none}
+#tip{position:fixed;z-index:45;background:#f8f1df;color:#2a1d17;border:2px solid #1a120d;border-radius:8px;padding:7px 10px;font-size:12.5px;line-height:1.3;max-width:240px;display:none;box-shadow:0 4px 12px rgba(0,0,0,.5)}
+#tip.on{display:block}
+#tip b{font-size:14px}
 .tok.sP{background:#e3b521;color:#3a2d00}.tok.sN{background:#2f62b0;color:#fff}.tok.sI{background:#2f7d4a;color:#fff}.tok.sR{background:#b3261e;color:#fff}.tok.sJ{background:#222;color:#fff}
 .tok.trh,.tok.tkal{background:#f8f1e1;color:#5a1311;border:2px solid #d4af37}
 .tok.tlub{background:#5d5d66;color:#f0f0f0}.tok.tshar{background:#f2f8ee;color:#1e5632;border:1px solid #2c6e43}
@@ -148,6 +150,7 @@ table.fin td,table.fin th{border-bottom:1px solid #5a4030;padding:5px 6px;text-a
  </div>
 </div>
 <div id="pv"></div>
+<div id="tip"></div>
 <div id="ov"><div class="ovb" id="ovb"></div></div>
 <script>
 "use strict";
@@ -165,9 +168,9 @@ const RANKN=['head','second','third','fourth','fifth','sixth','seventh'];
 const MEN=[
 ['P','Zhdanov','Andrei Zhdanov','Secretary for Ideology'],
 ['P','Mekhlis','Lev Mekhlis','Editor-in-Chief of Pravda'],
-['P','Stetsky','Aleksei Stetsky','Head of Agitprop'],
+['P','Yaroslavsky','Yemelyan Yaroslavsky','Chairman of the League of the Militant Godless'],
 ['P','Bukharin','Nikolai Bukharin','Editor of Izvestia'],
-['P','Radek','Karl Radek','Foreign Commentator at Izvestia'],
+['P','Ehrenburg','Ilya Ehrenburg','Izvestia Correspondent in Paris'],
 ['P','Kerzhentsev','Platon Kerzhentsev','Chairman of the Committee for the Arts'],
 ['P','Shumyatsky','Boris Shumyatsky','Head of the Cinema Administration'],
 ['N','Yagoda','Genrikh Yagoda',"People's Commissar of Internal Affairs"],
@@ -175,14 +178,14 @@ const MEN=[
 ['N','Agranov','Yakov Agranov','First Deputy Commissar'],
 ['N','Frinovsky','Mikhail Frinovsky','Head of the Border Guards'],
 ['N','Pauker','Karl Pauker',"Head of Stalin's Bodyguard"],
-['N','Slutsky','Abram Slutsky','Head of Foreign Intelligence'],
-['N','Blokhin','Vasily Blokhin','Commandant of the Lubyanka'],
+['N','Artuzov','Artur Artuzov','Head of Counter-Intelligence'],
+['N','Berman','Matvei Berman','Head of the Gulag Administration'],
 ['I','Sergo','Sergo Ordzhonikidze',"People's Commissar of Heavy Industry"],
 ['I','Kaganovich','Lazar Kaganovich',"People's Commissar of Railways"],
 ['I','Pyatakov','Georgy Pyatakov','Deputy Commissar of Heavy Industry'],
 ['I','Mikoyan','Anastas Mikoyan',"People's Commissar of the Food Industry"],
-['I','Mezhlauk','Valery Mezhlauk','Chairman of Gosplan'],
-['I','Zavenyagin','Avraamy Zavenyagin','Director of the Magnitogorsk Steel Works'],
+['I','Rukhimovich','Moisei Rukhimovich',"People's Commissar of the Defence Industry"],
+['I','Likhachov','Ivan Likhachov','Director of the Stalin Auto Works'],
 ['I','Stakhanov','Aleksei Stakhanov','Miner at the Central-Irmino Pit'],
 ['R','Voroshilov','Kliment Voroshilov',"People's Commissar of Defence"],
 ['R','Tukhachevsky','Mikhail Tukhachevsky','Deputy Commissar of Defence'],
@@ -320,8 +323,9 @@ function newState(np){
   decks:{},disc:{P:[],N:[],I:[],R:[],J:[]},line:LINE0,deferred:{},over:false,M:null,stats:{arrests:0,deaths:0,skipped:0,meetings:0,burn:0},firstDraw:0,nkvdMet:false};
  for(const d of D)S.decks[d]=shuffle(decks[d].slice());
  S.decks.N=S.decks.N.slice(0,8*np);
- MEN.forEach((m,i)=>{const id='m'+i;S.men[id]={id,home:m[0],sn:m[1],name:m[2],title:m[3],owner:null,rev:false,nobody:false,medal:false,from:null};
+ MEN.forEach((m,i)=>{const id='m'+i;const pts=m[2].split(' ');S.men[id]={id,home:m[0],sn:m[1],name:m[2],title:m[3],ini:pts[0][0]+pts[pts.length-1][0],owner:null,rev:false,nobody:false,medal:false,from:null};
   if(D.includes(m[0]))S.seats[m[0]].push(id);else if(m[0]==='RH')S.rh=id;else if(m[0]==='K')S.kal=id;else S.exile.push(id)});
+ {const seen={};for(const k in S.men){const i=S.men[k].ini;if(seen[i])console.warn('duplicate initials',i);seen[i]=1}}
  for(let p=0;p<np;p++)S.players.push({i:p,name:PNAMES[p],ai:p!==HUMAN,hand:[]});
  const ids=shuffle(Object.keys(S.men));
  for(let p=0;p<np;p++)for(let k=0;k<6;k++){S.men[ids[p*6+k]].owner=p}
@@ -538,7 +542,7 @@ async function setupReveal(){
   let id;
   if(p===HUMAN){cap('Setup: reveal one of your men.','Click one of your men below. He must sit in a department nobody has revealed in yet, if you can.');id=await ask('reveal',{ids:opts})}
   else{cap(`${P(p).name} is choosing a man to reveal…`);await wait(500);id=aiReveal(p,opts)}
-  man(id).rev=true;cap(`${P(p).name} reveal${p===HUMAN?'':'s'} ${man(id).name} (${locName(id)}).`);render();flashTok([id]);await wait(1100);
+  man(id).rev=true;cap(`${P(p).name} reveal${p===HUMAN?'':'s'} ${man(id).name} (${man(id).ini}, ${locName(id)}).`);render();flashTok([id]);await wait(1100);
  }
 }
 async function corridor(){
@@ -555,7 +559,7 @@ async function corridor(){
  for(const e of els)e.querySelector('.card').classList.remove('fd');
  await wait(700);
  const rev=[];
- for(let p=0;p<S.np;p++){const id=picks[p];if(id){man(id).rev=true;rev.push(`${P(p).name}: ${man(id).name}`)}}
+ for(let p=0;p<S.np;p++){const id=picks[p];if(id){man(id).rev=true;rev.push(`${P(p).name}: ${man(id).name} (${man(id).ini})`)}}
  cap(rev.length?`Coming forward: ${rev.join(', ')}.`:'Nobody comes forward.');render();if(rev.length)flashTok(picks.filter(Boolean));
  await wait(rev.length?1700:1000);
 }
@@ -610,7 +614,7 @@ async function meeting(d){
   if((c.resp==='Support'||c.resp==='Acclaim')&&M.ag.x==='name'&&!M.defer&&!M.fizzle){
    for(let k=0;k<(c.resp==='Acclaim'?2:1);k++){const opts=nameable(M);if(!opts.length)break;let n;
     if(p===HUMAN){cap(note,'Name another man to add to the agenda (or skip).');n=await ask('man',{ids:opts,allowNone:true,ai:()=>aiName(HUMAN,M,opts)})}else n=aiName(p,M,opts);
-    if(!n)break;M.named.push(n);note+=` Adds ${man(n).sn}.`}
+    if(!n)break;M.named.push(n);note+=` Proposes adding ${man(n).sn} (${man(n).ini}).`}
   }
   cap(note);tug();render();await wait(1100);
  }
@@ -627,7 +631,7 @@ function tally(M){
  let f=0,a=0,mf=0,ma=0;
  for(const x of M.plays){if(x.resp==='Support'){f+=1;mf=Math.max(mf,1)}if(x.resp==='Acclaim'){f+=2;mf=Math.max(mf,2)}if(x.resp==='Doubt'){a+=1;ma=Math.max(ma,1)}if(x.resp==='Protest'){a+=2;ma=Math.max(ma,2)}}
  const net=f-a;
- return{f,a,net,extra:net>0?Math.min(net,mf):0,soft:net<0?Math.min(-net,ma):0,fail:net<0};
+ return{f,a,mf,ma,net,extra:net>0?Math.min(net,mf):0,soft:net<0?Math.min(-net,ma):0,fail:net<0};
 }
 async function resolve(M){
  const a=M.ag,d=M.d,T=tally(M);
@@ -645,12 +649,14 @@ async function resolve(M){
  if(T.fail){res(`The objections carry the room. “${a.t}” fails.`);await wait(1500);return}
  let list=agList(M,M.subj);
  if(a.x==='next'||a.x==='up'){for(let i=0;i<T.extra;i++){const n=nextOf(list[list.length-1],a.x==='up'?-1:1);if(n&&!list.includes(n))list.push(n)}}
- if(a.x==='name'){for(const n of M.named.slice(0,T.extra))if(!list.includes(n))list.push(n)}
+ let dropNote='';
+ if(a.x==='name'){for(const n of M.named.slice(0,T.extra))if(!list.includes(n))list.push(n);
+  if(M.named.length>T.extra){const dr=M.named.slice(T.extra).map(id=>`${man(id).sn} (${man(id).ini})`);dropNote=` Only ${T.extra?T.extra+' extra name'+(T.extra>1?'s':''):'the subject'} carried: the loudest supporting voice was ${T.mf===2?'an Acclaim (up to two more)':'a Support (one more)'}${T.a?', less the objections':''}. Dropped: ${dr.join(', ')}.`}}
  const amt=(a.n||0)+(a.x==='more'?T.extra:0);
  if(list.length)flashTok(list);
  await wait(450);
  const out=[];
- const nm=id=>man(id).sn;
+ const nm=id=>`${man(id).sn} (${man(id).ini})`;
  switch(a.k){
  case'expose':for(const id of list){const m=man(id);if(m.owner==null){m.nobody=true;out.push(`${nm(id)} belongs to nobody`)}else if(m.rev)out.push(`${nm(id)} was already known to be ${m.owner===HUMAN?'yours':P(m.owner).name+"'s"}`);else{m.rev=true;out.push(`${nm(id)} belongs to ${m.owner===HUMAN?'you':P(m.owner).name}`)}}break;
  case'medal':for(const id of list){man(id).medal=true;out.push(`${nm(id)} receives the Order of Lenin`)}break;
@@ -676,7 +682,7 @@ async function resolve(M){
  case'none':out.push(a.line==='-'?'the Party line is withdrawn':'nothing happens');break;
  }
  if(a.line){const old=S.line;S.line=CARDS[M.card];M.keep=true;if(old.id!=='L0')S.disc.P.push(old.id);out.push(a.line==='-'?'the line names nobody':`the Party line now points at ${DN[a.line]}`)}
- res((T.extra?`Carried${T.extra>1?' with acclaim':''}: `:'Carried: ')+out.join('; ')+'.');
+ res((T.extra?`Carried${T.extra>1?' with acclaim':''}: `:'Carried: ')+out.join('; ')+'.'+dropNote);
  render();await wait(2100);
 }
 async function drawPhase(){
@@ -707,63 +713,71 @@ const T0=225,TS=62;
 function seatXY(d,r){const a=ANG[d]*Math.PI/180,rr=T0+TS*r;return[rr*Math.cos(a),rr*Math.sin(a)]}
 const CS=[800,440],CE=[930,95];
 function canalXY(i){return[CS[0]+(CE[0]-CS[0])*i/7,CS[1]+(CE[1]-CS[1])*i/7]}
-function posOf(id){const w=where(id);
+function posOf(id){const r=posRaw(id);return[1000-r[0],r[1]]}
+function posRaw(id){const w=where(id);
  switch(w.t){
  case'seat':return seatXY(w.d,w.r);
  case'rh':return[78,92];case'kal':return[590,940];
- case'lub':{const i=Math.min(w.i,14);return[595+(i%3)*66,516+Math.floor(i/3)*32+(w.i>14?(w.i-14)*3:0)]}
+ case'lub':{const i=Math.min(w.i,19);return[590+(i%4)*48,516+Math.floor(i/4)*32+(w.i>19?(w.i-19)*3:0)]}
  case'shar':return[517,596+w.i*30];
- case'gulag':{const i=Math.min(w.i,27);return[59+(i%4)*66,784+Math.floor(i/4)*30+(w.i>27?(w.i-27)*3:0)]}
+ case'gulag':{const i=Math.min(w.i,27);return[48+(i%4)*50,786+Math.floor(i/4)*30+(w.i>27?(w.i-27)*3:0)]}
  case'canal':return canalXY(w.i);
- case'exile':return[813+w.i*66,932];
- case'grave':{const i=Math.min(w.i,24);return[415+(i%5)*66,746+Math.floor(i/5)*30+(w.i>24?(w.i-24)*2:0)]}
+ case'exile':return[810+w.i*50,920];
+ case'grave':{const i=Math.min(w.i,34);return[404+(i%7)*46,746+Math.floor(i/7)*30+(w.i>34?(w.i-34)*2:0)]}
  }return[-100,-100]}
+const GULAG_SVG='<svg class="art" width="290" height="252" viewBox="0 0 290 252" aria-hidden="true" style="position:absolute;left:0;top:0;border-radius:8px"><defs><linearGradient id="gsk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#93a6b4"/><stop offset=".5" stop-color="#d3dbe0"/><stop offset="1" stop-color="#eef2f4"/></linearGradient></defs><rect width="290" height="252" rx="8" fill="url(#gsk)"/><path d="M252 82 L150 22 L146 44 Z" fill="#fffbe0" opacity=".45"/><path d="M0 118 C40 100 80 104 120 114 C160 124 200 98 240 102 C262 104 278 110 290 108 V252 H0Z" fill="#c4ced5"/><path d="M0 160 C50 138 100 150 150 158 C200 166 240 140 290 146 V252 H0Z" fill="#e2e8eb"/><path d="M0 206 C60 188 120 204 180 200 C230 196 260 186 290 192 V252 H0Z" fill="#f5f8f9"/><g stroke="#5f564c" stroke-width="2"><line x1="6" y1="150" x2="6" y2="170"/><line x1="32" y1="149" x2="32" y2="169"/><line x1="58" y1="148" x2="58" y2="168"/><line x1="84" y1="147" x2="84" y2="167"/><line x1="110" y1="147" x2="110" y2="167"/><line x1="136" y1="146" x2="136" y2="166"/><line x1="162" y1="145" x2="162" y2="165"/><line x1="188" y1="144" x2="188" y2="164"/><line x1="214" y1="144" x2="214" y2="164"/></g><path d="M0 154 L226 147 M0 162 L226 155" stroke="#5f564c" stroke-width="1" stroke-dasharray="3 2" fill="none"/><g stroke="#4a3b2c" stroke-width="3" fill="none" stroke-linecap="round"><path d="M236 198 L250 104 M284 198 L270 104 M241 170 L279 140 M279 170 L241 140 M245 140 L275 140 M240 170 L280 170"/></g><rect x="242" y="96" width="36" height="9" fill="#5a4632"/><rect x="247" y="74" width="26" height="22" fill="#6b5640"/><rect x="254" y="80" width="12" height="8" fill="#ffe9a0"/><path d="M240 76 L260 60 L280 76 Z" fill="#3d3024"/><path d="M240 76 L260 60 L280 76" fill="none" stroke="#fff" stroke-width="2" opacity=".8"/><circle cx="2" cy="6" r="1.0" fill="#fff" opacity=".85"/><circle cx="55" cy="43" r="1.5" fill="#fff" opacity=".85"/><circle cx="108" cy="80" r="2.0" fill="#fff" opacity=".85"/><circle cx="161" cy="117" r="1.0" fill="#fff" opacity=".85"/><circle cx="214" cy="154" r="1.5" fill="#fff" opacity=".85"/><circle cx="267" cy="191" r="2.0" fill="#fff" opacity=".85"/><circle cx="33" cy="228" r="1.0" fill="#fff" opacity=".85"/><circle cx="86" cy="25" r="1.5" fill="#fff" opacity=".85"/><circle cx="139" cy="62" r="2.0" fill="#fff" opacity=".85"/><circle cx="192" cy="99" r="1.0" fill="#fff" opacity=".85"/><circle cx="245" cy="136" r="1.5" fill="#fff" opacity=".85"/><circle cx="11" cy="173" r="2.0" fill="#fff" opacity=".85"/><circle cx="64" cy="210" r="1.0" fill="#fff" opacity=".85"/><circle cx="117" cy="7" r="1.5" fill="#fff" opacity=".85"/><circle cx="170" cy="44" r="2.0" fill="#fff" opacity=".85"/><circle cx="223" cy="81" r="1.0" fill="#fff" opacity=".85"/><circle cx="276" cy="118" r="1.5" fill="#fff" opacity=".85"/><circle cx="42" cy="155" r="2.0" fill="#fff" opacity=".85"/><circle cx="95" cy="192" r="1.0" fill="#fff" opacity=".85"/><circle cx="148" cy="229" r="1.5" fill="#fff" opacity=".85"/><circle cx="201" cy="26" r="2.0" fill="#fff" opacity=".85"/><circle cx="254" cy="63" r="1.0" fill="#fff" opacity=".85"/><circle cx="20" cy="100" r="1.5" fill="#fff" opacity=".85"/><circle cx="73" cy="137" r="2.0" fill="#fff" opacity=".85"/><circle cx="126" cy="174" r="1.0" fill="#fff" opacity=".85"/><circle cx="179" cy="211" r="1.5" fill="#fff" opacity=".85"/><circle cx="232" cy="8" r="2.0" fill="#fff" opacity=".85"/><circle cx="285" cy="45" r="1.0" fill="#fff" opacity=".85"/><circle cx="51" cy="82" r="1.5" fill="#fff" opacity=".85"/><circle cx="104" cy="119" r="2.0" fill="#fff" opacity=".85"/><circle cx="157" cy="156" r="1.0" fill="#fff" opacity=".85"/><circle cx="210" cy="193" r="1.5" fill="#fff" opacity=".85"/><circle cx="263" cy="230" r="2.0" fill="#fff" opacity=".85"/><circle cx="29" cy="27" r="1.0" fill="#fff" opacity=".85"/></svg>';
+const EXILE_SVG='<svg class="art" width="218" height="122" viewBox="0 0 218 122" aria-hidden="true" style="position:absolute;left:0;top:0;border-radius:8px"><defs><linearGradient id="esk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd07a"/><stop offset="1" stop-color="#fff2d2"/></linearGradient><radialGradient id="esun"><stop offset="0" stop-color="#fff6c0"/><stop offset=".55" stop-color="#ffc233" stop-opacity=".9"/><stop offset="1" stop-color="#ffc233" stop-opacity="0"/></radialGradient></defs><rect width="218" height="122" rx="8" fill="url(#esk)"/><circle cx="150" cy="26" r="24" fill="url(#esun)"/><circle cx="150" cy="26" r="10" fill="#ffad0a"/><path d="M0 92 C30 88 60 95 100 91 C140 87 180 93 218 89 V122 H0Z" fill="#2f9cc4"/><path d="M8 100 q6 -3 12 0 M52 106 q6 -3 12 0 M104 99 q6 -3 12 0 M150 104 q6 -3 12 0" stroke="#c9eef8" stroke-width="1.5" fill="none"/><path d="M120 116 C150 104 190 104 218 108 V122 H112Z" fill="#f0d29a"/><path d="M204 116 C202 96 198 80 192 60" stroke="#7a5230" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M204 116 C202 96 198 80 192 60" stroke="#a37446" stroke-width="5" fill="none" stroke-dasharray="2 5"/><g fill="#2e8b57"><path d="M192 60 C180 48 168 50 160 58 C172 54 182 56 192 62Z"/><path d="M192 60 C186 44 174 38 166 40 C178 44 186 50 192 61Z"/><path d="M192 60 C198 44 208 40 217 44 C206 46 199 52 193 61Z"/><path d="M192 60 C204 54 213 58 218 68 C208 62 200 60 193 62Z"/><path d="M192 60 C192 46 197 36 204 32 C199 40 195 50 193 61Z"/></g><path d="M178 116 C177 104 175 96 172 88" stroke="#7a5230" stroke-width="3.5" fill="none" stroke-linecap="round"/><g fill="#3a9d63"><path d="M172 88 C164 80 156 82 152 88 C160 85 166 86 172 90Z"/><path d="M172 88 C180 80 188 80 192 86 C184 84 178 86 173 90Z"/><path d="M172 88 C170 78 174 70 180 68 C176 74 174 80 173 89Z"/></g></svg>';
+const CANAL_SVG='<svg width="1000" height="1000" aria-hidden="true" style="position:absolute;left:0;top:0;pointer-events:none"><path d="M846 0 H1000 V128 C986 120 976 104 962 98 C944 90 934 76 916 66 C898 56 884 40 872 26 C862 16 852 8 846 0Z" fill="#557f9c"/><path d="M900 18 q6 -3 12 0 M940 30 q6 -3 12 0 M964 60 q6 -3 12 0 M918 48 q6 -3 12 0 M972 12 q6 -3 12 0 M984 92 q6 -3 12 0" stroke="#cfe6f2" stroke-width="1.5" fill="none"/><g transform="translate(800 440) rotate(-69.35)"><rect x="-40" y="-29" width="459" height="58" rx="8" fill="#9a8f7c"/><rect x="-40" y="-29" width="459" height="58" rx="8" fill="none" stroke="#6e6556" stroke-width="2" stroke-dasharray="7 4"/><rect x="-36" y="-22" width="455" height="44" rx="4" fill="#6c98b3"/><path d="M-20 -8 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M10 9 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M48 -10 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M80 6 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M120 -6 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M150 10 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M196 -9 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M230 7 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M268 -7 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M300 9 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M338 -5 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><path d="M372 6 q5 -3 10 0" stroke="#d6ecf7" stroke-width="1.4" fill="none" opacity=".8"/><rect x="23.8" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="26.3" cy="-28" r="3" fill="#3d2f22"/><circle cx="26.3" cy="28" r="3" fill="#3d2f22"/><rect x="76.5" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="79.0" cy="-28" r="3" fill="#3d2f22"/><circle cx="79.0" cy="28" r="3" fill="#3d2f22"/><rect x="129.2" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="131.7" cy="-28" r="3" fill="#3d2f22"/><circle cx="131.7" cy="28" r="3" fill="#3d2f22"/><rect x="181.8" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="184.3" cy="-28" r="3" fill="#3d2f22"/><circle cx="184.3" cy="28" r="3" fill="#3d2f22"/><rect x="234.5" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="237.0" cy="-28" r="3" fill="#3d2f22"/><circle cx="237.0" cy="28" r="3" fill="#3d2f22"/><rect x="287.2" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="289.7" cy="-28" r="3" fill="#3d2f22"/><circle cx="289.7" cy="28" r="3" fill="#3d2f22"/><rect x="339.8" y="-28" width="5" height="56" fill="#3d2f22"/><circle cx="342.3" cy="-28" r="3" fill="#3d2f22"/><circle cx="342.3" cy="28" r="3" fill="#3d2f22"/></g><ellipse cx="790" cy="462" rx="34" ry="16" fill="#6c98b3" stroke="#9a8f7c" stroke-width="3"/></svg>';
+function showTip(id,el){const m=man(id);const t=$('#tip');t.innerHTML=`<b>${m.ini} · ${esc(m.name)}</b><br>${esc(m.title)}<br><i>${esc(locName(id))}</i>`+(m.owner===HUMAN?'<br>Yours'+(m.rev?' (revealed)':' (secret)'):m.rev&&m.owner!=null?`<br>Belongs to ${esc(P(m.owner).name)}`:m.nobody?'<br>Belongs to nobody':'')+(m.medal?'<br>Order of Lenin':'');const r=el.getBoundingClientRect();t.classList.add('on');t.style.left=Math.min(innerWidth-250,Math.max(6,r.left))+'px';t.style.top=(r.bottom+6+120>innerHeight?r.top-6-t.offsetHeight:r.bottom+6)+'px';clearTimeout(showTip.h);showTip.h=setTimeout(hideTip,4000)}
+function hideTip(){const t=$('#tip');if(t)t.classList.remove('on')}
 function buildBoard(){
+ // The board is drawn mirrored: Stalin's office in the top-right corner, Propaganda leftmost.
  let h='';const A=(x,y,s,inner)=>`<div class="ab" style="left:${x}px;top:${y}px;${s}">${inner||''}</div>`;
- for(let r=0;r<7;r++){const R=T0+TS*r;h+=A(-R,-R,`width:${2*R}px;height:${2*R}px;border-radius:50%;border:1px dashed rgba(60,40,20,.22)`)}
- h+=A(-245,-245,'width:490px;height:490px;border-radius:50%;border:40px solid rgba(212,175,55,.32)');
- h+=A(-170,-170,'width:340px;height:340px;border-radius:50%;background:#7d1d1a;box-shadow:0 0 0 3px #5a1311');
- h+=A(14,10,'font-family:Oswald,sans-serif;font-size:26px;letter-spacing:.1em;color:#f3e9d2','STALIN');
- h+=A(15,44,'font-size:11px;color:#ecd6cd','Corner office, the Kremlin');
- h+=A(36,106,'font-size:10px;color:#f1d98a;font-weight:700',"RIGHT HAND");
- h+=`<div class="ab" style="left:136px;top:136px;transform:translate(-50%,-50%) rotate(-45deg);font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.2em;color:#9c7a0c;white-space:nowrap">POLITBURO</div>`;
- h+=A(47,80,'width:62px;height:24px;border-radius:5px;border:1.5px dashed #d4af37');
- for(const d of D)for(let r=0;r<7;r++){const[x,y]=seatXY(d,r);h+=A(x-31,y-12,`width:62px;height:24px;border-radius:5px;border:1.5px ${r===0?'solid':'dashed'} ${r===0?'#b8901c':DK[d]};opacity:${r===0?.9:.45}`)}
+ const B=(r,y,s,inner)=>`<div class="ab" style="right:${r}px;top:${y}px;text-align:right;${s}">${inner||''}</div>`;
+ const X=(x,w)=>1000-x-w;
+ for(let r=0;r<7;r++){const R=T0+TS*r;h+=A(1000-R,-R,`width:${2*R}px;height:${2*R}px;border-radius:50%;border:1px dashed rgba(60,40,20,.22)`)}
+ h+=A(755,-245,'width:490px;height:490px;border-radius:50%;border:40px solid rgba(212,175,55,.32)');
+ h+=A(830,-170,'width:340px;height:340px;border-radius:50%;background:#7d1d1a;box-shadow:0 0 0 3px #5a1311');
+ h+=B(14,10,'font-family:Oswald,sans-serif;font-size:26px;letter-spacing:.1em;color:#f3e9d2','STALIN');
+ h+=B(15,44,'font-size:11px;color:#ecd6cd','Corner office, the Kremlin');
+ h+=B(36,106,'font-size:10px;color:#f1d98a;font-weight:700',"RIGHT HAND");
+ h+=`<div class="ab" style="left:864px;top:136px;transform:translate(-50%,-50%) rotate(45deg);font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.2em;color:#9c7a0c;white-space:nowrap">POLITBURO</div>`;
+ h+=A(902,79,'width:40px;height:26px;border-radius:5px;border:1.5px dashed #d4af37');
+ for(const d of D)for(let r=0;r<7;r++){const[x,y]=seatXY(d,r);h+=A(1000-x-20,y-13,`width:40px;height:26px;border-radius:5px;border:1.5px ${r===0?'solid':'dashed'} ${r===0?'#b8901c':DK[d]};opacity:${r===0?.9:.45}`)}
  const nums={P:1,N:2,I:3,R:4,J:5};
- for(const d of D){const a=ANG[d]*Math.PI/180,R=T0+TS*6+42;h+=`<div class="lbl" style="left:${R*Math.cos(a)}px;top:${R*Math.sin(a)-9}px;transform:rotate(${ANG[d]}deg);font-size:15px;color:${DL[d]}">${nums[d]} · ${DN[d].toUpperCase()}</div>`}
- // corridor NKVD -> Lubyanka
- h+=`<div class="ab" style="left:532px;top:286px;width:215px;height:0;border-top:3px dashed #2456a6;transform:rotate(59.9deg);transform-origin:0 0"><div class="ab" style="right:-10px;top:-8.5px;width:0;height:0;border-left:11px solid #2456a6;border-top:7px solid transparent;border-bottom:7px solid transparent"></div></div>`;
- h+=A(612,364,'font-size:11px;font-style:italic;color:#2456a6','arrests');
- h+=`<div class="ab" style="left:500px;top:556px;width:140px;height:3px;background:#2c6e43;transform:rotate(-122.6deg);transform-origin:0 50%"><div class="ab" style="right:-10px;top:-5.5px;width:0;height:0;border-left:11px solid #2c6e43;border-top:7px solid transparent;border-bottom:7px solid transparent"></div></div>`;
- h+=`<div class="ab" style="left:200px;top:730px;width:194px;height:3px;background:#a3221b;transform:rotate(-69.1deg);transform-origin:0 50%"><div class="ab" style="right:-10px;top:-5.5px;width:0;height:0;border-left:11px solid #a3221b;border-top:7px solid transparent;border-bottom:7px solid transparent"></div></div>`;
- h+=A(232,642,'font-size:11px;font-style:italic;color:#a3221b','drafted back');
+ for(const d of D){const a=ANG[d]*Math.PI/180,R=T0+TS*6+42;h+=`<div class="lbl" style="right:${R*Math.cos(a)}px;top:${R*Math.sin(a)-9}px;transform:rotate(${-ANG[d]}deg);transform-origin:100% 50%;font-size:15px;color:${DL[d]}">${nums[d]} · ${DN[d].toUpperCase()}</div>`}
+ const arrow=(x,y,len,deg,col,dash)=>`<div class="ab" style="left:${x}px;top:${y}px;width:${len}px;${dash?`height:0;border-top:3px dashed ${col}`:`height:3px;background:${col}`};transform:rotate(${deg}deg);transform-origin:0 ${dash?'0':'50%'}"><div class="ab" style="right:-10px;top:${dash?-8.5:-5.5}px;width:0;height:0;border-left:11px solid ${col};border-top:7px solid transparent;border-bottom:7px solid transparent"></div></div>`;
+ h+=arrow(468,286,215,120.1,'#2456a6',true);
+ h+=B(612,364,'font-size:11px;font-style:italic;color:#2456a6','arrests');
+ h+=arrow(500,556,140,-57.4,'#2c6e43');
+ h+=arrow(800,730,194,-110.9,'#a3221b');
+ h+=B(232,642,'font-size:11px;font-style:italic;color:#a3221b','drafted back');
  // Lubyanka
- h+=A(552,470,'width:210px;height:198px;border-radius:8px;background:#3a3a40;padding:8px 12px;color:#f0ece4',`<div class="bt">LUBYANKA</div>`);
- for(let i=0;i<15;i++)h+=A(564+(i%3)*66,504+Math.floor(i/3)*32,'width:62px;height:24px;border-radius:4px;background:#4a4a52;border:1px solid #5f5f68');
- // sharashka
- h+=A(478,552,'width:76px;height:116px;border-radius:8px 0 0 8px;background:#e3eedb;border:2px solid #2c6e43;border-right:none;padding:4px 0 0 6px;font-family:Oswald,sans-serif;font-size:10.5px;letter-spacing:.05em;color:#1e5632','SHARASHKA');
- for(let i=0;i<3;i++)h+=A(486,584+i*30,'width:62px;height:24px;border-radius:4px;background:#fff;border:1px solid #7fa58a');
+ h+=A(238,470,'width:210px;height:198px;border-radius:8px;background:#3a3a40;padding:8px 12px;color:#f0ece4',`<div class="bt">LUBYANKA</div>`);
+ for(let i=0;i<20;i++)h+=A(X(570+(i%4)*48,40),503+Math.floor(i/4)*32,'width:40px;height:26px;border-radius:4px;background:#4a4a52;border:1px solid #5f5f68');
+ // sharashka, an annex on the Lubyanka's Industry side
+ h+=A(446,552,'width:76px;height:116px;border-radius:0 8px 8px 0;background:#e3eedb;border:2px solid #2c6e43;border-left:none;padding:4px 6px 0 0;text-align:right;font-family:Oswald,sans-serif;font-size:10.5px;letter-spacing:.05em;color:#1e5632','SHARASHKA');
+ for(let i=0;i<3;i++)h+=A(463,583+i*30,'width:40px;height:26px;border-radius:4px;background:#fff;border:1px solid #7fa58a');
  // grave
- h+=A(372,704,'width:344px;height:182px;border-radius:8px;background:#2a2a2a;padding:8px 12px;color:#ddd',`<div class="bt">THE GRAVE</div>`);
- // canal
- const L=Math.hypot(CE[0]-CS[0],CE[1]-CS[1])+90,ang=Math.atan2(CE[1]-CS[1],CE[0]-CS[0])*180/Math.PI;
- h+=`<div class="ab" style="left:${CS[0]}px;top:${CS[1]-22}px;width:${L}px;height:44px;border-radius:22px;background:rgba(127,159,179,.35);transform:translateX(-30px) rotate(${ang}deg);transform-origin:30px 50%"></div>`;
- for(let i=0;i<8;i++){const[x,y]=canalXY(i);h+=A(x-31,y-12,'width:62px;height:24px;border-radius:12px;background:#dbe8f0;border:1.5px solid #7f9fb3')}
- h+=A(928,40,'width:62px;height:24px;border-radius:4px;background:#151515;color:#f0ece4;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center','WHITE SEA');
- h+=A(652,404,'font-family:Oswald,sans-serif;font-size:14px;letter-spacing:.06em;color:#2b4a5e','WHITE SEA CANAL');
- h+=A(652,422,'font-size:10.5px;color:#2b4a5e','prisoners enter here');
- // gulag
- h+=A(16,736,'width:290px;height:252px;border-radius:8px;background:#d9d5cc;border:1px solid #8d877b;padding:8px 12px;color:#3d3a35',`<div class="bt">GULAG <span class="bs" style="font-family:'PT Sans';letter-spacing:0">a queue: front at top left</span></div>`);
- // exile
- h+=A(770,866,'width:218px;height:122px;border-radius:8px;background:#e3dcea;border:1px solid #8a7a9e;padding:8px 12px;color:#4b3a63',`<div class="bt">EXILE</div><div class="bs">Abroad, farthest from Stalin</div>`);
- for(let i=0;i<3;i++)h+=A(782+i*66,920,'width:62px;height:24px;border-radius:5px;border:1.5px dashed #8a7a9e');
+ h+=A(284,704,'width:344px;height:182px;border-radius:8px;background:#2a2a2a;padding:8px 12px;color:#ddd',`<div class="bt">THE GRAVE</div>`);
+ // canal (top-left, running up to the White Sea)
+ h+=CANAL_SVG.replace('pointer-events:none">','pointer-events:none"><g transform="translate(1000 0) scale(-1 1)">').replace(/<\/svg>$/,'</g></svg>');
+ for(let i=0;i<8;i++){const[x,y]=canalXY(i);h+=A(1000-x-20,y-13,'width:40px;height:26px;border-radius:4px;background:#a9c9dc;border:1.5px solid #e8f3f9')}
+ h+=A(10,40,'width:62px;height:24px;border-radius:4px;background:#151515;color:#f0ece4;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center','WHITE SEA');
+ h+=B(620,404,'font-family:Oswald,sans-serif;font-size:14px;letter-spacing:.06em;color:#2b4a5e','WHITE SEA CANAL');
+ h+=B(620,422,'font-size:10.5px;color:#2b4a5e','prisoners enter here');
+ // gulag (bottom-right)
+ h+=A(694,736,'width:290px;height:252px;border-radius:8px;border:1px solid #6d7880;color:#1f2a33;overflow:hidden',GULAG_SVG.replace('border-radius:8px"','border-radius:8px;transform:scaleX(-1)"')+`<div class="bt" style="position:relative;padding:8px 12px 0;text-align:right">GULAG <span class="bs" style="font-family:'PT Sans';letter-spacing:0">a queue: front at top right</span></div>`);
+ // exile (bottom-left, farthest from Stalin)
+ h+=A(12,866,'width:218px;height:122px;border-radius:8px;border:1px solid #c89b45;color:#5a3a10;overflow:hidden',EXILE_SVG.replace('border-radius:8px"','border-radius:8px;transform:scaleX(-1)"')+`<div style="position:relative;padding:6px 12px 0;text-align:right"><div class="bt">EXILE</div><div class="bs">Abroad, farthest from Stalin</div></div>`);
+ for(let i=0;i<3;i++)h+=A(X(790+i*50,40),907,'width:40px;height:26px;border-radius:5px;border:1.5px dashed #a0763a;background:rgba(255,255,255,.35)');
  // kalinin
- h+=A(440,902,'width:200px;height:86px;border-radius:8px;border:1px dashed #b9a77f;padding:6px 10px;color:#6b5a3a',`<div class="bt" style="font-size:12px">HEAD OF STATE</div><div class="bs">a figurehead</div>`);
- // party line + decks
- h+=A(786,486,'width:204px;height:170px;border-radius:8px;background:#e4d8bd;border:1px solid #b9a77f;padding:8px 10px;color:#5a1311',`<div class="bt" style="font-size:13px">THE PARTY LINE</div><div id="lineSlot" style="margin-top:6px"></div>`);
- h+=A(786,668,'width:204px;height:186px;border-radius:8px;background:#e4d8bd;border:1px solid #b9a77f;padding:8px 10px;color:#5a1311',`<div class="bt" style="font-size:13px">STALIN'S DECKS</div><div class="bs" style="color:#4a3d27">Blue is the clock: it is never reshuffled.</div>`);
- D.forEach((d,i)=>{h+=`<div class="pile" data-d="${d}" style="left:${800+i*38}px;top:730px;background:repeating-linear-gradient(45deg,${DC[d]},${DC[d]} 5px,${DK[d]} 5px,${DK[d]} 9px)"></div><div class="pcount" data-pc="${d}" style="left:${800+i*38}px;top:782px"></div>`});
- h+=A(800,806,'font-size:10.5px;color:#4a3d27;width:180px;line-height:1.25','<span id="discInfo"></span>');
+ h+=A(360,902,'width:200px;height:86px;border-radius:8px;border:1px dashed #b9a77f;padding:6px 10px;color:#6b5a3a;text-align:right',`<div class="bt" style="font-size:12px">HEAD OF STATE</div><div class="bs">a figurehead</div>`);
+ // party line + decks (left side)
+ h+=A(10,486,'width:204px;height:170px;border-radius:8px;background:#e4d8bd;border:1px solid #b9a77f;padding:8px 10px;color:#5a1311',`<div class="bt" style="font-size:13px">THE PARTY LINE</div><div id="lineSlot" style="margin-top:6px"></div>`);
+ h+=A(10,668,'width:204px;height:186px;border-radius:8px;background:#e4d8bd;border:1px solid #b9a77f;padding:8px 10px;color:#5a1311',`<div class="bt" style="font-size:13px">STALIN'S DECKS</div><div class="bs" style="color:#4a3d27">Blue is the clock: it is never reshuffled.</div>`);
+ D.forEach((d,i)=>{h+=`<div class="pile" data-d="${d}" style="left:${24+i*38}px;top:730px;background:repeating-linear-gradient(45deg,${DC[d]},${DC[d]} 5px,${DK[d]} 5px,${DK[d]} 9px)"></div><div class="pcount" data-pc="${d}" style="left:${24+i*38}px;top:782px"></div>`});
+ h+=A(24,806,'font-size:10.5px;color:#4a3d27;width:180px;line-height:1.25','<span id="discInfo"></span>');
  $('#stat').innerHTML=h;
 }
 
@@ -775,10 +789,10 @@ function render(){
  if(!S)return;
  const pick=PEND&&PEND.kind==='man'?new Set(PEND.ids):new Set();
  for(const id in S.men){const m=S.men[id];let el=TOK[id];if(!el){el=document.createElement('div');el.dataset.id=id;$('#toks').appendChild(el);TOK[id]=el}
-  const w=where(id),[x,y]=posOf(id);el.style.left=(x-31)+'px';el.style.top=(y-12)+'px';
-  el.className='tok '+(m.sn.length>=11?'l2 ':m.sn.length>=9?'l1 ':'')+(w.t==='seat'?'s'+w.d:'t'+w.t)+(m.owner===HUMAN?' mine':'')+(pick.has(id)?' pick':'')+(HL.has(id)?' hl':S.M&&(S.M.subj===id||S.M.named.includes(id))?' subj':'');
+  const w=where(id),[x,y]=posOf(id);el.style.left=(x-20)+'px';el.style.top=(y-13)+'px';
+  el.className='tok '+(w.t==='seat'?'s'+w.d:'t'+w.t)+(m.owner===HUMAN?' mine':'')+(pick.has(id)?' pick':'')+(HL.has(id)?' hl':S.M&&(S.M.subj===id||S.M.named.includes(id))?' subj':'');
   el.style.zIndex=w.t==='grave'?3:5;
-  el.innerHTML=(m.rev&&m.owner!=null?`<i class="ob" style="background:${PCOL[m.owner]}"></i>`:m.nobody?'<i class="ob nob"></i>':'')+`<span>${esc(m.sn)}</span>`+(m.medal?'<i class="md"></i>':'');
+  el.innerHTML=(m.rev&&m.owner!=null?`<i class="ob" style="background:${PCOL[m.owner]}"></i>`:m.nobody?'<i class="ob nob"></i>':'')+`<span>${m.ini}</span>`+(m.medal?'<i class="md"></i>':'');
   el.title=`${m.name}\n${m.title}\n${locName(id)}`+(m.owner===HUMAN?'\nYours'+(m.rev?' (revealed)':' (secret)'):m.rev&&m.owner!=null?`\nBelongs to ${P(m.owner).name}`:m.nobody?'\nBelongs to nobody':'')+(m.medal?'\nOrder of Lenin':'');
  }
  // piles
@@ -789,7 +803,7 @@ function render(){
  // players
  let ph='';
  for(const p of S.players){const cnt={};D.forEach(d=>cnt[d]=0);p.hand.forEach(c=>cnt[CARDS[c].d]++);
-  const rv=owned(p.i).filter(id=>man(id).rev).map(id=>man(id).sn+(alive(id)?'':' †'));
+  const rv=owned(p.i).filter(id=>man(id).rev).map(id=>man(id).ini+(alive(id)?'':' †'));
   const lead=S.M&&S.M.lead===p.i;
   ph+=`<div class="pchip${lead?' lead':''}${PEND&&PEND.kind==='player'?' pick':''}" data-p="${p.i}"><div class="nm"><span class="dot" style="background:${PCOL[p.i]}"></span>${esc(p.name)}${lead?' · chair':''}</div><div class="backs">${D.map(d=>`<div class="bg">${Array.from({length:cnt[d]},()=>`<div class="bk" style="background:${DC[d]}"></div>`).join('')}</div>`).join('')}</div><div class="rvl">${rv.length?'Revealed: '+rv.join(', '):'No one revealed'}</div></div>`}
  $('#pl').innerHTML=ph;
@@ -801,7 +815,7 @@ function renderMine(){
  const pend=PEND&&(PEND.kind==='corridor'||PEND.kind==='reveal');
  const ok=id=>PEND&&(PEND.kind==='reveal'?PEND.ids.includes(id):PEND.kind==='corridor'&&!man(id).rev&&alive(id));
  let h=owned(HUMAN).map(id=>{const m=man(id),w=where(id);const dc=w.t==='seat'?DC[w.d]:'#777';
-  return `<div class="mc${pend&&ok(id)?' pick':''}${alive(id)?'':' dead'}" data-m="${id}" style="border-left-color:${dc}"><b>${esc(m.sn)}${m.medal?' ●':''}</b>${esc(locName(id))}${m.rev?'<span class="rb">REVEALED</span>':''}</div>`}).join('');
+  return `<div class="mc${pend&&ok(id)?' pick':''}${alive(id)?'':' dead'}" data-m="${id}" style="border-left-color:${dc}"><b>${m.ini} · ${esc(m.sn)}${m.medal?' ●':''}</b>${esc(locName(id))}${m.rev?'<span class="rb">REVEALED</span>':''}</div>`}).join('');
  if(PEND&&PEND.kind==='corridor')h+=`<div class="mc blank pick" data-m="blank">The blank: stay silent</div>`;
  $('#mine').innerHTML=`<div style="font-size:11px;color:#d8c9ad;width:100%">Your men (only you can see this):</div>`+h;
 }
@@ -881,6 +895,8 @@ document.addEventListener('click',e=>{
   if(k==='close'){$('#ov').classList.remove('on')}
   if(k==='np'){CHOSEN=+x.dataset.n;document.querySelectorAll('.np button').forEach(b=>b.classList.toggle('on',b===x))}
   return}
+ if(!PEND||PEND.kind!=='man'){const tk=e.target.closest('.tok');if(tk){showTip(tk.dataset.id,tk);return}}
+ hideTip();
  if(!PEND)return;
  const t=e.target.closest('.tok');
  if(t&&PEND.kind==='man'&&PEND.ids.includes(t.dataset.id)){PEND.res(t.dataset.id);return}
