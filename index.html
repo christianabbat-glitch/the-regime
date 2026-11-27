@@ -964,7 +964,15 @@ async function resolve(M){
   render();await wait(1900);return;
  }
  if(T.fail){res(`The objections carry the room. “${a.t}” fails.`);await wait(1500);return}
+ // Stalin's card has already taken effect. A card that names a place (the first in the Gulag queue, a department's head)
+ // acts on whoever is there now; a man the chair picked who has died or been moved since is beyond its reach.
+ let late='';const nmi=id=>`${man(id).sn} (${man(id).ini})`;
+ if(a.z&&a.z.fixed){const f=fixedSubj(a.z.fixed),old=M.subj;if(f!==old){M.subj=f;if(old)late=` ${nmi(old)} ${alive(old)?'is no longer there':'froze before the order arrived'}${f?`, so it applies to the next man, ${nmi(f)}`:''}.`;
+  if(!f){res(late.trim()+` Nobody is left for “${a.t}” to act on.`);await wait(1600);return}}}
  let list=finalList(M,T);
+ if(!(a.z&&a.z.fixed)){const gone=list.filter(id=>id&&(!alive(id)||(a.z.pris&&!a.z.pris.includes(where(id).t))));
+  if(gone.length){list=list.filter(id=>!gone.includes(id));late=' '+gone.map(id=>`${nmi(id)} ${alive(id)?'was moved':'died'} before the order arrived`).join('; ')+'.';
+   if(!list.filter(Boolean).length){res(late.trim()+' Nothing happens.');await wait(1700);return}}}
  let dropNote='';
  if(0){
   if(M.named.length>T.extra){const dr=M.named.slice(T.extra).map(id=>`${man(id).sn} (${man(id).ini})`);dropNote=` The total was ${T.net>0?'+':''}${T.net}, so ${T.extra?'only the first '+T.extra+' extra name'+(T.extra>1?'s':''):'no extra names'} carried. Dropped: ${dr.join(', ')}.`}}
@@ -1006,7 +1014,7 @@ async function resolve(M){
  }
  if(a.line){const old=S.line;S.line=CARDS[M.card];M.keep=true;if(old.id!=='L0')S.disc.P.push(old.id);out.push(a.line==='-'?'the line names nobody':`the Party line now points at ${DN[a.line]}`)}
  if(['transferTo','transferI','swapIR','swap','vacancy','cadres'].includes(a.k))S.stats.moves+=list.length;if(a.k==='vacancy'||a.k==='cadres')S.stats['mv_'+a.k]=(S.stats['mv_'+a.k]||0)+list.length;if(a.k==='reshuffle')S.stats.resh++;
- res('Carried: '+out.join('; ')+'.');
+ res((late?late.trim()+' ':'')+'Carried: '+out.join('; ')+'.');
  render();await wait(2100);
 }
 async function drawPhase(){
@@ -1495,6 +1503,7 @@ function rulesScreen(){
 <p>The chair's card is read as an <b>agenda</b> (top left). Everyone else's card is read as a <b>response</b> (bottom right).</p>
 <h2>3 · The vote</h2><p>The vote only decides whether the agenda passes. Every response card shows its voice: <b>+1</b> Support, <b>+1</b> Acclaim, <b>−1</b> Doubt, <b>0</b> Abstain, and the rare <b>±1</b> Either Way, whose sign you choose when you play it. Stalin's card counts too. Add them up: zero or more and it passes, below zero it fails. What happens is printed on the agenda: how many men, which department, which sentence. A trial that fails leaves its prisoners waiting in the Lubyanka. <b>Acclaim</b> (rare) also overrules a Defer. <b>Amend</b> (rare) takes one man off the agenda and puts any other man it could name in his place. <b>Defer</b> postpones the agenda to the department's next meeting, unless someone plays an Acclaim. Abstain says nothing.</p>
 <h2>Stalin's chair</h2><p>At every meeting a card from Stalin's own small deck is dealt face down to his chair, and turned over after everyone else has spoken. It is pure weight: +1, 0 or −1 on the scales, like any other voice, and it never names anyone. His Defer cannot be overruled, not even by an Acclaim. Once the man in Stalin's right-hand seat has come forward, his owner may look at Stalin's card before each meeting.</p>
+<p><b>Stalin's word comes first.</b> His card takes effect before the agenda is carried out. A card that names a place (the first prisoner in the Gulag queue, the head of a department) then acts on whoever is in that place. A man the chair picked who has died or been moved meanwhile is beyond its reach: the order arrives too late.</p>
 <h2>4 · Prisons</h2><p><b>Tupolev's bureau:</b> at every Industry meeting, before the agenda, whoever chairs it may move one Gulag prisoner into the sharashka. No vote. The sharashka holds three: when a fourth man comes in, the man held there longest has finished his project and goes back to Industry's bottom seat, where he can be arrested again.</p><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first, as shown on the track under the Lubyanka: the sharashka (safe, for now), the Gulag (alive, and may come back), the White Sea Canal (alive for now) and the firing squad. During a trial the current sentence glows on the track. The camps are deadlier than the Lubyanka. <b>The Gulag is cold:</b> three cards in Stalin's deck kill the man held longest in the Gulag and the man furthest along the Canal when they are turned over. <b>The Canal never stops:</b> it moves one place along at the end of every round, and whenever an agenda pushes the work; whoever is pushed off the end dies. A new prisoner always starts at the first place.</p>
 <h2>5 · Drawing</h2><p>At the end of the round everyone draws back up to fifteen, one card at a time, choosing the deck in the open. Whoever chaired the Judiciary decides who draws first.</p>
 <h2>The end</h2><p>The blue NKVD deck is the clock and is never reshuffled: it holds ten cards per player. When its last card is drawn (or burned), the round finishes and everyone plays one final round, like the last turn in Ticket to Ride. Nobody draws after it, and then the Terror ends. </p><h2>Scoring</h2><p>Survival is survival. Every one of your men still alive at the end scores 1 point, free or in any prison or camp. Every one who died costs you 1 point. Most points wins; a tie is shared.</p>
