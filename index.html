@@ -220,25 +220,26 @@ function castMen(){
 const AG={
 P:[
 {c:1,t:'Expose the wreckers in the coal trust.',d:'Reveal who owns an Industry man. The Party line becomes Industry.',k:'expose',z:{seat:'I'},x:'one',line:'I'},
-{c:2,t:'Vigilance in the Red Army!',d:'Reveal who owns a Red Army man. The Party line becomes the Red Army.',k:'expose',z:{seat:'R'},x:'one',line:'R'},
+{c:1,t:'Vigilance in the Red Army!',d:'Reveal who owns a Red Army man. The Party line becomes the Red Army.',k:'expose',z:{seat:'R'},x:'one',line:'R'},
 {c:1,t:'Unmask the enemies within the organs.',d:'Reveal who owns an NKVD man. The Party line becomes the NKVD.',k:'expose',z:{seat:'N'},x:'one',line:'N'},
-{c:2,t:'Unmask the saboteurs of Soviet justice.',d:'Reveal who owns a Judiciary man. The Party line becomes the Judiciary.',k:'expose',z:{seat:'J'},x:'one',line:'J'},
+{c:1,t:'Unmask the saboteurs of Soviet justice.',d:'Reveal who owns a Judiciary man. The Party line becomes the Judiciary.',k:'expose',z:{seat:'J'},x:'one',line:'J'},
 {c:1,t:'Bourgeois formalism in the arts.',d:'Reveal who owns a Propaganda man. The Party line becomes Propaganda.',k:'expose',z:{seat:'P'},x:'one',line:'P'},
 {c:1,t:'Unmask the hidden enemies.',d:'Reveal who owns a man in the Party line’s department and the man below him. If it names nobody, the chair picks the department.',k:'expose',z:{seat:'LINE'},x:'next',nx:1},
 {c:1,t:'The Party has erred: the line is withdrawn.',d:'The Party line names nobody.',k:'none',z:{none:1},x:'none',line:'-'},
 {c:4,t:'The Canal reforges the enemies of the people.',d:'Send a prisoner from the Lubyanka to the White Sea Canal.',k:'feed',z:{pris:['lub']},x:'one'},
 {c:2,t:'Shock workers for the White Sea Canal.',d:'Pick a prisoner in the Gulag: he is sent to dig the Canal.',k:'feed',z:{pris:['gulag']},x:'one'},
-{c:2,t:"Honour Comrade Stalin's closest companions.",d:'Pin the Order of Lenin on a member of the Politburo.',k:'medal',z:{polit:1},x:'one'},
+{c:1,t:"Honour Comrade Stalin's closest companions.",d:'Pin the Order of Lenin on a member of the Politburo.',k:'medal',z:{polit:1},x:'one'},
 {c:2,t:'A new favourite at the dacha.',d:"A department head trades places with Stalin's right hand.",k:'favourite',z:{heads:1},x:'one'},
-{c:2,t:'Self-criticism in the editorial office.',d:'A Propaganda man moves down two seats.',k:'demote',n:2,z:{seat:'P'},x:'one'},
-{c:3,t:'Strengthen the organs with Party cadres.',d:"A man from any other department moves to the NKVD's bottom seat.",k:'transferTo',to:'N',z:{anyBut:'N'},x:'one'},
+{c:1,t:'Self-criticism in the editorial office.',d:'A Propaganda man moves down two seats.',k:'demote',n:2,z:{seat:'P'},x:'one'},
+{c:2,t:'Strengthen the organs with Party cadres.',d:"A man from any other department moves to the NKVD's bottom seat.",k:'transferTo',to:'N',z:{anyBut:'N'},x:'one'},
 {c:1,t:'Send a correspondent to Paris.',d:'A Propaganda man is posted abroad and stays there: he goes into exile, if a place is free.',k:'exileOut',z:{seat:'P'},x:'one'},
-{c:2,t:'Cadres decide everything.',d:"A man from any other department moves to Industry's bottom seat.",k:'transferTo',to:'I',z:{anyBut:'I'},x:'one'},
+{c:1,t:'Cadres decide everything.',d:"A man from any other department moves to Industry's bottom seat.",k:'transferTo',to:'I',z:{anyBut:'I'},x:'one'},
 {c:2,t:'Party organisers for the Army.',d:"A man from any other department moves to the Red Army's bottom seat.",k:'transferTo',to:'R',z:{anyBut:'R'},x:'one'},
 {c:2,t:'Exchange cadres with the organs.',d:'A Propaganda man trades places with the NKVD man in the same rank.',k:'swap',with:'N',z:{seat:'P'},x:'one'},
 {c:2,t:'A denunciation in Pravda.',d:'Arrest a man in the Party line’s department. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'one'},
 {c:2,t:'The workers demand the supreme penalty.',d:'Factory rallies demand blood: a prisoner in the Lubyanka is shot.',k:'shoot',z:{pris:['lub']},x:'one'},
 {c:1,t:'Lies of the Trotskyite press.',d:'Reveal who owns a man in exile.',k:'expose',z:{exile:1},x:'one'},
+{c:6,t:'Revise the Short Course.',d:'Rewrite Party history. Pick a dead man: from the grave he is honoured in the Mausoleum, or from the Mausoleum he goes back into the grave. Men killed in exile cannot be honoured.',k:'history',z:{dead:1},x:'one'},
 ],
 N:[
 {c:6,t:'Arrest the enemies named by the Party.',d:'Arrest a man in the Party line’s department. If it names nobody, the chair picks the department.',k:'arrest',z:{seat:'LINE'},x:'one'},
@@ -257,7 +258,8 @@ N:[
 {c:2,t:'The parallel centre in Heavy Industry.',d:'Arrest an Industry man and the two men below him.',k:'arrest',z:{seat:'I'},x:'next',nx:2},
 {c:2,t:'Hunt the double-dealers in the press.',d:'Arrest a Propaganda man and the man below him.',k:'arrest',z:{seat:'P'},x:'next',nx:1},
 {c:2,t:"Purge the Prosecutor's Office.",d:'Arrest a Judiciary man and the man below him.',k:'arrest',z:{seat:'J'},x:'next',nx:1},
-{c:3,t:"Send investigators to the Prosecutor's Office.",d:"A man from any other department moves to the Judiciary's bottom seat.",k:'transferTo',to:'J',z:{anyBut:'J'},x:'one'},
+{c:2,t:"Send investigators to the Prosecutor's Office.",d:"A man from any other department moves to the Judiciary's bottom seat.",k:'transferTo',to:'J',z:{anyBut:'J'},x:'one'},
+{c:1,t:'Fell guarding the Soviet border.',d:"No vote. The man in the NKVD's bottom seat is killed at Lake Khasan and buried with honours in the Mausoleum.",k:'accident',novote:1,z:{fixed:'bottomN'},x:'one'},
 {c:2,t:'Place informers in the editorial offices.',d:"A man from any other department moves to Propaganda's bottom seat.",k:'transferTo',to:'P',z:{anyBut:'P'},x:'one'},
 {c:2,t:'Plenipotentiaries for the Army.',d:"A man from any other department moves to the Red Army's bottom seat.",k:'transferTo',to:'R',z:{anyBut:'R'},x:'one'},
 {c:3,t:'Sentence by the Special Board.',d:'Arrest a man in the Party line’s department and the two men below him. They go straight to the Gulag, with no trial. If it names nobody, the chair picks the department.',k:'oso',z:{seat:'LINE'},x:'next',nx:2},
@@ -280,16 +282,17 @@ I:[
 {c:2,t:'Engineers for the tank divisions.',d:"A man from any other department moves to the Red Army's bottom seat.",k:'transferTo',to:'R',z:{anyBut:'R'},x:'one'},
 {c:1,t:'A trade delegation to Berlin.',d:'An Industry man goes abroad with the delegation and does not return: he goes into exile, if a place is free.',k:'exileOut',z:{seat:'I'},x:'one'},
 {c:3,t:'Unmask the wreckers in our factories.',d:'Arrest an Industry man.',k:'arrest',z:{seat:'I'},x:'one'},
-{c:3,t:'An “accident” at the Magnitogorsk works.',d:"The man in Industry's bottom seat is killed.",k:'accident',z:{fixed:'bottomI'},x:'one'},
+{c:3,t:'An “accident” at the Magnitogorsk works.',d:"The man in Industry's bottom seat is killed. He is buried with honours in the Mausoleum.",k:'accident',maus:1,z:{fixed:'bottomI'},x:'one'},
 ],
 R:[
 {c:2,t:'Replace the General Staff.',d:'The head of the Red Army is sent to its bottom seat. Everyone below moves up.',k:'bottom',z:{fixed:'headR'},x:'one'},
-{c:2,t:'Increase tank production.',d:'A Red Army man trades places with the Industry man in the same rank.',k:'swap',with:'I',z:{seat:'R'},x:'one'},
-{c:3,t:'We honour the victorious battle against the fascists in Finland.',d:'Pin the Order of Lenin on a Red Army man.',k:'medal',z:{seat:'R'},x:'one'},
+{c:1,t:'Increase tank production.',d:'A Red Army man trades places with the Industry man in the same rank.',k:'swap',with:'I',z:{seat:'R'},x:'one'},
+{c:2,t:'We honour the victorious battle against the fascists in Finland.',d:'Pin the Order of Lenin on a Red Army man.',k:'medal',z:{seat:'R'},x:'one'},
 {c:2,t:'Recall experienced officers from the camps.',d:"The first prisoner in the Gulag queue takes the Red Army's bottom seat.",k:'draft',z:{fixed:'frontGulag'},x:'one'},
 {c:3,t:'Deepen the Canal for the Navy.',d:'Every prisoner on the Canal moves one place along. Whoever is pushed off the end dies.',k:'push',n:1,z:{none:1},x:'none'},
 {c:1,t:'Military advisers to Spain.',d:'A Red Army man goes abroad into exile, if a place is free.',k:'exileOut',z:{seat:'R'},x:'one'},
 {c:2,t:'Defend the Far East.',d:'A Red Army man is posted to its bottom seat.',k:'bottom',z:{seat:'R'},x:'one'},
+{c:2,t:'Killed in action against the fascists.',d:"No vote. The man in the Red Army's bottom seat falls in Spain and is buried with honours in the Mausoleum.",k:'accident',novote:1,z:{fixed:'bottomR'},x:'one'},
 {c:1,t:'Promote the young commanders.',d:'A Red Army man moves up one seat.',k:'promote',n:1,z:{seat:'R'},x:'one'},
 {c:3,t:'Expose the conspiracy in the General Staff.',d:'Arrest a man in one of the top three seats of the Red Army and the man below him.',k:'arrest',z:{seat:'R',top:3},x:'next',nx:1},
 {c:2,t:'Arrest the corps commanders.',d:'Arrest a Red Army man and the two men below him.',k:'arrest',z:{seat:'R'},x:'next',nx:2},
@@ -377,7 +380,7 @@ let S=null;let HUMAN=0; // the seat this browser plays
 function newState(np,seed,names,humans){
  GRNG=seeded(seed==null?Math.floor(Math.random()*2147483647):seed);
  const decks=buildDecks();
- S={np,round:0,players:[],men:{},seats:{P:[],N:[],I:[],R:[],J:[]},rh:null,kal:null,lub:[],shar:[],gulag:[],canal:Array(CANAL_N).fill(null),exile:[],grave:[],
+ S={np,round:0,players:[],men:{},seats:{P:[],N:[],I:[],R:[],J:[]},rh:null,kal:null,lub:[],shar:[],gulag:[],canal:Array(CANAL_N).fill(null),exile:[],grave:[],maus:[],
   decks:{},disc:{P:[],N:[],I:[],R:[],J:[]},line:LINE0,deferred:{},over:false,M:null,stats:{arrests:0,deaths:0,skipped:0,meetings:0,burn:0,verdicts:0,toGulag:0,toCanal:0,toShot:0,toShar:0,moves:0,resh:0},firstDraw:0,nkvdMet:false};
  for(const d of D)S.decks[d]=shuffle(decks[d].slice());
  S.sdeck=buildStalin();S.sdisc=[];
@@ -397,17 +400,19 @@ const hand=p=>P(p).hand.map(c=>CARDS[c]);
 function where(id){
  for(const d of D){const r=S.seats[d].indexOf(id);if(r>=0)return{t:'seat',d,r}}
  if(S.rh===id)return{t:'rh'};if(S.kal===id)return{t:'kal'};
- for(const t of ['lub','shar','gulag','exile','grave']){const i=S[t].indexOf(id);if(i>=0)return{t,i}}
+ for(const t of ['lub','shar','gulag','exile','grave','maus']){const i=S[t].indexOf(id);if(i>=0)return{t,i}}
  const ci=S.canal.indexOf(id);if(ci>=0)return{t:'canal',i:ci};
  return{t:'none'};
 }
-const alive=id=>where(id).t!=='grave';
+const alive=id=>{const t=where(id).t;return t!=='grave'&&t!=='maus'};
+// Points: alive +1 wherever he is; dead in the Mausoleum 0; dead in the grave −1.
+const ptsOf=id=>{const t=where(id).t;return t==='maus'?0:t==='grave'?-1:1};
 const isFree=id=>['seat','rh','kal','exile'].includes(where(id).t);
 function owned(p){return Object.values(S.men).filter(m=>m.owner===p).map(m=>m.id)}
 function lineDept(){const l=S.line.ag.line;return l&&l!=='-'?l:null}
 function locName(id){const w=where(id);
  if(w.t==='seat')return `${DN[w.d]}, ${RANKN[w.r]} seat`;
- return{rh:"Stalin's right hand",kal:'Head of State',lub:'the Lubyanka',shar:'the sharashka',gulag:'the Gulag',canal:'the White Sea Canal',exile:'exile',grave:'dead'}[w.t]||'';}
+ return{rh:"Stalin's right hand",kal:'Head of State',lub:'the Lubyanka',shar:'the sharashka',gulag:'the Gulag',canal:'the White Sea Canal',exile:'exile',grave:'dead, in the grave',maus:'dead, honoured in the Mausoleum'}[w.t]||'';}
 
 // ================= MOVES =================
 function pull(id){
@@ -419,7 +424,10 @@ function pull(id){
  else if(w.t!=='none')S[w.t].splice(w.i,1);
  return w;
 }
-function kill(id){pull(id);S.grave.push(id);S.stats.deaths++}
+function kill(id){man(id).died=where(id).t;pull(id);S.grave.push(id);S.stats.deaths++}
+// Killed in service, not by the state: buried with honours in the Mausoleum (five places; the grave once it is full).
+const MAUS_N=5;
+function killHonoured(id){man(id).died=where(id).t;pull(id);const ok=S.maus.length<MAUS_N;(ok?S.maus:S.grave).push(id);S.stats.deaths++;S.stats.mIn=(S.stats.mIn||0)+(ok?1:0);return ok}
 function arrest(id){const m=man(id);if(m.medal>0){m.medal--;return'medal'}pull(id);S.lub.push(id);S.stats.arrests++;m.jailed=1;return'ok'}
 function enter(d,id){if(S.seats[d].length>=SEATS)return false;pull(id);S.seats[d].push(id);return true}
 function toGulag(id){pull(id);S.gulag.push(id);S.stats.gIn=(S.stats.gIn||0)+1}
@@ -427,7 +435,7 @@ function osoArrest(id){const m=man(id);if(m.medal>0){m.medal--;return'medal'}m.j
 const CANAL_N=5; // places on the White Sea Canal; whoever is pushed off the last one dies
 // the cold takes the man held longest in the Gulag (front of the queue) and on the Canal (furthest along)
 function coldVictims(){let c=null;for(let i=CANAL_N-1;i>=0;i--)if(S.canal[i]){c=S.canal[i];break}return[S.gulag[0],c].filter(Boolean)}
-function canalPush(n){for(let k=0;k<n;k++){const last=S.canal[CANAL_N-1];if(last){S.canal[CANAL_N-1]=null;S.grave.push(last);S.stats.deaths++;S.stats.belt=(S.stats.belt||0)+1}for(let i=CANAL_N-1;i>0;i--)S.canal[i]=S.canal[i-1];S.canal[0]=null}}
+function canalPush(n){for(let k=0;k<n;k++){const last=S.canal[CANAL_N-1];if(last){S.canal[CANAL_N-1]=null;man(last).died='canal';S.grave.push(last);S.stats.deaths++;S.stats.belt=(S.stats.belt||0)+1}for(let i=CANAL_N-1;i>0;i--)S.canal[i]=S.canal[i-1];S.canal[0]=null}}
 // a new prisoner always starts at the first place; the men in front of him shuffle along just far enough to make room
 async function canalWinter(){if(!S.canal.some(Boolean))return;const before=S.grave.length;canalPush(1);const dead=S.grave.slice(before);
  cap('The work on the Canal never stops: everyone moves one place along.'+(dead.length?` ${dead.map(id=>man(id).sn+' ('+man(id).ini+')').join(', ')} dies at the end.`:''));render();await wait(1500)}
@@ -493,12 +501,13 @@ function areaIds(a){
  else if(z.pris)ids=z.pris.flatMap(t=>t==='canal'?S.canal.filter(Boolean):S[t]);
  else if(z.lubLine){const ld=lineDept();ids=S.lub.filter(id=>!ld||man(id).from===ld)}
  else if(z.exile)ids=S.exile.slice();
+ else if(z.dead)ids=S.grave.filter(id=>man(id).died!=='exile'&&S.maus.length<MAUS_N).concat(S.maus); // the Short Course: honour from the grave, or erase from the Mausoleum; men killed in exile stay traitors
  else if(z.fixed){const f=fixedSubj(z.fixed);ids=f?[f]:[]}
  return ids.filter(Boolean).filter(id=>canTake(a,id));
 }
 // A man the agenda could not actually change is never a valid subject: no promoting a head, no demoting the bottom man.
 function canTake(a,id){const w=where(id);if(a.k==='swap')return !!swapPartner(a,id);if(a.k==='vacancy'){if(w.t!=='seat')return false;const o=D.filter(d=>d!==w.d).map(d=>S.seats[d].length);return S.seats[w.d].length>=Math.min(...o)+2}if(a.k==='reshuffle')return w.t==='seat'&&partnerCands(id).length>0;if(w.t!=='seat')return true;if(a.k==='promote')return w.r>0;if(a.k==='demote'||a.k==='bottom')return w.r<S.seats[w.d].length-1;return true}
-function fixedSubj(f){if(f==='headR')return S.seats.R[0]||null;if(f==='headN')return S.seats.N[0]||null;if(f==='frontGulag')return S.gulag[0]||null;if(f==='bottomI'){const a=S.seats.I;return a[a.length-1]||null}return null}
+function fixedSubj(f){if(f==='headR')return S.seats.R[0]||null;if(f==='headN')return S.seats.N[0]||null;if(f==='frontGulag')return S.gulag[0]||null;if(f==='bottomI'||f==='bottomR'||f==='bottomN'){const a=S.seats[f.slice(-1)];return a[a.length-1]||null}return null}
 function nextOf(id,dir){const w=where(id);
  if(w.t==='seat')return S.seats[w.d][w.r+dir]||null;
  if(['lub','gulag','shar','exile'].includes(w.t))return S[w.t][w.i+dir]||null;
@@ -528,7 +537,7 @@ function aiSetup(){
 }
 let AIC=null,FORCEW=0; // AIC: per-decision cache of what the table can see; FORCEW: value cards as if you owned everyone
 function aiCtx(){if(AIC)return AIC;const np=S.np,rev=Array(np).fill(0),ptsRev=Array(np).fill(0);let U=0,uPts=0;
- for(const id in S.men){const m=S.men[id],pt=alive(id)?1:-1;if(m.owner!=null&&m.rev){rev[m.owner]++;ptsRev[m.owner]+=pt}else if(!m.nobody){U++;uPts+=pt}}
+ for(const id in S.men){const m=S.men[id],pt=ptsOf(id);if(m.owner!=null&&m.rev){rev[m.owner]++;ptsRev[m.owner]+=pt}else if(!m.nobody){U++;uPts+=pt}}
  const fr=U?uPts/U:0,str=rev.map((r,q)=>ptsRev[q]+(6-r)*fr); // points as the table can see them: alive +1, dead −1
  AIC={rev,U,str,mean:str.reduce((a,b)=>a+b,0)/np,lead:{}};return AIC}
 // how far ahead q is, as p sees it: men still free, counting the hidden ones at the table's average
@@ -546,7 +555,7 @@ function wt(p,id){if(FORCEW)return 1;const m=man(id);if(m.owner===p)return 1;if(
  const g=ownGuess(p,id);let v=0;for(let q=0;q<S.np;q++)if(q!==p&&g[q])v-=g[q]*foe(p,q);return 0.7*v}
 function soft(o,T){if(!o.length)return null;if(o.length<2)return o[0];const mx=Math.max(...o.map(x=>x.v));let s=0;const w=o.map(x=>{const e=Math.exp((x.v-mx)/Math.max(0.005,T));s+=e;return e});let r=RNG()*s;for(let i=0;i<o.length;i++){r-=w[i];if(r<=0)return o[i]}return o[o.length-1]}
 // what an agenda would do to each man it names, from his owner's side (+ helps, − hurts)
-const READK=['arrest','shoot','accident','assassin','medal','promote','demote','bottom','exileOut','draft','sharBack','amnesty','feed','toShar','toGulag','oso','canalBack','verdict','review','transferI'];
+const READK=['arrest','shoot','accident','history','assassin','medal','promote','demote','bottom','exileOut','draft','sharBack','amnesty','feed','toShar','toGulag','oso','canalBack','verdict','review','transferI'];
 function stakes(M){const a=M.ag;if(!a||M.fizzle||!READK.includes(a.k)||a.x==='harsh')return[];const L=fullList(M,M.subj);FORCEW=1;const r=L.filter(Boolean).map(id=>({id,e:val(0,a.k,[id],a.n||0,a.base||0)}));FORCEW=0;return r.filter(x=>Math.abs(x.e)>=0.05)}
 // After every vote the whole table learns something: a chair who names a man to be hurt is unlikely to own him,
 // and a man's defenders probably do. Owners also remember who came after their men.
@@ -592,7 +601,9 @@ function val(p,k,ids,amt,rung){
  for(const id of ids){if(!id)continue;const w=wt(p,id),m=man(id);
   switch(k){
   case'arrest':v-=w*(m.medal?0.05:0.8);break;
-  case'shoot':case'accident':v-=w;break;
+  case'shoot':v-=w;break;
+  case'accident':v-=w*0.6;break; // dead, but honoured: he costs his owner 1 point, not 2
+  case'history':v+=w*(where(id).t==='maus'?-0.5:0.5);break;
   case'assassin':v-=w*0.4;break;
   case'expose':if(m.owner===p&&!m.rev)v-=0.35;else if(!m.rev&&!m.nobody)v+=0.12;break;
   case'medal':v+=w*(m.medal?0.3:0.45);break;
@@ -846,9 +857,10 @@ async function meeting(d){
   setNom(M);await pickMore(p,M);await pickPartner(p,M);await pickDest(p,M);await proposeFate(M);
   cap(`${P(p).name} propose${p===HUMAN?'':'s'}: “${M.ag.t}”`+(M.subj?` Subject: ${man(M.subj).name} (${man(M.subj).ini})`+(M.named.length?`, with ${M.named.map(x=>man(x).name+' ('+man(x).ini+')').join(', ')}`:'')+'.'+(M.to?` He would move to ${DN[M.to]}.`:'')+(partnerOf(M)?` He would trade places with ${man(partnerOf(M)).name} (${man(partnerOf(M)).ini}) of ${DN[M.pd]}.`:''):M.fizzle?' There is no one it can apply to.':''));
  }
- if(!M.fizzle)await stalinDeal(M);
+ if(!M.fizzle&&!(M.ag&&M.ag.novote))await stalinDeal(M);
  tug();
  render();await wait(1100);
+ if(M.ag&&M.ag.novote&&!M.fizzle){resp=[];cap(`“${M.ag.t}” There is no vote: it simply happens.`);render();await wait(1000)}
  M.order=resp;
  for(const p of resp){
   if(!hand(p).some(c=>c.d===d))continue;
@@ -926,7 +938,7 @@ function effectText(M){const a=M.ag;const lab=id=>`${man(id).ini} ${man(id).sn}`
  const list=finalList(M);if(!list.length)return'';
  const dst=MOVEK.includes(a.k)?mvDest(M,M.subj,M.lead):null;
  const amt=(a.k==='promote'||a.k==='demote')?` ${a.n} seat${a.n>1?'s':''}`:'';
- return`${list.map(lab).join(', ')} ${list.length>1?'are':'is'} ${a.k==='verdict'?'sentenced to '+RUNG[a.base||1]:(KV[a.k]||'affected')}${dst?' to '+DN[dst]:''}${amt}`}
+ return`${list.map(lab).join(', ')} ${list.length>1?'are':'is'} ${a.k==='verdict'?'sentenced to '+RUNG[a.base||1]:a.k==='history'?(where(list[0]).t==='maus'?'airbrushed back into the grave':'honoured in the Mausoleum'):a.k==='accident'?'killed, and buried with honours in the Mausoleum':(KV[a.k]||'affected')}${dst?' to '+DN[dst]:''}${amt}`}
 function forecast(M){
  const a=M.ag,T=tally(M);
  if(!a)return'';
@@ -991,7 +1003,9 @@ async function resolve(M){
  case'swapIR':for(const id of list){out.push(swapIR(id)?`${nm(id)} trades places with an Industry man`:`${nm(id)} has no Industry man to trade with`)}break;
  case'exileOut':for(const id of list){out.push(toExile(id)?`${nm(id)} goes abroad into exile`:`no exile place is free for ${nm(id)}`)}break;
  case'arrest':for(const id of list){const r=arrest(id);out.push(r==='medal'?`${nm(id)}'s Order of Lenin saves him this time (one medal is lost${man(id).medal?`; ${man(id).medal} left`:''})`:`${nm(id)} is arrested`)}break;
- case'shoot':case'accident':for(const id of list){kill(id);out.push(`${nm(id)} is dead`)}break;
+ case'shoot':for(const id of list){kill(id);out.push(`${nm(id)} is dead`)}break;
+ case'accident':for(const id of list){out.push(killHonoured(id)?`${nm(id)} is dead, and buried with honours in the Mausoleum`:`${nm(id)} is dead; the Mausoleum is full, so he goes into the grave`)}break;
+ case'history':for(const id of list){if(where(id).t==='maus'){pull(id);S.grave.push(id);out.push(`${nm(id)} is airbrushed out of the photographs and goes back into the grave`)}else if(S.maus.length<MAUS_N){pull(id);S.maus.push(id);out.push(`${nm(id)} is rehabilitated and honoured in the Mausoleum`)}else out.push(`the Mausoleum is full: ${nm(id)} stays in the grave`)}break;
  case'assassin':for(const id of list){const fl=fateDraw();const f=fl.f;await showFate(fl,'Fate for '+man(id).ini);if(f==='Shot'){kill(id);out.push(`the assassin finds ${nm(id)} (fate: SHOT)`)}else out.push(`${nm(id)} escapes the assassin (fate: ${f.toUpperCase()})`)}break;
  case'draft':for(const id of list)out.push(await freeInto(M,id,'R','is recalled into'));break;
  case'sharBack':for(const id of list)out.push(await freeInto(M,id,'I','returns to'));break;
@@ -1056,6 +1070,7 @@ function posRaw(id){const w=where(id);
  case'gulag':{const i=Math.min(w.i,27);return[48+(3-i%4)*50,786+Math.floor(i/4)*30+(w.i>27?(w.i-27)*3:0)]}
  case'canal':return canalXY(w.i);
  case'exile':return[810+w.i*50,920];
+ case'maus':{const P2=[[268,196],[320,196],[372,196],[294,232],[346,232]][Math.min(w.i,4)];return[1000-P2[0],P2[1]]}
  case'grave':{const i=Math.min(w.i,34);return[404+(6-i%7)*46,846+Math.floor(i/7)*30+(w.i>34?(w.i-34)*2:0)]}
  }return[-100,-100]}
 const GULAG_SVG='<svg class="art" width="290" height="252" viewBox="0 0 290 252" aria-hidden="true" style="position:absolute;left:0;top:0;border-radius:8px"><defs><linearGradient id="gsk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#93a6b4"/><stop offset=".5" stop-color="#d3dbe0"/><stop offset="1" stop-color="#eef2f4"/></linearGradient></defs><rect width="290" height="252" rx="8" fill="url(#gsk)"/><path d="M252 82 L150 22 L146 44 Z" fill="#fffbe0" opacity=".45"/><path d="M0 118 C40 100 80 104 120 114 C160 124 200 98 240 102 C262 104 278 110 290 108 V252 H0Z" fill="#c4ced5"/><path d="M0 160 C50 138 100 150 150 158 C200 166 240 140 290 146 V252 H0Z" fill="#e2e8eb"/><path d="M0 206 C60 188 120 204 180 200 C230 196 260 186 290 192 V252 H0Z" fill="#f5f8f9"/><g stroke="#5f564c" stroke-width="2"><line x1="6" y1="150" x2="6" y2="170"/><line x1="32" y1="149" x2="32" y2="169"/><line x1="58" y1="148" x2="58" y2="168"/><line x1="84" y1="147" x2="84" y2="167"/><line x1="110" y1="147" x2="110" y2="167"/><line x1="136" y1="146" x2="136" y2="166"/><line x1="162" y1="145" x2="162" y2="165"/><line x1="188" y1="144" x2="188" y2="164"/><line x1="214" y1="144" x2="214" y2="164"/></g><path d="M0 154 L226 147 M0 162 L226 155" stroke="#5f564c" stroke-width="1" stroke-dasharray="3 2" fill="none"/><g stroke="#4a3b2c" stroke-width="3" fill="none" stroke-linecap="round"><path d="M236 198 L250 104 M284 198 L270 104 M241 170 L279 140 M279 170 L241 140 M245 140 L275 140 M240 170 L280 170"/></g><rect x="242" y="96" width="36" height="9" fill="#5a4632"/><rect x="247" y="74" width="26" height="22" fill="#6b5640"/><rect x="254" y="80" width="12" height="8" fill="#ffe9a0"/><path d="M240 76 L260 60 L280 76 Z" fill="#3d3024"/><path d="M240 76 L260 60 L280 76" fill="none" stroke="#fff" stroke-width="2" opacity=".8"/><circle cx="2" cy="6" r="1.0" fill="#fff" opacity=".85"/><circle cx="55" cy="43" r="1.5" fill="#fff" opacity=".85"/><circle cx="108" cy="80" r="2.0" fill="#fff" opacity=".85"/><circle cx="161" cy="117" r="1.0" fill="#fff" opacity=".85"/><circle cx="214" cy="154" r="1.5" fill="#fff" opacity=".85"/><circle cx="267" cy="191" r="2.0" fill="#fff" opacity=".85"/><circle cx="33" cy="228" r="1.0" fill="#fff" opacity=".85"/><circle cx="86" cy="25" r="1.5" fill="#fff" opacity=".85"/><circle cx="139" cy="62" r="2.0" fill="#fff" opacity=".85"/><circle cx="192" cy="99" r="1.0" fill="#fff" opacity=".85"/><circle cx="245" cy="136" r="1.5" fill="#fff" opacity=".85"/><circle cx="11" cy="173" r="2.0" fill="#fff" opacity=".85"/><circle cx="64" cy="210" r="1.0" fill="#fff" opacity=".85"/><circle cx="117" cy="7" r="1.5" fill="#fff" opacity=".85"/><circle cx="170" cy="44" r="2.0" fill="#fff" opacity=".85"/><circle cx="223" cy="81" r="1.0" fill="#fff" opacity=".85"/><circle cx="276" cy="118" r="1.5" fill="#fff" opacity=".85"/><circle cx="42" cy="155" r="2.0" fill="#fff" opacity=".85"/><circle cx="95" cy="192" r="1.0" fill="#fff" opacity=".85"/><circle cx="148" cy="229" r="1.5" fill="#fff" opacity=".85"/><circle cx="201" cy="26" r="2.0" fill="#fff" opacity=".85"/><circle cx="254" cy="63" r="1.0" fill="#fff" opacity=".85"/><circle cx="20" cy="100" r="1.5" fill="#fff" opacity=".85"/><circle cx="73" cy="137" r="2.0" fill="#fff" opacity=".85"/><circle cx="126" cy="174" r="1.0" fill="#fff" opacity=".85"/><circle cx="179" cy="211" r="1.5" fill="#fff" opacity=".85"/><circle cx="232" cy="8" r="2.0" fill="#fff" opacity=".85"/><circle cx="285" cy="45" r="1.0" fill="#fff" opacity=".85"/><circle cx="51" cy="82" r="1.5" fill="#fff" opacity=".85"/><circle cx="104" cy="119" r="2.0" fill="#fff" opacity=".85"/><circle cx="157" cy="156" r="1.0" fill="#fff" opacity=".85"/><circle cx="210" cy="193" r="1.5" fill="#fff" opacity=".85"/><circle cx="263" cy="230" r="2.0" fill="#fff" opacity=".85"/><circle cx="29" cy="27" r="1.0" fill="#fff" opacity=".85"/></svg>';
@@ -1102,6 +1117,8 @@ function buildBoard(){
  // sharashka, an annex on the Lubyanka's Industry side
  h+=A(446,552,'width:76px;height:116px;border-radius:0 8px 8px 0;background:#e3eedb;border:2px solid #2c6e43;border-left:none;padding:4px 6px 0 0;text-align:right;font-family:Oswald,sans-serif;font-size:10.5px;letter-spacing:.05em;color:#1e5632','SHARASHKA');
  for(let i=0;i<3;i++)h+=A(463,583+i*30,'width:40px;height:26px;border-radius:4px;background:#fff;border:1px solid #7fa58a');
+ // the Mausoleum, Propaganda's: the honoured dead
+ h+=A(226,140,'width:192px;height:118px;pointer-events:none',`<svg width="192" height="118" viewBox="0 0 192 118" aria-hidden="true" style="position:absolute;left:0;top:0"><path d="M6 116 V96 H20 V80 H40 V64 H152 V80 H172 V96 H186 V116 Z" fill="#5b1f1d" stroke="#2c0e0d" stroke-width="1.5"/><path d="M40 64 V50 H70 V38 H122 V50 H152 V64 Z" fill="#3a1413"/><rect x="6" y="0" width="180" height="34" rx="5" fill="rgba(58,20,19,.82)"/><text x="96" y="16" text-anchor="middle" font-family="Oswald,sans-serif" font-size="13" letter-spacing="3" fill="#f1d98a">MAUSOLEUM</text><text x="96" y="29" text-anchor="middle" font-size="9.5" fill="#ecd6cd">honoured dead · 0 points · 5 places</text></svg>`+[[268,196],[320,196],[372,196],[294,232],[346,232]].map(([x,y])=>`<div style="position:absolute;left:${x-226-20}px;top:${y-140-11}px;width:40px;height:22px;border:1px dashed rgba(241,217,138,.55);border-radius:4px"></div>`).join(''));
  // grave
  const TR=[['SHARASHKA','safe','#2c6e43'],['GULAG','may return','#6d6a63'],['THE CANAL','alive, for now','#2b5f7e'],['SHOT','gone','#151515']];
  TR.forEach((t,i)=>{h+=`<div class="trk" data-rung="${i}" style="left:${238+i*98}px;top:671px;width:94px;height:31px;background:${t[2]}"><b>${t[0]}</b>${t[1]}</div>`});
@@ -1147,7 +1164,7 @@ function render(){AIC=null;
  for(const id in S.men){const m=S.men[id];let el=TOK[id];if(!el){el=document.createElement('div');el.dataset.id=id;$('#toks').appendChild(el);TOK[id]=el}
   const w=where(id),[x,y]=posOf(id);el.style.left=(x-20)+'px';el.style.top=(y-13)+'px';
   el.className='tok '+(w.t==='seat'?'s'+w.d:'t'+w.t)+(m.owner===HUMAN?' mine':'')+(pick.has(id)?' pick':'')+(HL.has(id)?' hl':S.M&&(S.M.subj===id||S.M.named.includes(id)||partnerOf(S.M)===id)?' subj':'');
-  el.style.zIndex=w.t==='grave'?3:5;
+  el.style.zIndex=w.t==='grave'||w.t==='maus'?3:5;
   el.innerHTML=(m.nobody?'<i class="ob nob"></i>':'')+`<span>${m.ini}</span>`+(m.medal?`<i class="md">${'★'.repeat(Math.min(m.medal,3))}${m.medal>3?'+':''}</i>`:'');
   el.style.border=m.rev&&m.owner!=null?`3px solid ${PCOL[m.owner]}`:'';el.style.borderBottomWidth=m.rev&&m.owner!=null?'7px':'';el.style.lineHeight=m.rev&&m.owner!=null?'12px':'';
   el.title=`${m.name}\n${m.title?m.title+'\n':''}${locName(id)}`+(m.owner===HUMAN?'\nYours'+(m.rev?' (revealed)':' (secret)'):m.rev&&m.owner!=null?`\nBelongs to ${P(m.owner).name}`:m.nobody?'\nBelongs to nobody':'')+(m.medal?`\nOrder of Lenin${m.medal>1?' ×'+m.medal:''}`:'');
@@ -1504,9 +1521,9 @@ function rulesScreen(){
 <h2>3 · The vote</h2><p>The vote only decides whether the agenda passes. Every response card shows its voice: <b>+1</b> Support, <b>+1</b> Acclaim, <b>−1</b> Doubt, <b>0</b> Abstain, and the rare <b>±1</b> Either Way, whose sign you choose when you play it. Stalin's card counts too. Add them up: zero or more and it passes, below zero it fails. What happens is printed on the agenda: how many men, which department, which sentence. A trial that fails leaves its prisoners waiting in the Lubyanka. <b>Acclaim</b> (rare) also overrules a Defer. <b>Amend</b> (rare) takes one man off the agenda and puts any other man it could name in his place. <b>Defer</b> postpones the agenda to the department's next meeting, unless someone plays an Acclaim. Abstain says nothing.</p>
 <h2>Stalin's chair</h2><p>At every meeting a card from Stalin's own small deck is dealt face down to his chair, and turned over after everyone else has spoken. It is pure weight: +1, 0 or −1 on the scales, like any other voice, and it never names anyone. His Defer cannot be overruled, not even by an Acclaim. Once the man in Stalin's right-hand seat has come forward, his owner may look at Stalin's card before each meeting.</p>
 <p><b>Stalin's word comes first.</b> His card takes effect before the agenda is carried out. A card that names a place (the first prisoner in the Gulag queue, the head of a department) then acts on whoever is in that place. A man the chair picked who has died or been moved meanwhile is beyond its reach: the order arrives too late.</p>
-<h2>4 · Prisons</h2><p><b>Tupolev's bureau:</b> at every Industry meeting, before the agenda, whoever chairs it may move one Gulag prisoner into the sharashka. No vote. The sharashka holds three: when a fourth man comes in, the man held there longest has finished his project and goes back to Industry's bottom seat, where he can be arrested again.</p><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first, as shown on the track under the Lubyanka: the sharashka (safe, for now), the Gulag (alive, and may come back), the White Sea Canal (alive for now) and the firing squad. During a trial the current sentence glows on the track. The camps are deadlier than the Lubyanka. <b>The Gulag is cold:</b> three cards in Stalin's deck kill the man held longest in the Gulag and the man furthest along the Canal when they are turned over. <b>The Canal never stops:</b> it moves one place along at the end of every round, and whenever an agenda pushes the work; whoever is pushed off the end dies. A new prisoner always starts at the first place.</p>
+<h2>4 · Prisons</h2><p><b>The Mausoleum</b> holds five honoured dead, and they cost their owners nothing at the end. Men killed in service go straight there: the Magnitogorsk “accident”, killed in action in Spain, fallen on the border (the last two are genuine accidents, so nobody votes on them). Propaganda's <i>Revise the Short Course</i> moves a dead man either way: into the Mausoleum from the grave, or out of it back into the grave. Men killed in exile cannot be honoured.</p><p><b>Tupolev's bureau:</b> at every Industry meeting, before the agenda, whoever chairs it may move one Gulag prisoner into the sharashka. No vote. The sharashka holds three: when a fourth man comes in, the man held there longest has finished his project and goes back to Industry's bottom seat, where he can be arrested again.</p><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first, as shown on the track under the Lubyanka: the sharashka (safe, for now), the Gulag (alive, and may come back), the White Sea Canal (alive for now) and the firing squad. During a trial the current sentence glows on the track. The camps are deadlier than the Lubyanka. <b>The Gulag is cold:</b> three cards in Stalin's deck kill the man held longest in the Gulag and the man furthest along the Canal when they are turned over. <b>The Canal never stops:</b> it moves one place along at the end of every round, and whenever an agenda pushes the work; whoever is pushed off the end dies. A new prisoner always starts at the first place.</p>
 <h2>5 · Drawing</h2><p>At the end of the round everyone draws back up to fifteen, one card at a time, choosing the deck in the open. Whoever chaired the Judiciary decides who draws first.</p>
-<h2>The end</h2><p>The blue NKVD deck is the clock and is never reshuffled: it holds ten cards per player. When its last card is drawn (or burned), the round finishes and everyone plays one final round, like the last turn in Ticket to Ride. Nobody draws after it, and then the Terror ends. </p><h2>Scoring</h2><p>Survival is survival. Every one of your men still alive at the end scores 1 point, free or in any prison or camp. Every one who died costs you 1 point. Most points wins; a tie is shared.</p>
+<h2>The end</h2><p>The blue NKVD deck is the clock and is never reshuffled: it holds ten cards per player. When its last card is drawn (or burned), the round finishes and everyone plays one final round, like the last turn in Ticket to Ride. Nobody draws after it, and then the Terror ends. </p><h2>Scoring</h2><p>Survival is survival. Every one of your men still alive at the end scores 1 point, free or in any prison or camp. Every one who died costs you 1 point, unless he lies in the Mausoleum (0). Most points wins; a tie is shared.</p>
 <h2>The cards</h2><p>220 in all: Propaganda, Industry, Red Army and Judiciary 36 each (their discards are reshuffled when a deck runs out), the blue NKVD deck 60 (ten per player are used), and Stalin's 16.</p>
 <h2>The computer players</h2><p>Each has a temperament: the zealot, the survivor, the schemer, the avenger or the opportunist. They remember who came after their men, gang up on whoever seems to be surviving best, and watch the votes: whoever defends a man probably owns him. So they sometimes vote against their own man when it would pass anyway. You find out who was which at the end.</p>
 <p style="color:#d8c9ad;font-size:13px">Playtest safeguard: if the NKVD does not meet in a round, one blue card is burned, so the game cannot stall forever.</p>
@@ -1515,14 +1532,14 @@ function rulesScreen(){
 }
 function endScreen(){
  let rows='';const sc=[];
- for(const p of S.players){const ids=owned(p.i);const f=ids.filter(isFree),pr=ids.filter(id=>alive(id)&&!isFree(id)),dd=ids.filter(id=>!alive(id));
-  sc.push({p,pts:f.length+pr.length-dd.length,row:pts=>`<td><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${PCOL[p.i]}"></span> <b>${esc(p.name)}</b><div style="font:700 18px Oswald,sans-serif;margin-top:2px">${pts>0?'+':''}${pts}</div></td><td>${f.map(id=>esc(man(id).sn)).join(', ')||'–'}</td><td>${pr.map(id=>esc(man(id).sn)+' ('+locName(id).replace('the ','')+')').join(', ')||'–'}</td><td>${dd.map(id=>esc(man(id).sn)).join(', ')||'–'}</td>`})}
+ for(const p of S.players){const ids=owned(p.i);const f=ids.filter(isFree),pr=ids.filter(id=>alive(id)&&!isFree(id)),dd=ids.filter(id=>!alive(id)),hon=dd.filter(id=>where(id).t==='maus');
+  sc.push({p,pts:f.length+pr.length-(dd.length-hon.length),row:pts=>`<td><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${PCOL[p.i]}"></span> <b>${esc(p.name)}</b><div style="font:700 18px Oswald,sans-serif;margin-top:2px">${pts>0?'+':''}${pts}</div></td><td>${f.map(id=>esc(man(id).sn)).join(', ')||'–'}</td><td>${pr.map(id=>esc(man(id).sn)+' ('+locName(id).replace('the ','')+')').join(', ')||'–'}</td><td>${dd.map(id=>esc(man(id).sn)+(where(id).t==='maus'?' (Mausoleum, 0)':'')).join(', ')||'–'}</td>`})}
  sc.sort((a,b)=>b.pts-a.pts);const top=sc[0].pts,win=sc.filter(x=>x.pts===top).map(x=>esc(x.p.name));
  for(const x of sc)rows+=`<tr${x.pts===top?' style="background:rgba(212,175,55,.14)"':''}>${x.row(x.pts)}</tr>`;
  const winTxt=win.length>1?`${win.slice(0,-1).join(', ')} and ${win[win.length-1]} share the win with ${top} points.`:`${win[0]} ${win[0]==='You'?'survive':'survives'} the Terror best, with ${top} point${Math.abs(top)===1?'':'s'}.`;
  const free=Object.keys(S.men).filter(isFree).length;
- $('#ovb').innerHTML=`<h1>THE TERROR IS OVER</h1><p>${S.round} rounds. ${free} of ${Object.keys(S.men).length} men are still free. ${S.stats.arrests} arrests, ${S.stats.deaths} deaths.</p><p><b>${winTxt}</b> Every man alive scores 1, every dead man costs 1.</p><table class="fin"><tr><th>Player, points</th><th>Alive, free</th><th>Alive in prison</th><th>Dead</th></tr>${rows}</table>${S.players.some(p=>p.ai)?`<p style="margin-top:10px;font-size:13px;opacity:.85">The computer players were: ${S.players.filter(p=>p.ai).map(p=>`${esc(p.name)}, ${p.pers.lab}`).join('; ')}.</p>`:''}<p style="margin-top:14px"><button class="go" data-x="new">New game</button> <button class="btn" data-x="close">Look at the board</button></p>`;
- {const j=Object.values(S.men).filter(m=>m.jailed);S.stats.jailed=j.length;S.stats.jailedDead=j.filter(m=>!alive(m.id)).length;S.stats.pts=sc.map(x=>x.pts);S.stats.endLub=S.lub.length;S.stats.endGulag=S.gulag.length;S.stats.endCanal=S.canal.filter(Boolean).length}
+ $('#ovb').innerHTML=`<h1>THE TERROR IS OVER</h1><p>${S.round} rounds. ${free} of ${Object.keys(S.men).length} men are still free. ${S.stats.arrests} arrests, ${S.stats.deaths} deaths.</p><p><b>${winTxt}</b> Every man alive scores 1; every dead man costs 1, unless he lies in the Mausoleum.</p><table class="fin"><tr><th>Player, points</th><th>Alive, free</th><th>Alive in prison</th><th>Dead</th></tr>${rows}</table>${S.players.some(p=>p.ai)?`<p style="margin-top:10px;font-size:13px;opacity:.85">The computer players were: ${S.players.filter(p=>p.ai).map(p=>`${esc(p.name)}, ${p.pers.lab}`).join('; ')}.</p>`:''}<p style="margin-top:14px"><button class="go" data-x="new">New game</button> <button class="btn" data-x="close">Look at the board</button></p>`;
+ {const j=Object.values(S.men).filter(m=>m.jailed);S.stats.jailed=j.length;S.stats.jailedDead=j.filter(m=>!alive(m.id)).length;S.stats.pts=sc.map(x=>x.pts);S.stats.endMaus=S.maus.length;S.stats.endLub=S.lub.length;S.stats.endGulag=S.gulag.length;S.stats.endCanal=S.canal.filter(Boolean).length}
  $('#ov').classList.add('on');
  window.__done=true;
  {const t=JSON.stringify([S.round,S.stats,Object.keys(S.men).map(id=>{const m=S.men[id];return[id,JSON.stringify(where(id)),m.owner,m.rev,m.medal]})]);let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;document.body.dataset.final=(h>>>0).toString(36)}
