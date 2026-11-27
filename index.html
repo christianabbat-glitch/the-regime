@@ -982,7 +982,8 @@ async function resolve(M){
  if(a.z&&a.z.fixed){const f=fixedSubj(a.z.fixed),old=M.subj;if(f!==old){M.subj=f;if(old)late=` ${nmi(old)} ${alive(old)?'is no longer there':'froze before the order arrived'}${f?`, so it applies to the next man, ${nmi(f)}`:''}.`;
   if(!f){res(late.trim()+` Nobody is left for “${a.t}” to act on.`);await wait(1600);return}}}
  let list=finalList(M,T);
- if(!(a.z&&a.z.fixed)){const gone=list.filter(id=>id&&(!alive(id)||(a.z.pris&&!a.z.pris.includes(where(id).t))));
+ if(!(a.z&&a.z.fixed)){const reach=id=>{const t=where(id).t;return a.z.dead?(t==='grave'||t==='maus'):a.z.pris?a.z.pris.includes(t):alive(id)}; // still where the card can reach him (the Short Course reaches the dead)
+  const gone=list.filter(id=>id&&!reach(id));
   if(gone.length){list=list.filter(id=>!gone.includes(id));late=' '+gone.map(id=>`${nmi(id)} ${alive(id)?'was moved':'died'} before the order arrived`).join('; ')+'.';
    if(!list.filter(Boolean).length){res(late.trim()+' Nothing happens.');await wait(1700);return}}}
  let dropNote='';
