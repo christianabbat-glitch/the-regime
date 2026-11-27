@@ -268,7 +268,7 @@ I:[
 {c:2,t:'Hero of Socialist Labour.',d:'Pin the Order of Lenin on an Industry man.',k:'medal',z:{seat:'I'},x:'one'},
 {c:2,t:'Storm the plan!',d:'An Industry man moves up one seat.',k:'promote',n:1,z:{seat:'I'},x:'one'},
 {c:2,t:'The plan has failed.',d:'An Industry man moves down two seats.',k:'demote',n:2,z:{seat:'I'},x:'one'},
-{c:2,t:"Tupolev's design bureau needs engineers.",d:'Pick a prisoner in the Gulag: he goes to the sharashka, if a place is free.',k:'toShar',z:{pris:['gulag']},x:'one'},
+{c:2,t:"Tupolev's design bureau needs engineers.",d:'Pick a prisoner in the Gulag: he goes to the sharashka.',k:'toShar',z:{pris:['gulag']},x:'one'},
 {c:2,t:'Transfer cadres to the Urals.',d:"A man in the Party line’s department moves to Industry's bottom seat. If it names nobody, the chair picks the department.",k:'transferI',z:{seat:'LINE'},x:'one'},
 {c:3,t:'Double the norms on the Canal.',d:'Every prisoner on the Canal moves two places along. Whoever is pushed off the end dies.',k:'push',n:2,z:{none:1},x:'none'},
 {c:2,t:'Release the engineers from the sharashka.',d:"A prisoner in the sharashka returns to Industry's bottom seat.",k:'sharBack',z:{pris:['shar']},x:'one'},
@@ -308,7 +308,7 @@ J:[
 {c:3,t:'Ten years without the right of correspondence.',d:'Try a prisoner in the Lubyanka. Sentence: shot. His family is told he got ten years.',k:'verdict',base:3,z:{pris:['lub']},x:'one'},
 {c:4,t:'Try the accomplices of the accused.',d:'Try a prisoner in the Lubyanka. Sentence: the Canal.',k:'verdict',base:2,z:{pris:['lub']},x:'one'},
 {c:2,t:'Review the case files.',d:'Turn over the top card of the black deck before the vote. The fate in its corner is the sentence for everyone in the Lubyanka.',k:'mass',fateBase:1,z:{none:1},x:'harsh'},
-{c:2,t:'Assign specialists to the sharashka.',d:'A prisoner in the Lubyanka goes to the sharashka, if a place is free.',k:'toShar',z:{pris:['lub']},x:'one'},
+{c:2,t:'Assign specialists to the sharashka.',d:'A prisoner in the Lubyanka goes to the sharashka.',k:'toShar',z:{pris:['lub']},x:'one'},
 {c:1,t:'The wrong file was sent.',d:'A prisoner on the Canal is sent back to the end of the Gulag queue.',k:'canalBack',z:{pris:['canal']},x:'one'},
 {c:1,t:'Amnesty for the repentant.',d:"The first prisoner in the Gulag queue takes Propaganda's bottom seat.",k:'amnesty',z:{fixed:'frontGulag'},x:'one'},
 {c:3,t:'Recall a cadre to Moscow.',d:"A man from any other department moves to the NKVD's bottom seat.",k:'transferTo',to:'N',z:{anyBut:'N'},x:'one'},
@@ -432,7 +432,11 @@ function canalPush(n){for(let k=0;k<n;k++){const last=S.canal[CANAL_N-1];if(last
 async function canalWinter(){if(!S.canal.some(Boolean))return;const before=S.grave.length;canalPush(1);const dead=S.grave.slice(before);
  cap('The work on the Canal never stops: everyone moves one place along.'+(dead.length?` ${dead.map(id=>man(id).sn+' ('+man(id).ini+')').join(', ')} dies at the end.`:''));render();await wait(1500)}
 function toCanal(id){pull(id);S.stats.cIn=(S.stats.cIn||0)+1;let g=S.canal.indexOf(null);if(g<0){canalPush(1);g=0}for(let i=g;i>0;i--)S.canal[i]=S.canal[i-1];S.canal[0]=id}
-function toShar(id){if(S.shar.length>=3)return false;pull(id);S.shar.push(id);return true}
+const SHAR_N=3;let SHAROUT=[];
+// The sharashka holds three. When a fourth man comes in, the man held longest has finished his project and goes back
+// to Industry's bottom seat (or the emptiest department, if Industry is full), where he can be arrested again.
+function toShar(id){pull(id);if(S.shar.length>=SHAR_N){const ev=S.shar.shift();if(!enter('I',ev)){const d=D.slice().sort((a,b)=>S.seats[a].length-S.seats[b].length)[0];if(!enter(d,ev))S.exile.push(ev)}SHAROUT.push(ev);S.stats.sOut=(S.stats.sOut||0)+1}S.shar.push(id);S.stats.sIn=(S.stats.sIn||0)+1;return true}
+function sharNote(){const l=SHAROUT;SHAROUT=[];return l.map(ev=>{const w=where(ev);return` ${man(ev).sn} (${man(ev).ini}), held longest in the sharashka, finishes his project and goes back to ${w.t==='seat'?(w.d==='I'?"Industry's bottom seat":`the bottom of ${DN[w.d]} (Industry is full)`):'exile'}.`}).join('')}
 function toExile(id){if(S.exile.length>=3)return false;pull(id);S.exile.push(id);return true}
 function moveSeat(id,delta){const w=where(id);if(w.t!=='seat')return;const a=S.seats[w.d];a.splice(w.r,1);const nr=Math.max(0,Math.min(a.length,w.r+delta));a.splice(nr,0,id)}
 function swapIR(id){const w=where(id);if(w.t!=='seat'||w.d!=='R')return false;const o=S.seats.I[w.r];if(!o)return false;S.seats.R[w.r]=o;S.seats.I[w.r]=id;return true}
@@ -465,7 +469,7 @@ async function freeInto(M,id,pref,verb){const nm=x=>`${man(x).sn} (${man(x).ini}
  return`${DN[pref]} is full, so ${nm(id)} takes its bottom seat and ${nm(bm)} goes to ${place} in his place`}
 function aiFreeDept(p,id,opts){const mine=man(id).owner===p;let best=opts[0],bv=-1e9;
  for(const d of opts){const tc=topClaim(d);let v=RNG()*0.1+(SEATS-S.seats[d].length)*0.02;if(mine&&tc&&tc.p===p)v+=0.3;if(mine&&!tc)v+=0.2;if(!mine&&tc&&tc.p===p)v-=0.1;if(v>bv){bv=v;best=d}}return best}
-function sentence(id,r){S.stats.verdicts++;if(r<=0){if(toShar(id))S.stats.toShar++;else{toGulag(id);S.stats.toGulag++}}else if(r===1){toGulag(id);S.stats.toGulag++}else if(r===2){toCanal(id);S.stats.toCanal++}else{kill(id);S.stats.toShot++}}
+function sentence(id,r){S.stats.verdicts++;if(r<=0){toShar(id);S.stats.toShar++}else if(r===1){toGulag(id);S.stats.toGulag++}else if(r===2){toCanal(id);S.stats.toCanal++}else{kill(id);S.stats.toShot++}}
 function fateDraw(){
  if(!S.decks.J.length&&S.disc.J.length){S.decks.J=shuffle(S.disc.J);S.disc.J=[]}
  if(!S.decks.J.length)return{f:['Shot','Gulag','Gulag','Canal','Shot','Sharashka'][rnd(6)],cid:null};
@@ -559,6 +563,14 @@ function aiObserve(M){AIC=null;const st=stakes(M);if(!st.length)return;
   for(const{q,v}of votes)if(q!==o)G[q]+=(harm?(v>0?0.4:-0.35):(v>0?-0.2:0.25))*mag*k;
   for(let q=0;q<S.np;q++)G[q]=+G[q].toFixed(4)}
 }
+function aiBureau(p){const t=P(p).pers,ev=S.shar.length>=SHAR_N?S.shar[0]:null,evv=ev?-wt(p,ev)*0.35:0; // pushing an enemy's man out of the sharashka is a bonus
+ const o=[{id:null,v:0.02}];
+ S.gulag.forEach((id,i)=>{const m=man(id);let v=wt(p,id)*0.5*(i===0?1.4:1)+evv;if(m.owner===p&&!m.rev)v-=0.05*t.caut;o.push({id,v})}); // the front of the queue is next for the cold
+ return soft(o,t.temp).id}
+function bureauObserve(ch,id,ev){AIC=null;const m=man(id);
+ if(!m.rev&&!m.nobody){const s=S.ai.s[id]||(S.ai.s[id]=Array(S.np).fill(0));s[ch]=+Math.min(3,s[ch]+0.8).toFixed(4)}
+ if(m.owner!=null&&m.owner!==ch)S.ai.g[m.owner][ch]=+(S.ai.g[m.owner][ch]-0.5).toFixed(4);
+ if(ev){const o=man(ev).owner;if(o!=null&&o!==ch)S.ai.g[o][ch]=+(S.ai.g[o][ch]+0.6).toFixed(4)}}
 function aiRound(){for(const G of S.ai.g)for(let q=0;q<G.length;q++)G[q]=+(G[q]*0.75).toFixed(4);for(const id in S.ai.s)S.ai.s[id]=S.ai.s[id].map(x=>+(x*0.95).toFixed(4));AIC=null}
 // The voices still to come, as p sees them: everyone after him who holds a card of this colour, then Stalin.
 function voiceDist(p,M){
@@ -588,9 +600,10 @@ function val(p,k,ids,amt,rung){
   case'demote':v-=w*0.12*amt;break;
   case'bottom':v-=w*0.3;break;
   case'exileOut':v+=w*0.5;break;
-  case'draft':case'sharBack':case'amnesty':v+=w*0.7;break;
+  case'draft':case'amnesty':v+=w*0.7;break;
+  case'sharBack':v-=w*0.25;break; // back out of safety, where he can be arrested again
   case'feed':v-=w*0.6;break;
-  case'toShar':v+=w*0.5;break;
+  case'toShar':v+=w*0.5+(S.shar.length>=SHAR_N?-wt(p,S.shar[0])*0.35:0);break;
   case'toGulag':v+=w*-0.1+0.04;break;
   case'oso':v-=w*(m.medal?0.05:0.6);break;
   case'canalBack':v+=w*0.45;break;
@@ -798,6 +811,7 @@ async function meeting(d){
  const M={d,lead:order[0],chair:tc.p,plays:[],named:[],subj:null,ag:null,card:null,defer:false,cards:[]};
  S.M=M;
  clearTable(head,`chaired by ${order[0]===HUMAN?'you':P(order[0]).name}${order[0]!==tc.p?` (${tc.p===HUMAN?'you hold':P(tc.p).name+' holds'} no ${DN[d]} card)`:''}`,d);
+ if(d==='I')await bureau(M);
  let resp=order.slice(1);
  const dfr=S.deferred[d];
  let reopen=false,preCid=null,preSubj=null;
@@ -922,8 +936,20 @@ function forecast(M){
  const eff=effectText(M);
  return`If it passes: ${eff}. Total so far ${T.net>0?'+':''}${T.net} (for ${T.f}, against ${T.a}): it ${T.fail?'fails':'passes'}.`;
 }
+// Tupolev's bureau: before the agenda, whoever chairs Industry may move one Gulag prisoner into the sharashka. No vote.
+async function bureau(M){
+ if(!S.gulag.length)return;
+ const ch=M.lead,ids=S.gulag.slice(),ev=S.shar.length>=SHAR_N?S.shar[0]:null;
+ const note=ev?` The sharashka is full, so ${man(ev).sn} (${man(ev).ini}), held there longest, would go back to Industry.`:'';
+ if(ch!==HUMAN){cap(`Tupolev's bureau: ${P(ch).name} may pull one man out of the Gulag…`);render();await wait(700)}
+ const id=await decide(ch,()=>{cap("Tupolev's bureau",`You chair Industry: click a Gulag prisoner to move him into the sharashka, or Skip.${note}`);return ask('man',{ids,allowNone:true,ai:()=>aiBureau(HUMAN)})},
+  ()=>aiBureau(ch),`Waiting for ${P(ch).name} to decide on Tupolev's bureau…`);
+ if(!id||!S.gulag.includes(id)){cap(`Tupolev's bureau: ${ch===HUMAN?'you leave':P(ch).name+' leaves'} the Gulag alone.`);render();await wait(800);return}
+ bureauObserve(ch,id,ev);SHAROUT=[];flashTok(ev?[id,ev]:[id]);await wait(400);toShar(id);S.stats.bureau=(S.stats.bureau||0)+1;
+ cap(`Tupolev's bureau: ${ch===HUMAN?'you pull':P(ch).name+' pulls'} ${man(id).sn} (${man(id).ini}) out of the Gulag to work in the sharashka.`+sharNote());render();await wait(1600);
+}
 async function resolve(M){
- aiObserve(M);
+ aiObserve(M);SHAROUT=[];
  const a=M.ag,d=M.d,T=tally(M);
  if(deferActive(M)){S.deferred[d]={cid:M.card,subj:M.subj,base:M.base,pd:M.pd,to:M.to,named:M.named.slice()};M.keep=true;res(`Deferred. “${a.t}” comes back at the next ${DN[d]} meeting.`);await wait(1500);return}
  if(M.fizzle){res('The agenda has no one to act on. Nothing happens.');await wait(1300);return}
@@ -934,7 +960,7 @@ async function resolve(M){
   if(!list.length||!list[0]){res('There is nobody in the Lubyanka to try.');await wait(1300);return}
   flashTok(list);await wait(500);
   for(const id of list)sentence(id,rung);
-  res(`${list.map(id=>man(id).sn).join(', ')} ${list.length>1?'are':'is'} sentenced to ${RUNG[rung]}.`+(S.shar.length>=3&&rung===0?' (The sharashka is full, so the rest go to the Gulag.)':''));
+  res(`${list.map(id=>man(id).sn).join(', ')} ${list.length>1?'are':'is'} sentenced to ${RUNG[rung]}.`+sharNote());
   render();await wait(1900);return;
  }
  if(T.fail){res(`The objections carry the room. “${a.t}” fails.`);await wait(1500);return}
@@ -967,7 +993,7 @@ async function resolve(M){
  case'review':{const l=S.lub.slice();if(!l.length)out.push('the Lubyanka is empty');for(const id of l){const f=fateFlip();sentence(id,{Sharashka:0,Gulag:1,Canal:2,Shot:3}[f]);out.push(`${nm(id)}: ${f.toUpperCase()}`)}break}
  case'oso':for(const id of list){const r=osoArrest(id);out.push(r==='medal'?`${nm(id)}'s Order of Lenin saves him this time (one medal is lost${man(id).medal?`; ${man(id).medal} left`:''})`:`${nm(id)} is sent straight to the Gulag`)}break;
  case'toGulag':for(const id of list){toGulag(id);S.stats.toGulag++;out.push(`${nm(id)} is sent to the Gulag`)}break;
- case'toShar':for(const id of list){out.push(toShar(id)?`${nm(id)} goes to the sharashka`:`the sharashka is full`)}break;
+ case'toShar':for(const id of list){toShar(id);out.push(`${nm(id)} goes to the sharashka`+sharNote())}break;
  case'canalBack':for(const id of list){toGulag(id);out.push(`${nm(id)} goes back to the Gulag`)}break;
  case'transferI':{const dn=[];for(const id of list)out.push(transferMsg(id,'I',tradeInto('I',id,dn)));break}
  case'transferTo':{const to=a.to==='LINE'?lineDept():a.to;const dn=[];for(const id of list){if(!to){out.push('the line names nobody');break}out.push(transferMsg(id,to,tradeInto(to,id,dn)))}break}
@@ -1469,7 +1495,7 @@ function rulesScreen(){
 <p>The chair's card is read as an <b>agenda</b> (top left). Everyone else's card is read as a <b>response</b> (bottom right).</p>
 <h2>3 · The vote</h2><p>The vote only decides whether the agenda passes. Every response card shows its voice: <b>+1</b> Support, <b>+1</b> Acclaim, <b>−1</b> Doubt, <b>0</b> Abstain, and the rare <b>±1</b> Either Way, whose sign you choose when you play it. Stalin's card counts too. Add them up: zero or more and it passes, below zero it fails. What happens is printed on the agenda: how many men, which department, which sentence. A trial that fails leaves its prisoners waiting in the Lubyanka. <b>Acclaim</b> (rare) also overrules a Defer. <b>Amend</b> (rare) takes one man off the agenda and puts any other man it could name in his place. <b>Defer</b> postpones the agenda to the department's next meeting, unless someone plays an Acclaim. Abstain says nothing.</p>
 <h2>Stalin's chair</h2><p>At every meeting a card from Stalin's own small deck is dealt face down to his chair, and turned over after everyone else has spoken. It is pure weight: +1, 0 or −1 on the scales, like any other voice, and it never names anyone. His Defer cannot be overruled, not even by an Acclaim. Once the man in Stalin's right-hand seat has come forward, his owner may look at Stalin's card before each meeting.</p>
-<h2>4 · Prisons</h2><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first, as shown on the track under the Lubyanka: the sharashka (safe, and the way back into Industry), the Gulag (alive, and may come back), the White Sea Canal (alive for now) and the firing squad. During a trial the current sentence glows on the track. The camps are deadlier than the Lubyanka. <b>The Gulag is cold:</b> three cards in Stalin's deck kill the man held longest in the Gulag and the man furthest along the Canal when they are turned over. <b>The Canal never stops:</b> it moves one place along at the end of every round, and whenever an agenda pushes the work; whoever is pushed off the end dies. A new prisoner always starts at the first place.</p>
+<h2>4 · Prisons</h2><p><b>Tupolev's bureau:</b> at every Industry meeting, before the agenda, whoever chairs it may move one Gulag prisoner into the sharashka. No vote. The sharashka holds three: when a fourth man comes in, the man held there longest has finished his project and goes back to Industry's bottom seat, where he can be arrested again.</p><p>Arrested men wait in the Lubyanka until a trial. Sentences, mildest first, as shown on the track under the Lubyanka: the sharashka (safe, for now), the Gulag (alive, and may come back), the White Sea Canal (alive for now) and the firing squad. During a trial the current sentence glows on the track. The camps are deadlier than the Lubyanka. <b>The Gulag is cold:</b> three cards in Stalin's deck kill the man held longest in the Gulag and the man furthest along the Canal when they are turned over. <b>The Canal never stops:</b> it moves one place along at the end of every round, and whenever an agenda pushes the work; whoever is pushed off the end dies. A new prisoner always starts at the first place.</p>
 <h2>5 · Drawing</h2><p>At the end of the round everyone draws back up to fifteen, one card at a time, choosing the deck in the open. Whoever chaired the Judiciary decides who draws first.</p>
 <h2>The end</h2><p>The blue NKVD deck is the clock and is never reshuffled: it holds ten cards per player. When its last card is drawn (or burned), the round finishes and everyone plays one final round, like the last turn in Ticket to Ride. Nobody draws after it, and then the Terror ends. </p><h2>Scoring</h2><p>Survival is survival. Every one of your men still alive at the end scores 1 point, free or in any prison or camp. Every one who died costs you 1 point. Most points wins; a tie is shared.</p>
 <h2>The cards</h2><p>220 in all: Propaganda, Industry, Red Army and Judiciary 36 each (their discards are reshuffled when a deck runs out), the blue NKVD deck 60 (ten per player are used), and Stalin's 16.</p>
