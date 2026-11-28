@@ -451,7 +451,8 @@ const SHAR_N=3;let SHAROUT=[];
 // to Industry's bottom seat (or the emptiest department, if Industry is full), where he can be arrested again.
 function toShar(id){pull(id);if(S.shar.length>=SHAR_N){const ev=S.shar.shift();if(!enter('I',ev)){const d=D.slice().sort((a,b)=>S.seats[a].length-S.seats[b].length)[0];if(!enter(d,ev))S.exile.push(ev)}SHAROUT.push(ev);S.stats.sOut=(S.stats.sOut||0)+1}S.shar.push(id);S.stats.sIn=(S.stats.sIn||0)+1;return true}
 function sharNote(){const l=SHAROUT;SHAROUT=[];return l.map(ev=>{const w=where(ev);return` ${man(ev).sn} (${man(ev).ini}), held longest in the sharashka, finishes his project and goes back to ${w.t==='seat'?(w.d==='I'?"Industry's bottom seat":`the bottom of ${DN[w.d]} (Industry is full)`):'exile'}.`}).join('')}
-function toExile(id){if(S.exile.length>=3)return false;pull(id);S.exile.push(id);return true}
+const EXILE_N=2; // two places abroad (Trotsky holds one from the start)
+function toExile(id){if(S.exile.length>=EXILE_N)return false;pull(id);S.exile.push(id);return true}
 function moveSeat(id,delta){const w=where(id);if(w.t!=='seat')return;const a=S.seats[w.d];a.splice(w.r,1);const nr=Math.max(0,Math.min(a.length,w.r+delta));a.splice(nr,0,id)}
 function swapIR(id){const w=where(id);if(w.t!=='seat'||w.d!=='R')return false;const o=S.seats.I[w.r];if(!o)return false;S.seats.R[w.r]=o;S.seats.I[w.r]=id;return true}
 // Reshuffle: the chair picks a man, then the man of the same rank in another department he trades places with.
@@ -1150,7 +1151,7 @@ ${Array.from({length:60},(_,k)=>`<circle cx="${(k*53)%344}" cy="${40+((k*37)%160
  for(let i=0;i<28;i++)h+=A(X(28+(3-i%4)*50,40),773+Math.floor(i/4)*30,'width:40px;height:26px;box-sizing:border-box;border:1px dashed rgba(31,42,51,.28);border-radius:4px;color:rgba(31,42,51,.5);font-size:8.5px;line-height:9px;padding:1px 0 0 3px;pointer-events:none',String(i+1));
  // exile (bottom-left, farthest from Stalin)
  h+=A(12,866,'width:218px;height:122px;border-radius:8px;border:1px solid #c89b45;color:#5a3a10;overflow:hidden',EXILE_SVG.replace('border-radius:8px"','border-radius:8px;transform:scaleX(-1)"')+`<div style="position:relative;padding:6px 12px 0;text-align:right"><div class="bt">EXILE</div><div class="bs">Abroad, farthest from Stalin</div></div>`);
- for(let i=0;i<3;i++)h+=A(X(790+i*50,40),907,'width:40px;height:26px;border-radius:5px;border:1.5px dashed #a0763a;background:rgba(255,255,255,.35)');
+ for(let i=0;i<EXILE_N;i++)h+=A(X(790+i*50,40),907,'width:40px;height:26px;border-radius:5px;border:1.5px dashed #a0763a;background:rgba(255,255,255,.35)');
  // kalinin
 
  // party line + decks (left side)
