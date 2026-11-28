@@ -1172,9 +1172,10 @@ function render(){AIC=null;
   const w=where(id),[x,y]=posOf(id);el.style.left=(x-20)+'px';el.style.top=(y-13)+'px';
   el.className='tok '+(w.t==='seat'?'s'+w.d:'t'+w.t)+(m.start?' starter':'')+(m.owner===HUMAN?' mine':'')+(pick.has(id)?' pick':'')+(HL.has(id)?' hl':S.M&&(S.M.subj===id||S.M.named.includes(id)||partnerOf(S.M)===id)?' subj':'');
   el.style.zIndex=w.t==='grave'||w.t==='maus'?3:5;
-  el.innerHTML=(m.nobody&&!m.start?'<i class="ob nob"></i>':'')+`<span>${m.ini}</span>`+(m.medal?`<i class="md">${'★'.repeat(Math.min(m.medal,3))}${m.medal>3?'+':''}</i>`:'');
-  el.style.border=m.rev&&m.owner!=null?`3px solid ${PCOL[m.owner]}`:'';el.style.borderBottomWidth=m.rev&&m.owner!=null?'7px':'';el.style.lineHeight=m.rev&&m.owner!=null?'12px':'';
-  el.title=`${m.name}\n${m.title?m.title+'\n':''}${locName(id)}`+(m.owner===HUMAN?'\nYours'+(m.rev?' (revealed)':' (secret)'):m.rev&&m.owner!=null?`\nBelongs to ${P(m.owner).name}`:m.nobody?'\nBelongs to nobody':'')+(m.medal?`\nOrder of Lenin${m.medal>1?' ×'+m.medal:''}`:'');
+  const own=m.owner!=null&&(m.rev||S.over); // when the Terror is over, every owner is shown
+  el.innerHTML=((m.nobody||S.over&&m.owner==null)&&!m.start?'<i class="ob nob"></i>':'')+`<span>${m.ini}</span>`+(m.medal?`<i class="md">${'★'.repeat(Math.min(m.medal,3))}${m.medal>3?'+':''}</i>`:'');
+  el.style.border=own?`3px solid ${PCOL[m.owner]}`:'';el.style.borderBottomWidth=own?'7px':'';el.style.lineHeight=own?'12px':'';
+  el.title=`${m.name}\n${m.title?m.title+'\n':''}${locName(id)}`+(m.owner===HUMAN?'\nYours'+(m.rev?' (revealed)':S.over?'':' (secret)'):own?`\nBelongs to ${P(m.owner).name}`:m.nobody||S.over?'\nBelongs to nobody':'')+(m.medal?`\nOrder of Lenin${m.medal>1?' ×'+m.medal:''}`:'');
  }
  // piles
  document.querySelectorAll('.pile').forEach(el=>{const d=el.dataset.d;const n=S.decks[d].length;el.classList.toggle('empty',!n&&!(d!=='N'&&S.disc[d].length));el.classList.toggle('pick',!!(PEND&&PEND.kind==='deck'&&canDraw(d)))});
@@ -1538,6 +1539,7 @@ function rulesScreen(){
  $('#ov').classList.add('on');
 }
 function endScreen(){
+ S.over=true;render(); // the board behind the overlay now shows every man's owner
  let rows='';const sc=[];
  for(const p of S.players){const ids=owned(p.i);const f=ids.filter(isFree),pr=ids.filter(id=>alive(id)&&!isFree(id)),dd=ids.filter(id=>!alive(id)),hon=dd.filter(id=>where(id).t==='maus');
   sc.push({p,pts:f.length+pr.length-(dd.length-hon.length),row:pts=>`<td><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${PCOL[p.i]}"></span> <b>${esc(p.name)}</b><div style="font:700 18px Oswald,sans-serif;margin-top:2px">${pts>0?'+':''}${pts}</div></td><td>${f.map(id=>esc(man(id).sn)).join(', ')||'–'}</td><td>${pr.map(id=>esc(man(id).sn)+' ('+locName(id).replace('the ','')+')').join(', ')||'–'}</td><td>${dd.map(id=>esc(man(id).sn)+(where(id).t==='maus'?' (Mausoleum, 0)':'')).join(', ')||'–'}</td>`})}
